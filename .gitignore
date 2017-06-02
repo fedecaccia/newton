@@ -1,0 +1,20 @@
+syntax: glob
+
+src/test
+obj/*.o
+*.vtk
+*.msh
+*.png
+*.pdf
+*.txt
+bin/*
+relap.*
+*.CRM
+*.fer
+*.bathe
+*.dat
+*.info
+*.i
+*.o
+*.r
+log
