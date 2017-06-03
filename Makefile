@@ -4,7 +4,8 @@ DEP_DIR=$(MAIN_DIR)/inc
 SRC_DIR=$(MAIN_DIR)/src
 OBJ_DIR=$(MAIN_DIR)/obj
 BIN_DIR=$(MAIN_DIR)/bin
-OBJELEM = $(OBJ_DIR)/main.o
+OBJELEM = $(OBJ_DIR)/Solver.o 		\
+		  $(OBJ_DIR)/main.o
 EXE=$(BIN_DIR)/newton
 MPICC=mpic++
 
