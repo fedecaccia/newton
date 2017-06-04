@@ -30,11 +30,42 @@ Parser::Parser()
 /* Parser::parseInput
 Parse the input file.
 
+input: System pointer
+output: -
+
+*/
+void Parser::parseInput(System* sys)
+{
+	rootPrints("Reading config file...");
+
+	// Look for important data in order to allocate or everything ??
+	configFile.open("newton.config");  
+	if (configFile.is_open()){
+		configFile >> aux;
+		while(!configFile.eof()){
+			if(aux=="N_STEPS"){
+				configFile >> aux;
+				stringstream(aux) >> sys->nSteps;
+			}
+
+			// Next word
+			configFile >> aux;
+		}
+	}
+	else{
+		error = NEWTON_ERROR;
+		checkError(error,"Error opening \"newton.config\"");
+	}
+}
+
+/* Parser::checkConsistency
+Check if the data readed is consistent.
+
 input: -
 output: -
 
 */
-void Parser::parseInput()
+void Parser::checkConsistency()
 {
-	checkError(error,"Error opening input file.");
+	
 }

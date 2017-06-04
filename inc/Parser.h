@@ -20,15 +20,24 @@ Date: 4 June 2017
 #define PARSER_H
 
 #include "global.h"
+#include "System.h"
+
+#include <iostream> //endl, cout
+#include <fstream> // ifsteam
+#include <sstream> // stingstream
+#include <string>
 
 class Parser
 {
 	public:
 		Parser();
-		void parseInput();		
+		void parseInput(System*);
+		void checkConsistency();
 		
 	private:
 		int error;
+		std::string aux;
+		std::ifstream configFile;
 
 };
 

@@ -67,7 +67,7 @@ void checkError(int error, string errorPhrase)
                   				 MPI_COMM_WORLD); // MPI_Comm comm);
 	}
 
-	if(error!=NEWTON_SUCCESS && mpierror != MPI_SUCCESS){
+	if(error!=NEWTON_SUCCESS || mpierror != MPI_SUCCESS){
 		rootPrints(errorPhrase);
 		throw error;
 	}

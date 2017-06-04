@@ -12,7 +12,7 @@ OBJELEM = $(OBJ_DIR)/Communicator.o	\
 		  $(OBJ_DIR)/Parser.o 		\
 		  $(OBJ_DIR)/System.o 		\
 		  $(OBJ_DIR)/Solver.o
-EXE=$(BIN_DIR)/newton
+EXE=$(BIN_DIR)/Newton
 MPICC=mpic++
 
 all: $(BIN_DIR) $(OBJ_DIR) $(OBJELEM)

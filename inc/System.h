@@ -25,7 +25,9 @@ class System
 {
 	public:
 		System();
-		void construct();		
+		void construct();
+
+		int nSteps;
 		
 	private:
 		int error;

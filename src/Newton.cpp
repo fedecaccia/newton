@@ -26,7 +26,16 @@ input: -
 */
 Newton::Newton()
 {
+	// Variables initialization
 	error = NEWTON_SUCCESS;
+
+	// Objects initialization
+	NewtonParser = new Parser();
+	NewtonSystem = new System();
+	NewtonEvolution = new Evolution();
+	NewtonComm = new Communicator();
+	NewtonSolver = new Solver();
+	NewtonMap = new Mapper();
 }
 
 /* Newton::initialize
@@ -39,32 +48,20 @@ output: -
 */
 void Newton::initialize()
 {
-	// MPI
+	// MPI init and main variables
 	mpiInit();
 
 	// Objects initialization
 
-	// Parser
-	NewtonParser = new Parser();
-	NewtonParser->parseInput();
-
-	// System
-	NewtonSystem = new System();
+	NewtonParser->parseInput(NewtonSystem);
+	NewtonParser->checkConsistency();
+	
 	NewtonSystem->construct();
-
-	// Evolution
-	NewtonEvolution = new Evolution();
+	
 	NewtonEvolution->start();
-
-	// Communication
-	NewtonComm = new Communicator();
+	
 	NewtonComm->initialize();
-
-	// Solver
-	NewtonSolver = new Solver();
-
-	// Mapper
-	NewtonMap = new Mapper();
+	
 	NewtonMap->config();
 	
 }
