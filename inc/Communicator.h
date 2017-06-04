@@ -3,28 +3,29 @@
 NEWTON					|
 						|
 Implicit coupling 		|	CLASS
-in nonlinear			|	SOLVER
+in nonlinear			|	COMMUNICATOR
 calculations			|
 						|
 
 -------------------------------------------------------------------------------
 
-Solver computes the residual values and solves the nonlinear system with different kind of methods.
+Evolution updates the evolution parameter and other problem dependent variables and configurations.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
 
 \*****************************************************************************/
 
-#ifndef SOLVER_H
-#define SOLVER_H
+#ifndef COMMUNICATOR_H
+#define COMMUNICATOR_H
 
 #include "global.h"
 
-class Solver
+class Communicator
 {
 	public:
-		Solver();	
+		Communicator();
+		void initialize();		
 		
 	private:
 		int error;

@@ -3,26 +3,38 @@
 NEWTON					|
 						|
 Implicit coupling 		|	CLASS
-in nonlinear			|	SOLVER
+in nonlinear			|	MAPPER
 calculations			|
 						|
 
 -------------------------------------------------------------------------------
 
-Solver computes the residual values and solves the nonlinear system with different kind of methods.
+Mapper manages the preprocessing and / or postprocessing of the variables received and / or sended to the clients.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
 
 \*****************************************************************************/
 
-#include "Solver.h"
+#include "Mapper.h"
 
 using namespace::std;
 
 /* Evolution constructor
 */
-Solver::Solver()
+Mapper::Mapper()
 {
 	error = NEWTON_SUCCESS;
+}
+
+/* Mapper::config
+Set configuration parameters.
+
+input: -
+output: -
+
+*/
+void Mapper::config()
+{
+	checkError(error,"Error configuration mapper.");
 }

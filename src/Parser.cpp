@@ -3,32 +3,38 @@
 NEWTON					|
 						|
 Implicit coupling 		|	CLASS
-in nonlinear			|	SOLVER
+in nonlinear			|	PARSER
 calculations			|
 						|
 
 -------------------------------------------------------------------------------
 
-Solver computes the residual values and solves the nonlinear system with different kind of methods.
+Parser read the input newton file and load all the necessary data to solve the problem.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
 
 \*****************************************************************************/
 
-#ifndef SOLVER_H
-#define SOLVER_H
+#include "Parser.h"
 
-#include "global.h"
+using namespace::std;
 
-class Solver
+/* Parser constructor
+*/
+Parser::Parser()
 {
-	public:
-		Solver();	
-		
-	private:
-		int error;
+	error = NEWTON_SUCCESS;
+}
 
-};
+/* Parser::parseInput
+Parse the input file.
 
-#endif
+input: -
+output: -
+
+*/
+void Parser::parseInput()
+{
+	checkError(error,"Error opening input file.");
+}

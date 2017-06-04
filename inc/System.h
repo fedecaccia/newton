@@ -3,28 +3,29 @@
 NEWTON					|
 						|
 Implicit coupling 		|	CLASS
-in nonlinear			|	SOLVER
+in nonlinear			|	SYSTEM
 calculations			|
 						|
 
 -------------------------------------------------------------------------------
 
-Solver computes the residual values and solves the nonlinear system with different kind of methods.
+System contains all the usefull information of the strucure of the problem, like number of unknowns, connectivities, etc.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
 
 \*****************************************************************************/
 
-#ifndef SOLVER_H
-#define SOLVER_H
+#ifndef SYSTEM_H
+#define SYSTEM_H
 
 #include "global.h"
 
-class Solver
+class System
 {
 	public:
-		Solver();	
+		System();
+		void construct();		
 		
 	private:
 		int error;

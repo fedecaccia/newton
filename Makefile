@@ -1,15 +1,20 @@
-# Macros
 MAIN_DIR=.
 DEP_DIR=$(MAIN_DIR)/inc
 SRC_DIR=$(MAIN_DIR)/src
 OBJ_DIR=$(MAIN_DIR)/obj
 BIN_DIR=$(MAIN_DIR)/bin
-OBJELEM = $(OBJ_DIR)/Solver.o 		\
-		  $(OBJ_DIR)/main.o
+OBJELEM = $(OBJ_DIR)/Communicator.o	\
+		  $(OBJ_DIR)/Evolution.o	\
+		  $(OBJ_DIR)/global.o		\
+		  $(OBJ_DIR)/main.o 		\
+		  $(OBJ_DIR)/Mapper.o 		\
+		  $(OBJ_DIR)/Newton.o 		\
+		  $(OBJ_DIR)/Parser.o 		\
+		  $(OBJ_DIR)/System.o 		\
+		  $(OBJ_DIR)/Solver.o
 EXE=$(BIN_DIR)/newton
 MPICC=mpic++
 
-# Reglas explicitas
 all: $(BIN_DIR) $(OBJ_DIR) $(OBJELEM)
 	$(MPICC) $(OBJELEM) -o $(EXE)
 
@@ -18,9 +23,8 @@ all: $(BIN_DIR) $(OBJ_DIR) $(OBJELEM)
 #~ 	$(PETSC_FORTRAN_LIB) $(PETSC_LIB) ${SLEPC_SYS_LIB} -lz
 
 clean_:
-	$(RM) $(OBJELEM) $(OBJELEMTEST) $(EXE) $(EXETEST)
+	$(RM) $(OBJELEM) $(OBJELEM2) $(EXE) $(EXETEST)
 
-# Creacion de objetos
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	$(MPICC) -c -o $@ $< -I${DEP_DIR}
 #~ 	${PETSC_COMPILE} -c ${CFLAGS} -o $@ $< -I${DEP_DIR}
