@@ -59,10 +59,8 @@ void Parser::parseInput(System* sys, Evolution* evol)
   configFile.close();
   
   // Allocations
+  sys->allocate();
   
-
-
-
 	// Complete parsing
 	configFile.open("newton.config");
 	if (configFile.is_open()){

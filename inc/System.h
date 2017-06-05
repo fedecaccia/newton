@@ -27,6 +27,7 @@ class System
 {
 	public:
 		System();
+    void allocate();
 		void construct();
       
     struct client{

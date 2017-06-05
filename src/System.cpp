@@ -54,9 +54,9 @@ void System::allocate()
   // Number of calculations per code
   codeNCalculations = new int[nCodes];
   // Number of calculations per code that are input to another code
-  codeNCalculations2Code = new int[nCodes];
+  codeNCalculations2Code = new int*[nCodes];
   // Possition of first calculations per code that are input to another code
-  codeCalculationPossitions = new int[nCodes];
+  codeCalculationPossitions = new int*[nCodes];
   
   // Initialization
   for(int iCode=0; iCode<nCodes; iCode++){
@@ -65,8 +65,8 @@ void System::allocate()
     codeNGuesses[iCode] = 0;
     codeGuessesPossitions[iCode] = 0;
     codeNCalculations[iCode] = 0;
-    codeNCalculations2Code[iCode] = new int*[nCodes];
-    codeCalculationPossitions[iCode] = new int*[nCodes];
+    codeNCalculations2Code[iCode] = new int[nCodes];
+    codeCalculationPossitions[iCode] = new int[nCodes];
     for(int jCode=0; jCode<nCodes; jCode++){
       codeNCalculations2Code[iCode][jCode] = 0;
       codeCalculationPossitions[iCode][jCode] = 0;
@@ -138,12 +138,12 @@ void System::construct()
     nPos += codeNGuesses[iCode];
   } 
   
-  // Setting calculation possitions
+  // Setting calculation possitions - should be TESTED
   nPos = 0;
   for (int iCode=0; iCode<nCodes; iCode++){
     for (int jCode=0; jCode<nCodes; jCode++){
       codeCalculationPossitions[jCode][iCode] = nPos;
-      nPos += codeNCalculations[jCode][iCode];
+      nPos += codeNCalculations2Code[jCode][iCode];
     }
   } 
   
