@@ -8,6 +8,7 @@ OBJELEM = $(OBJ_DIR)/Communicator.o	\
 		  $(OBJ_DIR)/global.o		\
 		  $(OBJ_DIR)/main.o 		\
 		  $(OBJ_DIR)/Mapper.o 		\
+		  $(OBJ_DIR)/MathLib.o 		\
 		  $(OBJ_DIR)/Newton.o 		\
 		  $(OBJ_DIR)/Parser.o 		\
 		  $(OBJ_DIR)/System.o 		\

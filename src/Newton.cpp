@@ -68,6 +68,8 @@ void Newton::initialize()
 	
 	NewtonSystem->construct();
 	
+  NewtonSolver->initialize(NewtonSystem);
+  
 	NewtonMap->config();
 
 	NewtonComm->initialize();	
@@ -87,7 +89,8 @@ void Newton::run()
 	while(NewtonEvolution->status != NEWTON_COMPLETE){
     click = clock();
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
-		NewtonSolver->iterateUntilConverge();
+		NewtonSolver->setInitialCondition(NewtonEvolution->step);
+		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonMap, NewtonComm);
 		NewtonEvolution->update();
     rootPrints(" Total time step: "
                +dou2str((clock()-click)/ CLOCKS_PER_SEC)+" seconds");
