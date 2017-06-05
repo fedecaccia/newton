@@ -3,13 +3,14 @@
  `Newton` is a master code that solves implicit coupling in nonlinear calculations.
 It was designed with a general purpose. 
 For example, it can be used in multiscale coupled problems, 
-in cfd-temalhydraulic problems, in neutronic-termalhydraulic problems, 
+in CFD-temalhydraulic problems, in neutronic-termalhydraulic problems, 
 and others.
  
 `Newton` solves residual coupling equations explicitly or implicitly.
-It has been demostrated in several works that the implicit approach improves the convergence of the iterations.
+It has been demostrated in several works([1], [2]) that the implicit approach improves the convergence of the iterations.
 
 ##Compiling `Newton`
+After seting MPI environment variables:
 
 ```bash
 make
@@ -23,12 +24,22 @@ mpirun -np 2 bin/Newton
 
 ## The future
 
-* Performance evaluation 
+* Performance evaluation
 
 * Scripts to test the code
 
-* Benchmarking
-
 * Documentation
+
+## References
+[1] Jorge S. Leiva, Pablo J. Blanco and Gustavo C. Buscaglia. 
+"Iterative strong coupling of dimensionally heterogeneous models".
+International journal for numerical methods in engineering, 2010, vol 81, pags 1558–1580.
+
+
+
+
+[2] Caccia, F. and Dari. E. “Acoplamiento multiescala en cálculos fluidodinámicos” (“Multiscale
+coupling in fluid dynamics calculations”). XXll Congress on Numerical Methods and its
+Applications, 7-11 November 2016, Córdoba, Argentina.
 
 Federico Caccia - [federicoagustincaccia@gmail.com]
