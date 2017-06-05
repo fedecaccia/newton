@@ -25,22 +25,12 @@ using namespace::std;
 Evolution::Evolution()
 {
 	// Actual evolution step
-	step = 0;	
+	step = 0;
+  // Total steps
+  nSteps = 1;
+  // Run status
 	status = NEWTON_INCOMPLETE;
 	error = NEWTON_SUCCESS;
-}
-
-/* Evolution::start
-Starts the evolution.
-
-input: -
-output: -
-
-*/
-void Evolution::start()
-{
-
-	checkError(error,"Error starting evolution.");
 }
 
 /* Evolution::update

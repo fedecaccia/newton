@@ -24,6 +24,7 @@ using namespace::std;
 */
 System::System()
 {
+  nCodes = 0;
 	error = NEWTON_SUCCESS;
 }
 
@@ -36,5 +37,7 @@ output: -
 */
 void System::construct()
 {
+  
+  rootPrints("Building system...");
 	checkError(error,"Error setting system structure.");
 }

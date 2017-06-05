@@ -26,6 +26,8 @@ class System
 	public:
 		System();
 		void construct();
+    
+    int nCodes;
 		
 	private:
 		int error;

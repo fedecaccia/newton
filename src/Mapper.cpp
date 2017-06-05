@@ -36,5 +36,6 @@ output: -
 */
 void Mapper::config()
 {
+  rootPrints("Configuration mapper...");  
 	checkError(error,"Error configuration mapper.");
 }

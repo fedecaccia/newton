@@ -25,7 +25,6 @@ class Evolution
 {
 	public:
 		Evolution();
-		void start();
 		void update();
 
 		int status;

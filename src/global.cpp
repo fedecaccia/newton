@@ -18,6 +18,8 @@ Date: 3 June 2017
 
 #include "global.h"
 
+#include <sstream>
+
 using namespace::std;
 
 // Global variables
@@ -87,4 +89,34 @@ void rootPrints(string phrase)
 	if(irank==NEWTON_ROOT){
 		cout<<phrase<<endl;
 	}
+}
+  
+/* int2str
+
+Converts integers to strings.
+
+input: int to print
+output: string
+
+*/
+string int2str (int a)
+{
+    ostringstream temp;
+    temp<<a;
+    return temp.str();
+}
+
+/* dou2str
+
+Converts doubles to strings.
+
+input: double to print
+output: string
+
+*/
+string dou2str (double a)
+{
+    ostringstream temp;
+    temp<<a;
+    return temp.str();
 }

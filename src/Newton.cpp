@@ -40,7 +40,8 @@ Newton::Newton()
 
 /* Newton::initialize
 
-Initialize MPI communication, creates necessary objects that are going to be used in the programm.
+Starts MPI and set world rank and size global variables.
+Creates necessary objects that are going to be used in the programm.
 
 input: -
 output: -
@@ -49,8 +50,17 @@ output: -
 void Newton::initialize()
 {
 	// MPI init and main variables
-	mpiInit();
-
+  
+	// Initialize the MPI environment
+	error = MPI_Init(NULL, NULL);
+	checkError(error, "MPI_INIT error");
+	// Get the number of processes
+	error = MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+	checkError(error, "MPI_Comm_size error");
+	// Get the rank of the process
+	error = MPI_Comm_rank(MPI_COMM_WORLD, &irank);
+	checkError(error, "MPI_Comm_rank error");
+  
 	// Objects initialization
 
 	NewtonParser->parseInput(NewtonSystem, NewtonEvolution);
@@ -73,11 +83,18 @@ output: -
 */
 void Newton::run()
 {	
-	NewtonEvolution->start();
+  firstClick = clock();
 	while(NewtonEvolution->status != NEWTON_COMPLETE){
+    click = clock();
+    rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
 		NewtonSolver->iterateUntilConverge();
 		NewtonEvolution->update();
+    rootPrints(" Total time step: "
+               +dou2str((clock()-click)/ CLOCKS_PER_SEC)+" seconds");
 	}
+  rootPrints("Calculation finished successfully.");
+  rootPrints("Total time: "
+             +dou2str((clock()-firstClick)/ CLOCKS_PER_SEC)+" seconds");
 }
 
 /* Newton::finish
@@ -93,25 +110,4 @@ void Newton::finish()
 {
 	NewtonComm->disconnect();
 	MPI_Finalize();
-}
-
-/* Newton::mpiInit
-
-Starts MPI and set world rank and size global variables.
-
-input: -
-output: -
-
-*/
-void Newton::mpiInit()
-{
-	// Initialize the MPI environment
-	error = MPI_Init(NULL, NULL);
-	checkError(error, "MPI_INIT error");
-	// Get the number of processes
-	error = MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-	checkError(error, "MPI_Comm_size error");
-	// Get the rank of the process
-	error = MPI_Comm_rank(MPI_COMM_WORLD, &irank);
-	checkError(error, "MPI_Comm_rank error");
 }

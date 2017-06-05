@@ -24,6 +24,16 @@ using namespace::std;
 */
 Solver::Solver()
 {
+  // Default values
+  
+  // Big residual
+  residual = 1000;
+  // Non linear tolerance
+  nltol = 1e-07;
+  // Non linear iterations
+  iter = 0;
+  // Maximum amount of non linear iterations allowed in each evolution step
+  maxIter = 10;
 	error = NEWTON_SUCCESS;
 }
 
@@ -36,5 +46,51 @@ output: -
 */
 void Solver::iterateUntilConverge()
 {
-
+  calculateResiduals();
+  rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
+  while(residual > nltol && iter < maxIter){
+    
+    calculateNewGuess();
+    calculateResiduals();
+    residual = 0;
+    iter++;
+    
+    rootPrints(" Non linear iteration: "+int2str(iter)+"\t Residual: "+dou2str(residual));
+  }
+  if(residual>nltol){
+    error = NEWTON_ERROR;
+    checkError(error, "Maximum non linear iterations reached.");      
+  }
 }
+  
+/* Solver calculateResiduals
+
+Calls particular solvers and compute the difference between guesses and calculations.
+
+input: -
+output: -
+
+*/
+void Solver::calculateResiduals()
+{
+  switch(method){
+    case D2N_SERIAL:
+      break;
+      
+    case D2N_PARALLEL:
+      break;   
+  }
+}
+
+/* Solver calculateNewGuess
+
+Calculate new guess by different methods.
+
+input: -
+output: -
+
+*/
+void Solver::calculateNewGuess()
+{
+  
+}  

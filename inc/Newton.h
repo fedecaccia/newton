@@ -31,6 +31,8 @@ Date: 3 June 2017
 #include "Mapper.h"
 
 #include "mpi.h"
+#include <time.h>
+#include <string>
 
 class Newton
 {
@@ -48,9 +50,9 @@ class Newton
 		Mapper* NewtonMap;		
 		
 	private:
-		void mpiInit();
-
 		int error;
+    double firstClick;
+    double click;
 
 };
 

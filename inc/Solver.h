@@ -26,10 +26,17 @@ class Solver
 	public:
 		Solver();
 		void iterateUntilConverge();
+    void calculateNewGuess();
+    void calculateResiduals();
+    
+    double nltol;
+    int maxIter;
+    int method;
 		
 	private:
 		int error;
-
+    double residual;    
+    int iter;    
 };
 
 #endif

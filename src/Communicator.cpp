@@ -38,6 +38,7 @@ output: -
 */
 void Communicator::initialize()
 {
+  rootPrints("Checking communication with clients...");
 	checkError(error,"Error starting communication.");
 }
 

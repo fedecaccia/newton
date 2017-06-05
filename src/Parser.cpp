@@ -36,18 +36,18 @@ output: -
 */
 void Parser::parseInput(System* sys, Evolution* evol)
 {
-	rootPrints("Reading config file...");
+	rootPrints("Parsing configuration file...");
 
-	// Look for important data in order to allocate or everything ??
-	configFile.open("newton.config");  
+	// Count amount of client codes in order to allocate
+	configFile.open("newton.config");
 	if (configFile.is_open()){
 		configFile >> aux;
 		while(!configFile.eof()){
-			if(aux=="N_STEPS"){
-				configFile >> aux;
-				stringstream(aux) >> evol->nSteps;
+			if(aux=="CODE_SPECIFIC"){
+        sys->nCodes++;
+				//configFile >> aux;
+				//stringstream(aux) >> evol->nSteps;
 			}
-
 			// Next word
 			configFile >> aux;
 		}
@@ -56,6 +56,31 @@ void Parser::parseInput(System* sys, Evolution* evol)
 		error = NEWTON_ERROR;
 		checkError(error,"Error opening \"newton.config\"");
 	}
+  configFile.close();
+  
+  // Allocations
+  
+
+
+
+	// Complete parsing
+	configFile.open("newton.config");
+	if (configFile.is_open()){
+		configFile >> aux;
+		while(!configFile.eof()){
+			if(aux=="N_STEPS"){
+				configFile >> aux;
+				stringstream(aux) >> evol->nSteps;
+			}
+			// Next word
+			configFile >> aux;
+		}
+	}
+	else{
+		error = NEWTON_ERROR;
+		checkError(error,"Error opening \"newton.config\"");
+	}
+  configFile.close();
 }
 
 /* Parser::checkConsistency
