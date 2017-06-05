@@ -25,7 +25,12 @@ class Evolution
 {
 	public:
 		Evolution();
-		void start();		
+		void start();
+		void update();
+
+		int status;
+		int step;
+		int nSteps;
 		
 	private:
 		int error;

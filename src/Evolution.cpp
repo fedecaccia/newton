@@ -24,6 +24,9 @@ using namespace::std;
 */
 Evolution::Evolution()
 {
+	// Actual evolution step
+	step = 0;	
+	status = NEWTON_INCOMPLETE;
 	error = NEWTON_SUCCESS;
 }
 
@@ -36,5 +39,22 @@ output: -
 */
 void Evolution::start()
 {
+
 	checkError(error,"Error starting evolution.");
+}
+
+/* Evolution::update
+Updates evolution parameters.
+
+input: -
+output: -
+
+*/
+void Evolution::update()
+{
+	step++;
+	if(step==nSteps){
+		status = NEWTON_COMPLETE;
+	}
+	checkError(error,"Error updating evolution.");
 }

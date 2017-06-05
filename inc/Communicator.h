@@ -25,10 +25,12 @@ class Communicator
 {
 	public:
 		Communicator();
-		void initialize();		
+		void initialize();
+		void disconnect();
 		
 	private:
 		int error;
+		int isConnectedByMPI;
 
 };
 

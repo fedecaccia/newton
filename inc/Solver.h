@@ -24,7 +24,8 @@ Date: 4 June 2017
 class Solver
 {
 	public:
-		Solver();	
+		Solver();
+		void iterateUntilConverge();
 		
 	private:
 		int error;

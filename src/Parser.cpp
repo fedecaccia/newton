@@ -34,7 +34,7 @@ input: System pointer
 output: -
 
 */
-void Parser::parseInput(System* sys)
+void Parser::parseInput(System* sys, Evolution* evol)
 {
 	rootPrints("Reading config file...");
 
@@ -45,7 +45,7 @@ void Parser::parseInput(System* sys)
 		while(!configFile.eof()){
 			if(aux=="N_STEPS"){
 				configFile >> aux;
-				stringstream(aux) >> sys->nSteps;
+				stringstream(aux) >> evol->nSteps;
 			}
 
 			// Next word
@@ -67,5 +67,5 @@ output: -
 */
 void Parser::checkConsistency()
 {
-	
+	checkError(error,"Error checking consistenc in config data");
 }

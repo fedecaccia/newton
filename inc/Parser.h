@@ -21,6 +21,7 @@ Date: 4 June 2017
 
 #include "global.h"
 #include "System.h"
+#include "Evolution.h"
 
 #include <iostream> //endl, cout
 #include <fstream> // ifsteam
@@ -31,7 +32,7 @@ class Parser
 {
 	public:
 		Parser();
-		void parseInput(System*);
+		void parseInput(System*, Evolution*);
 		void checkConsistency();
 		
 	private:

@@ -26,3 +26,15 @@ Solver::Solver()
 {
 	error = NEWTON_SUCCESS;
 }
+
+/* Solver iterateUntilConverge
+This function controls the nonlinear iterations solving the residual equations.
+
+input: -
+output: -
+
+*/
+void Solver::iterateUntilConverge()
+{
+
+}

@@ -26,8 +26,6 @@ class System
 	public:
 		System();
 		void construct();
-
-		int nSteps;
 		
 	private:
 		int error;

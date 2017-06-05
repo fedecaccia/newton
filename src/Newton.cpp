@@ -33,9 +33,9 @@ Newton::Newton()
 	NewtonParser = new Parser();
 	NewtonSystem = new System();
 	NewtonEvolution = new Evolution();
-	NewtonComm = new Communicator();
 	NewtonSolver = new Solver();
 	NewtonMap = new Mapper();
+	NewtonComm = new Communicator();
 }
 
 /* Newton::initialize
@@ -53,17 +53,14 @@ void Newton::initialize()
 
 	// Objects initialization
 
-	NewtonParser->parseInput(NewtonSystem);
+	NewtonParser->parseInput(NewtonSystem, NewtonEvolution);
 	NewtonParser->checkConsistency();
 	
 	NewtonSystem->construct();
 	
-	NewtonEvolution->start();
-	
-	NewtonComm->initialize();
-	
 	NewtonMap->config();
-	
+
+	NewtonComm->initialize();	
 }
 
 /* Newton::run
@@ -75,8 +72,12 @@ output: -
 
 */
 void Newton::run()
-{
-	
+{	
+	NewtonEvolution->start();
+	while(NewtonEvolution->status != NEWTON_COMPLETE){
+		NewtonSolver->iterateUntilConverge();
+		NewtonEvolution->update();
+	}
 }
 
 /* Newton::finish
@@ -90,13 +91,13 @@ output: -
 */
 void Newton::finish()
 {
+	NewtonComm->disconnect();
 	MPI_Finalize();
 }
 
 /* Newton::mpiInit
 
-Ends everything in the programm to complete a succesfull calculation,
-like MPI connections. 
+Starts MPI and set world rank and size global variables.
 
 input: -
 output: -
@@ -105,9 +106,12 @@ output: -
 void Newton::mpiInit()
 {
 	// Initialize the MPI environment
-	error = MPI_Init(NULL, NULL);checkError(error, "MPI_INIT error");
+	error = MPI_Init(NULL, NULL);
+	checkError(error, "MPI_INIT error");
 	// Get the number of processes
-	error = MPI_Comm_size(MPI_COMM_WORLD, &world_size);checkError(error, "MPI_Comm_size error");
+	error = MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+	checkError(error, "MPI_Comm_size error");
 	// Get the rank of the process
-	error = MPI_Comm_rank(MPI_COMM_WORLD, &irank);checkError(error, "MPI_Comm_rank error");
+	error = MPI_Comm_rank(MPI_COMM_WORLD, &irank);
+	checkError(error, "MPI_Comm_rank error");
 }

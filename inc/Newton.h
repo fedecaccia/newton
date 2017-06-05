@@ -45,8 +45,7 @@ class Newton
 		Evolution* NewtonEvolution;
 		Communicator* NewtonComm;
 		Solver* NewtonSolver;
-		Mapper* NewtonMap;
-		
+		Mapper* NewtonMap;		
 		
 	private:
 		void mpiInit();

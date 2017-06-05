@@ -25,11 +25,19 @@ Date: 3 June 2017
 #include <string>
 
 // Errors
-#define NEWTON_SUCCESS 0
-#define NEWTON_ERROR 1
+#define NEWTON_SUCCESS 				0
+#define NEWTON_ERROR 				1
 
 // MPI
-#define NEWTON_ROOT 0
+#define NEWTON_ROOT 				0
+
+// Communication with clients
+#define NEWTON_CONNECTED			0
+#define NEWTON_DISCONNECTED			1
+
+// Running status
+#define NEWTON_COMPLETE 			0
+#define NEWTON_INCOMPLETE			1
 
 extern int world_size;
 extern int irank;

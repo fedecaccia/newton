@@ -47,7 +47,7 @@ void functionTrying(void (*f)())
 
 /* checkError
 
-This function is called synchronized by all process.
+This function is called synchronized by all processes.
 It checks the value of the variable error previously computed by another 
 function. The error value is shared between processes. If just one has a 
 possitive error value, everyone abort.
