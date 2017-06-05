@@ -1,10 +1,15 @@
 # README 
 
- `Newton` is a code made for studying the coupling between neutronics and termohidraulics in a nuclear reactor core.
+ `Newton` is a master code that solves implicit coupling in nonlinear calculations.
+It was designed with a general purpose. 
+For example, it can be used in multiscale coupled problems, 
+in cfd-temalhydraulic problems, in neutronic-termalhydraulic problems, 
+and others.
  
->It can solve the residual coupling equations with different kind of methods, accelerating the convergence of the problem.
+`Newton` solves residual coupling equations explicitly or implicitly.
+It has been demostrated in several works that the implicit approach improves the convergence of the iterations.
 
-###`Newton`:
+##Compiling `Newton`
 
 ```bash
 make
@@ -13,7 +18,7 @@ make
 ##Running `Newton` on multiple processors
 
 ```bash
-mpirun -np 2 Newton
+mpirun -np 2 bin/Newton
 ```
 
 ## The future
@@ -27,5 +32,3 @@ mpirun -np 2 Newton
 * Documentation
 
 Federico Caccia - [federicoagustincaccia@gmail.com]
-
-Guido Giuntoli - [giuntoli1991@gmail.com]
