@@ -30,6 +30,7 @@ class Evolution
 		int status;
 		int step;
 		int nSteps;
+    double deltaStep;
 		
 	private:
 		int error;

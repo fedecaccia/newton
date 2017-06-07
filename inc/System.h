@@ -20,8 +20,10 @@ Date: 4 June 2017
 #define SYSTEM_H
 
 #include "global.h"
+#include "MathLib.h"
 
 #include <string>
+#include <math.h>
 
 class System
 {
@@ -29,25 +31,48 @@ class System
 		System();
     void allocate();
 		void construct();
+    int ToMap(int, double*);
       
     struct client{
       std::string name;
+      int type;
       int connection;
+      int map;
+      int nProcs;
+      int nGuesses;
+      int nGuessesMapped;      
+      int nCalculationsWMap;      
+      int nCalculations;
+      int* nCalculations2Code;
+      int firstGuessPossition;      
+      int* calculationPossitions;
+      double* xValuesToMap;
+      double* xValuesToSend;
+      double* yValuesReceived;
+      double* yValuesMapped;
+      string inputName;
+      string inputModel;
+      string actualInput;
+      string inputExt;
+      string actualRestart;
+      string restartExt;
+      string restartPath;
+      string actualOutput;
+      string outputExt;
+      string outputPath;
+      string commandToRun;
     };
     
     int nCodes;
     int nPhasesPerIter;
-    int* codeToConnectInPhase;
+    int* nCodesInPhase;
+    int** codeToConnectInPhase;
     client* code;
     int nUnk;
-    int* codeNGuesses;
-    int* codeGuessesPossitions;
-    int* codeNCalculations;
-    int** codeNCalculations2Code;
-    int** codeCalculationPossitions;    
 		
 	private:
 		int error;
+    MathLib* math;
 
 };
 

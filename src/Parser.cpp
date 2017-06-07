@@ -34,21 +34,26 @@ input: System pointer
 output: -
 
 */
-void Parser::parseInput(System* sys, Evolution* evol)
+void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 {
 	rootPrints("Parsing configuration file...");
 
-	// Count amount of client codes in order to allocate
+	// Count necessary elements in order to allocate
+  
 	configFile.open("newton.config");
 	if (configFile.is_open()){
 		configFile >> aux;
 		while(!configFile.eof()){
-			if(aux=="CODE_SPECIFIC"){
+			
+      if(aux=="CODE_SPECIFIC"){
         sys->nCodes++;
-				//configFile >> aux;
-				//stringstream(aux) >> evol->nSteps;
 			}
-			// Next word
+      
+      if(aux=="PHASE"){
+        sys->nPhasesPerIter++;
+			}
+			
+      // Next word
 			configFile >> aux;
 		}
 	}
@@ -59,18 +64,74 @@ void Parser::parseInput(System* sys, Evolution* evol)
   configFile.close();
   
   // Allocations
-  sys->allocate();
+  
+  sys->allocate();  
   
 	// Complete parsing
+  
 	configFile.open("newton.config");
 	if (configFile.is_open()){
 		configFile >> aux;
 		while(!configFile.eof()){
-			if(aux=="N_STEPS"){
+      
+      
+      // Parsing numerical methods
+      
+      if(aux=="N_STEPS"){
 				configFile >> aux;
 				stringstream(aux) >> evol->nSteps;
 			}
-			// Next word
+      
+      if(aux=="DELTA_STEP"){
+				configFile >> aux;
+				stringstream(aux) >> evol->deltaStep;
+			}
+      
+      if(aux=="NONLINEAR_ABS_TOLERANCE"){
+				configFile >> aux;
+				stringstream(aux) >> sol->nltol;
+			}
+      
+      if(aux=="NONLINEAR_MAX_ITERATIONS"){
+				configFile >> aux;
+				stringstream(aux) >> sol->maxIter;
+			}
+      
+      if(aux=="METHOD"){
+				configFile >> aux;
+				stringstream(aux) >> sol->method;
+			}
+      
+      if(aux=="DX_IN_JAC_CALC"){
+				configFile >> aux;
+				stringstream(aux) >> sol->dxJacCalc;
+			}
+      
+      if(aux=="FREC_IN_JAC_CALC"){
+				configFile >> aux;
+				stringstream(aux) >> sol->fJacCalc;
+			}
+      
+			if(aux=="EXPLICIT_SERIAL_ORDER"){                
+        for (int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+          if(aux=="PHASE"){
+            configFile >> aux;
+            while(aux!="PHASE"){
+              sys->nCodesInPhase[iPhase]++;
+              configFile >> aux;
+            }
+            sys->codeToConnectInPhase[iPhase] = new int[sys->nCodesInPhase[iPhase]];
+          }
+          else{
+            error = NEWTON_ERROR;
+            checkError(error, "Bad input. Check card EXPLICIT_SERIAL_ORDER.");
+          }
+        }
+      }
+			
+      // Parsing code specific
+      
+      // Next word
 			configFile >> aux;
 		}
 	}

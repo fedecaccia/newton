@@ -20,8 +20,9 @@ Date: 4 June 2017
 #define PARSER_H
 
 #include "global.h"
-#include "System.h"
 #include "Evolution.h"
+#include "Solver.h"
+#include "System.h"
 
 #include <iostream> //endl, cout
 #include <fstream> // ifsteam
@@ -32,7 +33,7 @@ class Parser
 {
 	public:
 		Parser();
-		void parseInput(System*, Evolution*);
+		void parseInput(System*, Evolution*, Solver*);
 		void checkConsistency();
 		
 	private:

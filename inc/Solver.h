@@ -38,9 +38,12 @@ class Solver
     double nltol;
     int maxIter;
     int method;
+    double dxJacCalc;
+    int fJacCalc;
 		
 	private:
-    int runCode(int);
+    int runCode(int, System*, Mapper*);
+    int spawnCode(int, System*);
     int readOutputFromCode(int);
     int sendDataToCode(int);
     int receiveDataFromCode(int);
@@ -50,6 +53,7 @@ class Solver
     int iter;
     int iCode;
     MathLib* math;
+    int freeRank;
     
     double* x;
     double* xStar;
