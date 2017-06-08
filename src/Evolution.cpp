@@ -43,11 +43,15 @@ input: -
 output: -
 
 */
-void Evolution::update()
+void Evolution::update(System* sys)
 {
 	step++;
 	if(step==nSteps){
 		status = NEWTON_COMPLETE;
 	}
+  else{
+    // Update file names and command args in I/O case
+    sys->setFilesAndCommands(step);
+  }
 	checkError(error,"Error updating evolution.");
 }

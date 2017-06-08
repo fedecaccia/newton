@@ -20,7 +20,7 @@ Date: 4 June 2017
 
 using namespace::std;
 
-/* Evolution constructor
+/* Mapper constructor
 */
 Mapper::Mapper()
 {
@@ -39,8 +39,8 @@ output: -
 */
 void Mapper::config()
 {
-  rootPrints("Configuration mapper...");  
-	checkError(error,"Error configuration mapper.");
+  rootPrints("Configurating mapper...");  
+	checkError(error,"Error configurating mapper.");
 }
 
 /*
@@ -52,44 +52,22 @@ output: error
 */
 int Mapper::map(System* sys, int iCode, int stage)
 {
-  switch (sys->code[iCode].map){
-    case NEWTON_NO_MAP:
-      // Just copy x2Map into xMapped
-      math->copyInVector(sys->code[iCode].xValuesToSend, 0, 
-                         sys->code[iCode].xValuesToMap, 0, 
-                         sys->code[iCode].nGuesses);
-      break;
-      
-    case NEWTON_PRE_MAP:
-      if(stage==NEWTON_PRE_SEND){
-        // Map
-        
-      }
-      else{
-      // Just copy x2Map into xMapped
-      math->copyInVector(sys->code[iCode].xValuesToSend, 0, 
-                         sys->code[iCode].xValuesToMap, 0, 
-                         sys->code[iCode].nGuesses);        
-      }
-      break;
-      
-    case NEWTON_POST_MAP:
-      if(stage==NEWTON_POST_RECV){
-        // Map
-        
-      }
-      else{
-      // Just copy x2Map into xMapped
-      math->copyInVector(sys->code[iCode].xValuesToSend, 0, 
-                         sys->code[iCode].xValuesToMap, 0, 
-                         sys->code[iCode].nGuesses);        
-      }
-      break;
-      
-    case NEWTON_BOTH_MAP:
+  if(sys->code[iCode].map[stage] == ""){ // id vacío
+    // Just copy x2Map into xMapped
+    math->copyInVector(sys->code[iCode].xValuesToSend, 0, 
+                       sys->code[iCode].xValuesToMap, 0, 
+                       sys->code[iCode].nGuesses);
+  }
+  else{
       // Map
+      // IDEA
+      // if(sys->code[iCode].map == function.id para alguna de las funciones de mapeo cargadas
+      // (el usuario al escribir la función, guarda el id en un string)      
       
-      break;
+      // usar sys->code[iCode].xvaluesToMap
+      // usar sys->code[iCode].xvaluesToSend
+      // usar sys->code[iCode].yvaluesReceived
+      // usar sys->code[iCode].yvaluesMapped
   }
   
   

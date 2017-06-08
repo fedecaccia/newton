@@ -20,6 +20,7 @@ Date: 4 June 2017
 #define SOLVER_H
 
 #include "global.h"
+#include "Client.h"
 #include "System.h"
 #include "Mapper.h"
 #include "Communicator.h"
@@ -44,7 +45,7 @@ class Solver
 	private:
     int runCode(int, System*, Mapper*);
     int spawnCode(int, System*);
-    int readOutputFromCode(int);
+    int readOutputFromCode(int, System*, Mapper*);
     int sendDataToCode(int);
     int receiveDataFromCode(int);
   
@@ -59,6 +60,8 @@ class Solver
     double* xStar;
     double* y;
     double* resVector;
+    
+    Client* NewtonClient;
 };
 
 #endif

@@ -22,6 +22,7 @@ Date: 4 June 2017
 #include "global.h"
 #include "MathLib.h"
 
+#include <boost/lexical_cast.hpp> // int to str
 #include <string>
 #include <math.h>
 
@@ -29,37 +30,50 @@ class System
 {
 	public:
 		System();
-    void allocate();
+    void allocate1();
+    void allocate2();
+    void allocate3();
 		void construct();
-    int ToMap(int, double*);
-      
+    int setFilesAndCommands(int);
+    int extractToMap(int, double*);
+    int setMappedOnY(int, double*);
+    
     struct client{
-      std::string name;
+      int id;
+      //std::string name;
       int type;
       int connection;
-      int map;
+      string* map;
       int nProcs;
+      int nArgs;
+      string* arg;
       int nGuesses;
       int nGuessesMapped;      
       int nCalculationsWMap;      
       int nCalculations;
       int* nCalculations2Code;
+      int* nCalculationsFromCode;
       int firstGuessPossition;      
       int* calculationPossitions;
       double* xValuesToMap;
       double* xValuesToSend;
       double* yValuesReceived;
       double* yValuesMapped;
-      string inputName;
-      string inputModel;
+      string inputModelName;
+      string actualInputName;      
       string actualInput;
       string inputExt;
+      string restartName;
+      string actualRestartName;
       string actualRestart;
       string restartExt;
       string restartPath;
+      string outputName;
+      string actualOutputName;
       string actualOutput;
       string outputExt;
       string outputPath;
+      string binCommand;
       string commandToRun;
     };
     

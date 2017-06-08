@@ -39,17 +39,15 @@ Date: 3 June 2017
 #define NEWTON_UNKNOWN_CONNECTION   0
 #define NEWTON_MPI_COMMUNICATION    1
 #define NEWTON_SPAWN                2
-
-// Mapper
-#define NEWTON_NO_MAP               0
-#define NEWTON_PRE_MAP              1
-#define NEWTON_POST_MAP             2
-#define NEWTON_BOTH_MAP             3
+#define NEWTON_PPLEP                3
 
 // Stages in residual calculation
 #define NEWTON_PRE_SEND             0
 #define NEWTON_POST_RECV            1
 
+// Mapper in each stage
+#define NEWTON_NO_MAP               0
+#define NEWTON_MAP                  1
 
 // Running status   
 #define NEWTON_COMPLETE 			      0
@@ -62,10 +60,11 @@ Date: 3 June 2017
 #define SECANT                      3
 #define BROYDEN                     4
 
-// Client code
-#define RELAP                       0
-#define FERMI                       1
-#define USER_CODE                   2
+// Client code type
+#define TEST                        0
+#define RELAP_POW2TH                1
+#define FERMI_XS2POW                2
+#define USER_CODE                   3
 
 extern int world_size;
 extern int irank;

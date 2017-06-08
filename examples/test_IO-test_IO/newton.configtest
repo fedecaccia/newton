@@ -1,0 +1,57 @@
+________________________________________________________________________
+
+                            NEWTON INPUT
+________________________________________________________________________
+
+Numerical methods
+
+ABS_TOL 1e-07 MAX_ITER 10
+METHOD explicit_serial linear1; linear2;
+DX_IN_JAC_CALC 0.01
+________________________________________________________________________
+
+Client code specifications
+
+CLIENT linear1{ 
+  CALC x y z;
+  GUESS w;
+}
+CLIENT linear2{ 
+  CALC w; 
+  GUESS x y z;
+}
+
+________________________________________________________________________
+
+CLIENT RELAP
+{
+  GUESS
+    pow_z1
+    pow_z2
+    pow_z3
+    pow_z4
+    pow_z5;
+  CALC
+    tref_z1 tfuel_z1 void_z1
+    tref_z2 tfuel_z2 void_z2
+    tref_z3 tfuel_z3 void_z3
+    tref_z4 tfuel_z4 void_Z4
+    tref_z5 tfuel_z5 void_z5;
+}
+
+CLIENT FERMI
+{
+  GUESS
+    tref_z1 tfuel_z1 void_z1
+    tref_z2 tfuel_z2 void_z2
+    tref_z3 tfuel_z3 void_z3
+    tref_z4 tfuel_z4 void_Z4
+    tref_z5 tfuel_z5 void_z5;
+  GUESS_MAP th2xs
+  CALC
+    pow_z1
+    pow_z2
+    pow_z3
+    pow_z4
+    pow_z5;
+}

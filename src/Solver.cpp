@@ -37,7 +37,9 @@ Solver::Solver()
   // Steps between Jacobian calculation by finite difference method
   fJacCalc = 0;    
   // Math object
-  math = new MathLib();  
+  math = new MathLib();
+  // client code object
+  NewtonClient = new Client();
   
   // Initial error value
 	error = NEWTON_SUCCESS;
@@ -61,6 +63,8 @@ void Solver::initialize(System* sys)
   y = new double[sys->nUnk];
   // Residual vector
   resVector = new double[sys->nUnk];
+  // Matrices
+  
   
   // Initialization
   math->zeros(x, sys->nUnk);
@@ -109,14 +113,13 @@ void Solver::iterateUntilConverge(System* sys, Mapper* map, Communicator* comm)
     
     calculateNewGuess();
     calculateResiduals(sys, map, comm);
-    residual = 0;
     iter++;
     
     rootPrints(" Non linear iteration: "+int2str(iter)+"\t Residual: "+dou2str(residual));
   }
   if(residual>nltol){
     error = NEWTON_ERROR;
-    checkError(error, "Maximum non linear iterations reached.");      
+    checkError(error, "Maximum non linear iterations reached - Solver-iterateUntilConverge");      
   }
 }
   
@@ -146,7 +149,7 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
      * After each phase, xStar is updated with previous calculations.
      */    
     for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
-      
+            
     
       // Send variables to all clients that connect by MPI in this phase
       for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
@@ -156,7 +159,7 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
             error = sendDataToCode(iCode);
           }
           // All processes check
-          checkError(irank, "Error sending data to code.");
+          checkError(irank, "Error sending data to code - Solver::calculateResiduals");
         }
       }
       // Run codes by script in this phase
@@ -165,13 +168,14 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
         int iCode = sys->codeToConnectInPhase[iPhase][iPhaseCode];
         if(sys->code[iCode].connection==NEWTON_SPAWN){
           if(irank==freeRank){
+            
             error = runCode(iCode, sys, map);
           }
           freeRank++;
           // When all processes run particular codes, 
           // check errors and give them more work
-          if(freeRank==world_size-1){
-            checkError(error, "Error running code.");
+          if(freeRank==world_size){
+            checkError(error, "Error running code - Solver::calculateResiduals");
             freeRank = 0;
           }
         }
@@ -185,13 +189,13 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
         int iCode = sys->codeToConnectInPhase[iPhase][iPhaseCode];
         if(sys->code[iCode].connection==NEWTON_SPAWN){
           if(irank==freeRank){
-            error = readOutputFromCode(iCode);
+            error = readOutputFromCode(iCode, sys, map);
           }
           freeRank++;
           // When all processes run particular codes, 
           // check errors and give them more work
-          if(freeRank==world_size-1){
-            checkError(error, "Error reading output from code.");
+          if(freeRank==world_size){
+            checkError(error, "Error reading output from code - Solver::calculateResiduals");
             freeRank = 0;
           }
         }
@@ -204,7 +208,7 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
             error = receiveDataFromCode(iCode);
           }
           // All processes check
-          checkError(irank, "Error receiving data from code.");
+          checkError(irank, "Error receiving data from code - Solver::calculateResiduals");
         }
       }
       
@@ -215,15 +219,21 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
                             MPI_DOUBLE_PRECISION, // MPI_Datatype datatype
                             MPI_SUM, // MPI_Op op
                             MPI_COMM_WORLD); // MPI_Comm comm  
-      checkError(error, "Error sharing y between processes.");
+      checkError(error, "Error sharing (y) between processes - Solver::calculateResiduals");
       
-       
-       
       // In serial case, xStar must be updated after each phase calculation       
       // Update xStar in the right possitions
-      // y(local, pos) -> xStar(all, pos)
-      error = NEWTON_ERROR;
-      checkError(error, "xStar has to be updated after phase calculation.");
+      // Browsing codes that had been running in phase
+      for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
+        int iCode = sys->codeToConnectInPhase[iPhase][iPhaseCode];
+        // Browsing calculations
+        for(int jCode=0; jCode<sys->nCodes; jCode++){
+          math->copyInVector(xStar, sys->code[iCode].calculationPossitions[jCode], // vector to save the copy, possition of first element
+                             y, sys->code[iCode].calculationPossitions[jCode], // vector to copy, possition of first element
+                             sys->code[iCode].nCalculations2Code[jCode]); // number of elements to copy
+        }
+      }
+      checkError(error, "x* has to be updated after phase calculation - Solver::calculateResiduals");
       
       // Zeroing y to allow new mpi_Allreduce in next phase
       math->zeros(y, sys->nUnk);      
@@ -242,7 +252,7 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
           error = sendDataToCode(iCode);
         }
         // All processes check
-        checkError(irank, "Error sending data to code.");
+        checkError(irank, "Error sending data to code  - Solver::calculateResiduals");
       }
     }
     // Run codes by script
@@ -255,8 +265,8 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
         freeRank++;
         // When all processes run particular codes, 
         // check errors and give them more work
-        if(freeRank==world_size-1){
-          checkError(error, "Error running code.");
+        if(freeRank==world_size){
+          checkError(error, "Error running code  - Solver::calculateResiduals");
           freeRank = 0;
         }
       }
@@ -269,13 +279,13 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
     for(int iCode = 0; iCode<sys->nCodes; iCode++){
       if(sys->code[iCode].connection==NEWTON_SPAWN){
         if(irank==freeRank){
-          error = readOutputFromCode(iCode);
+          error = readOutputFromCode(iCode, sys, map);
         }
         freeRank++;
         // When all processes run particular codes, 
         // check errors and give them more work
-        if(freeRank==world_size-1){
-          checkError(error, "Error reading output from code.");
+        if(freeRank==world_size){
+          checkError(error, "Error reading output from code  - Solver::calculateResiduals");
           freeRank = 0;
         }
       }
@@ -287,7 +297,7 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
           error = receiveDataFromCode(iCode);
         }
         // All processes check
-        checkError(irank, "Error receiving data from code.");
+        checkError(irank, "Error receiving data from code  - Solver::calculateResiduals");
       }
     }
     
@@ -298,7 +308,7 @@ void Solver::calculateResiduals(System* sys, Mapper* map, Communicator* comm)
                           MPI_DOUBLE_PRECISION, // MPI_Datatype datatype
                           MPI_SUM, // MPI_Op op
                           MPI_COMM_WORLD); // MPI_Comm comm  
-    checkError(error, "Error sharing y between processes.");
+    checkError(error, "Error sharing y between processes  - Solver::calculateResiduals");
     // Compute residuals as (y - x)
     resVector = math->differenceInVectors(y, x, sys->nUnk);      
   }
@@ -335,7 +345,7 @@ void Solver::calculateNewGuess()
       
     default:
       error = NEWTON_ERROR;
-      checkError(error, "Non linear method has not been implemented yet");
+      checkError(error, "Non linear method has not been implemented yet - Solver::calculateNewGuess");
   }
 }
 
@@ -347,47 +357,37 @@ like cross sections as a function of termalhydraulic variables.
 This funtion is executed by only one process, so errors are returned
 in order to be checked by synchronized functions.
 
-input: code ID
+input: code ID, system object and mapper object
 output: error
 
 */
 int Solver::runCode(int iCode, System* sys, Mapper* map)
 {  
-  // Extract x values of iCode's interest in sys->xValuesToMap
-  error = sys->ToMap(iCode, x);
+  // Extract x values of iCode's interest in sys->xValuesextractToMap
+  error = sys->extractToMap(iCode, x);
   if(error!=NEWTON_SUCCESS){
-    cout<<"Error extracting x values of interest to: "<<iCode<<" code"<<endl;
+    cout<<"Error extracting x values of interest to code ID: "<<sys->code[iCode].id<<" - Solver::runCode"<<endl;
     return error;
   }
   
-  // Map sys->xValuesToMap values to sys->xValuesToSend before send
+  // Map sys->xValuesextractToMap values to sys->xValuesToSend before send
   error = map->map(sys, iCode, NEWTON_PRE_SEND);
   if(error!=NEWTON_SUCCESS){
-    cout<<"Error mapping x values of interest to: "<<iCode<<" code"<<endl;
+    cout<<"Error mapping x values of interest to code ID: "<<sys->code[iCode].id<<" - Solver::runCode"<<endl;
     return error;
   }
   
   // Prepare input
-  switch (sys->code[iCode].type){
-    case RELAP:
-      //error = Relap->prepareInput(sys->xValuesToSend);
-      break;
-    case FERMI:
-      //error = Fermi->prepareInput(sys->xValuesToSend);
-      break;
-    case USER_CODE:
-      //error = UserCode->prepareInput(sys->xValuesToSend);   
-      break;
-  }
+  error = NewtonClient->prepareInput(iCode, sys);  
   if(error!=NEWTON_SUCCESS){
-    cout<<"Error preparing input to: "<<iCode<<" code"<<endl;
+    cout<<"Error preparing input to code ID: "<<sys->code[iCode].id<<" - Solver::runCode"<<endl;
     return error;
   }
   
   // Spawn client code
   error = spawnCode(iCode, sys);
   if(error!=NEWTON_SUCCESS){
-    cout<<"Error spawning code: "<<iCode<<endl;
+    cout<<"Error spawning code ID: "<<sys->code[iCode].id<<" - Solver::runCode"<<endl;
     return error;
   }  
   
@@ -407,7 +407,7 @@ int Solver::spawnCode(int iCode, System* sys)
 {
   if(sys->code[iCode].nProcs==1){
     // system
-    error = system((sys->code[iCode].commandToRun + sys->code[iCode].actualInput).c_str());
+    error = system((sys->code[iCode].commandToRun).c_str());
     
   }
   else if(sys->code[iCode].nProcs>1){
@@ -415,8 +415,12 @@ int Solver::spawnCode(int iCode, System* sys)
   
   }
   else{
-    cout<<"Wrong number of processes to spawn in code: "<<iCode<<endl;
+    cout<<"Wrong number of processes to spawn in code ID: "<<sys->code[iCode].id<<" - Solver::spawnCode"<<endl;
     error = NEWTON_ERROR;
+    return error;
+  }  
+  if(error!=NEWTON_SUCCESS){
+    cout<<"Error trying to spawn process from code ID: "<<sys->code[iCode].id<<" - Solver::spawnCode"<<endl;
     return error;
   }
   
@@ -424,7 +428,7 @@ int Solver::spawnCode(int iCode, System* sys)
   if(sys->code[iCode].outputPath!="."){
     error = system(("mv "+sys->code[iCode].outputPath+sys->code[iCode].actualOutput+" .").c_str());
     if(error!=NEWTON_SUCCESS){
-      cout<<"Error moving code "<<iCode<<" output"<<endl;
+      cout<<"Error moving output from code ID: "<<sys->code[iCode].id<<" - Solver::spawnCode"<<endl;
       return error;
     }
   }
@@ -433,7 +437,7 @@ int Solver::spawnCode(int iCode, System* sys)
   if(sys->code[iCode].restartPath!="."){
     error = system(("mv "+sys->code[iCode].restartPath+sys->code[iCode].actualRestart+" .").c_str());
     if(error!=NEWTON_SUCCESS){
-      cout<<"Error moving code "<<iCode<<" restart"<<endl;
+      cout<<"Error moving restart from code ID: "<<sys->code[iCode].id<<" - Solver::spawnCode"<<endl;
       return error;
     }
   }
@@ -447,21 +451,29 @@ int Solver::spawnCode(int iCode, System* sys)
 Load variables from specific ouput file.
 Map them before save in x.
 
-input: code ID
+input: code ID, System pointer, Mapper pointer
 output: error
 
 */
-int Solver::readOutputFromCode(int iCode)
+int Solver::readOutputFromCode(int iCode, System* sys, Mapper* map)
 {
-  // Read data from output
-  
-  
-  // Map data before save
-  
+  // Read data from output in Sys->code[iCode].yValuesReceived
+  error = NewtonClient->readOutput(iCode, sys);
+  if(error!=NEWTON_SUCCESS){
+    cout<<"Error reading output from code ID: "<<sys->code[iCode].id<<" - Solver::readOutputFromCode"<<endl;
+    return error;
+  }
+      
+  // Map data before save it in Sys->code[iCode].yValuesMapped
+  error = map->map(sys, iCode, NEWTON_POST_RECV);
+  if(error!=NEWTON_SUCCESS){
+    cout<<"Error mapping values received from code ID: "<<sys->code[iCode].id<<" - Solver::readOutputFromCode"<<endl;
+    return error;
+  }
   
   // Save in appropiate possitions in y
-  
-  
+  error = sys->setMappedOnY(iCode, y);
+
   
   error = NEWTON_SUCCESS;
   return error;

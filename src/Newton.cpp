@@ -64,7 +64,7 @@ void Newton::initialize()
 	// Objects initialization
 
 	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver);
-	NewtonParser->checkConsistency();
+	NewtonParser->checkConsistency(NewtonSystem);
 	
 	NewtonSystem->construct();
 	
@@ -91,7 +91,7 @@ void Newton::run()
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
 		NewtonSolver->setInitialCondition(NewtonEvolution->step);
 		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonMap, NewtonComm);
-		NewtonEvolution->update();
+		NewtonEvolution->update(NewtonSystem);
     rootPrints(" Total time step: "
                +dou2str((clock()-click)/ CLOCKS_PER_SEC)+" seconds");
 	}
