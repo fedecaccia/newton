@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
-Implicit coupling 		|	CLASS
-in nonlinear			|	SYSTEM
-calculations			|
-						|
+NEWTON                 |
+                       |
+Implicit coupling      s|  CLASS
+in nonlinear           |  SYSTEM
+calculations           |
+                       |
 
 -------------------------------------------------------------------------------
 
@@ -22,7 +22,6 @@ Date: 4 June 2017
 #include "global.h"
 #include "MathLib.h"
 
-#include <boost/lexical_cast.hpp> // int to str
 #include <string>
 #include <math.h>
 

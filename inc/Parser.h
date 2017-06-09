@@ -1,19 +1,19 @@
 /*****************************************************************************\
 
-NEWTON					      |
-                      |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	PARSER
-calculations			    |
-                      |
+NEWTON                 |
+                       |
+Implicit coupling      |    CLASS
+in nonlinear           |    PARSER
+calculations           |
+                       |
 
 -------------------------------------------------------------------------------
 
-Parser reads the input newton file and load all necessary data to solve the
+Parser reads the input newton file and load all necessary data to solve the 
 problem.
 
 Author: Federico A. Caccia
-Date: 4 June 2017
+Date: 8 June 2017
 
 \*****************************************************************************/
 
@@ -25,27 +25,25 @@ Date: 4 June 2017
 #include "Solver.h"
 #include "System.h"
 
-#include <iostream> //endl, cout
-#include <fstream> // ifsteam
-#include <sstream> // stingstream
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
+#include <algorithm>
 
 class Parser
 {
 	public:
 		Parser();
 		void parseInput(System*, Evolution*, Solver*);
-		void parseInputOld(System*, Evolution*, Solver*);
 		void checkConsistency(System*);
 		
 	private:
-    bool endCard(string myStr);
-    bool startModule(string myStr);
-    bool endModule(string myStr);
-  
+		bool isAComment(std:: string);
+
 		int error;
-    int jCode;
-		std::string aux;
+    	int codeReaded;
+		std::string word;
 		std::ifstream configFile;
 
 };

@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON					      |
-                      |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	PARSER
-calculations			    |
-                      |
+NEWTON                 |
+                       |
+Implicit coupling      |    CLASS
+in nonlinear           |    PARSER
+calculations           |
+                       |
 
 -------------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@ using namespace::std;
 Parser::Parser()
 {   
   // Initial error value
-	error = NEWTON_SUCCESS;
+    error = NEWTON_SUCCESS;
 }
 
 /* Parser::parseInput
@@ -40,216 +40,114 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 {
   rootPrints("Parsing configuration file...");
   
-	// Count necessary things in first stage
-    
-	configFile.open("newton.configtest");
-	if (configFile.is_open()){
-		configFile >> aux;
-		while(!configFile.eof()){
-
-      // Count amount of codes in order to allocate
-      if(aux=="CODE_SPECIFIC"){
-        sys->nCodes++;
-			}
-      			
-      // Next word
-			configFile >> aux;
-		}
-	}
-	else{
-		error = NEWTON_ERROR;
-		checkError(error,"Error opening \"newton.config\"");
-	}
-  configFile.close();  
-
-
-  
-  exit(1);
-
-}
-
-
-
-
-
-
-
-/* Parser::endCard
-Identify last input in the card
-
-input: String
-output: true if it's the end, false in other case
-
-*/
-bool Parser::endCard(string myStr)
-{
-  if (!myStr.empty())
-  {
-    char lastChar = *myStr.rbegin();
-    if(lastChar==';'){
-      return true;
-    }
-  }
-  return false;  
-}
-
-/* Parser::startModule
-Identify start of the module card
-
-input: String
-output: true if it's the end, false in other case
-
-*/
-bool Parser::startModule(string myStr)
-{
-  if (!myStr.empty())
-  {
-    char lastChar = *myStr.rbegin();
-    if(lastChar=='{'){
-      return true;
-    }
-    char firstChar = *myStr.begin();
-    if(firstChar=='{'){
-      return true;
-    }
-  }
-  return false;  
-}
-
-/* Parser::endModule
-Identify end of the module card
-
-input: String
-output: true if it's the end, false in other case
-
-*/
-bool Parser::endModule(string myStr)
-{
-  if (!myStr.empty())
-  {
-    char lastChar = *myStr.rbegin();
-    if(lastChar=='}'){
-      return true;
-    }
-    char firstChar = *myStr.begin();
-    if(firstChar=='}'){
-      return true;
-    }
-  }
-  return false;  
-}
-
-
-
-
-
-/* Parser::parseInputOld
-Parse the input file.
-
-input: System pointer
-output: -
-
-*/
-void Parser::parseInputOld(System* sys, Evolution* evol, Solver* sol)
-{
-	rootPrints("Parsing configuration file...");
-  
   // Number of client codes readed
-  jCode = 0;
+  codeReaded = 0;
 
-	// Count necessary things in first stage
-    
-	configFile.open("newton.config");
-	if (configFile.is_open()){
-		configFile >> aux;
-		while(!configFile.eof()){
+    // Count necessary things in first stage
+    word = "";
+    configFile.open("newton.configtest");
+    if (configFile.is_open()){
+      while(!configFile.eof()){
 
-      // Count amount of codes in order to allocate
-      if(aux=="CODE_SPECIFIC"){
-        sys->nCodes++;
-			}
-      			
-      // Next word
-			configFile >> aux;
-		}
-	}
-	else{
-		error = NEWTON_ERROR;
-		checkError(error,"Error opening \"newton.config\"");
-	}
+        // Take the rest of the line and erase it from lecture
+        if(isAComment(word)){          
+          getline(configFile, word);
+          word = "";
+        }
+
+        // Count amount of codes in order to allocate
+        if(word=="client"){
+          sys->nCodes++;
+        }
+                
+        // Next word
+        configFile >> word;
+        transform(word.begin(), word.end(), word.begin(), ::tolower);
+      }
+    }
+    else{
+        error = NEWTON_ERROR;
+        checkError(error,"Error opening \"newton.config\"");
+    }
   configFile.close();
   
+
+
+  exit(1);
+
+
+
   // Allocates
   
-  sys->allocate1();   
+  sys->allocate1();
   
-	// Count necessary things in second stage
+    // Count necessary things in second stage
   
-	configFile.open("newton.config");
-	if (configFile.is_open()){
-		configFile >> aux;
-		while(!configFile.eof()){
+    configFile.open("newton.config");
+    if (configFile.is_open()){
+        configFile >> word;
+        while(!configFile.eof()){
       
       // Count amount of phases and codes in each phase in explicit 
       // serial method
-      if(aux=="EXPLICIT_SERIAL_ORDER"){
+      if(word=="phases"){
         int nCodesInPhases = 0;        
-        while(nCodesInPhases<sys->nCodes && aux!="END_EXPLICIT"){
-          configFile >> aux;
-          while(aux!="&" && aux!="END_EXPLICIT"){
+        while(word!="&"){
+          configFile >> word;
+          while(word!="&" && word!="END_EXPLICIT"){
             nCodesInPhases++;
-            configFile >> aux;
+            configFile >> word;
           }
           sys->nPhasesPerIter++;
         }        
       }
       
       // Count amount of arguments that each binary client code takes
-      if(aux=="CODE_SPECIFIC"){
-        configFile >> aux;
-        while(aux!="END_CODE"){
+      if(word=="CODE_SPECIFIC"){
+        configFile >> word;
+        while(word!="END_CODE"){
         
-          if(aux=="N_ARGS"){
-            configFile >> aux;
-            stringstream(aux) >> sys->code[jCode].nArgs;
+          if(word=="N_ARGS"){
+            configFile >> word;
+            stringstream(word) >> sys->code[codeReaded].nArgs;
           }
-          configFile >> aux;
+          configFile >> word;
         }        
-        jCode++;
-			}
-			
+        codeReaded++;
+            }
+            
       // Next word
-			configFile >> aux;
-		}
-	}
-	else{
-		error = NEWTON_ERROR;
-		checkError(error,"Error opening \"newton.config\"");
-	}
+            configFile >> word;
+        }
+    }
+    else{
+        error = NEWTON_ERROR;
+        checkError(error,"Error opening \"newton.config\"");
+    }
   configFile.close();
   
   // Alloocate things  
   sys->allocate2();
   // Reinitialize count
-  jCode = 0;
+  codeReaded = 0;
   
-	// Count necessary things in third stage
+    // Count necessary things in third stage
 
-	configFile.open("newton.config");
-	if (configFile.is_open()){
-		configFile >> aux;
-		while(!configFile.eof()){
+    configFile.open("newton.config");
+    if (configFile.is_open()){
+        configFile >> word;
+        while(!configFile.eof()){
       
       // Count amount of codes in each phase in explicit serial method
       
-      if(aux=="EXPLICIT_SERIAL_ORDER"){
+      if(word=="EXPLICIT_SERIAL_ORDER"){
         int iPhase = 0;
         
-        while(sys->nCodesInPhase[iPhase] <sys->nCodes && aux!="END_EXPLICIT"){
-          configFile >> aux;
-          while(aux!="&" && aux!="END_EXPLICIT"){
+        while(sys->nCodesInPhase[iPhase] <sys->nCodes && word!="END_EXPLICIT"){
+          configFile >> word;
+          while(word!="&" && word!="END_EXPLICIT"){
             sys->nCodesInPhase[iPhase]++;
-            configFile >> aux;
+            configFile >> word;
           }          
           iPhase++;
         }
@@ -261,72 +159,72 @@ void Parser::parseInputOld(System* sys, Evolution* evol, Solver* sol)
         //~ exit(1);
       }
       // Next word
-			configFile >> aux;
-		}
-	}
-	else{
-		error = NEWTON_ERROR;
-		checkError(error,"Error opening \"newton.config\"");
-	}
+            configFile >> word;
+        }
+    }
+    else{
+        error = NEWTON_ERROR;
+        checkError(error,"Error opening \"newton.config\"");
+    }
   configFile.close();
   
   
   // Allocate things
   sys->allocate3();
-	
+    
   // Complete parsing
   
-	configFile.open("newton.config");
-	if (configFile.is_open()){
-		configFile >> aux;
-		while(!configFile.eof()){
+    configFile.open("newton.config");
+    if (configFile.is_open()){
+        configFile >> word;
+        while(!configFile.eof()){
       
       
       // Parsing numerical methods
       
-      if(aux=="N_STEPS"){
-				configFile >> aux;
-				stringstream(aux) >> evol->nSteps;
-			}
+      if(word=="N_STEPS"){
+                configFile >> word;
+                stringstream(word) >> evol->nSteps;
+            }
       
-      if(aux=="DELTA_STEP"){
-				configFile >> aux;
-				stringstream(aux) >> evol->deltaStep;
-			}
+      if(word=="DELTA_STEP"){
+                configFile >> word;
+                stringstream(word) >> evol->deltaStep;
+            }
       
-      if(aux=="NONLINEAR_ABS_TOLERANCE"){
-				configFile >> aux;
-				stringstream(aux) >> sol->nltol;
-			}
+      if(word=="NONLINEAR_ABS_TOLERANCE"){
+                configFile >> word;
+                stringstream(word) >> sol->nltol;
+            }
       
-      if(aux=="NONLINEAR_MAX_ITERATIONS"){
-				configFile >> aux;
-				stringstream(aux) >> sol->maxIter;
-			}
+      if(word=="NONLINEAR_MAX_ITERATIONS"){
+                configFile >> word;
+                stringstream(word) >> sol->maxIter;
+            }
       
-      if(aux=="METHOD"){
-				configFile >> aux;
-				stringstream(aux) >> sol->method;
-			}
+      if(word=="METHOD"){
+                configFile >> word;
+                stringstream(word) >> sol->method;
+            }
       
-      if(aux=="DX_IN_JAC_CALC"){
-				configFile >> aux;
-				stringstream(aux) >> sol->dxJacCalc;
-			}
+      if(word=="DX_IN_JAC_CALC"){
+                configFile >> word;
+                stringstream(word) >> sol->dxJacCalc;
+            }
       
-      if(aux=="FREC_IN_JAC_CALC"){
-				configFile >> aux;
-				stringstream(aux) >> sol->fJacCalc;
-			}
+      if(word=="FREC_IN_JAC_CALC"){
+                configFile >> word;
+                stringstream(word) >> sol->fJacCalc;
+            }
       
-			if(aux=="EXPLICIT_SERIAL_ORDER"){
-        configFile >> aux;
+            if(word=="EXPLICIT_SERIAL_ORDER"){
+        configFile >> word;
         for (int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
           for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
-            stringstream(aux) >> sys->codeToConnectInPhase[iPhase][iCode];         
-            configFile >> aux;
+            stringstream(word) >> sys->codeToConnectInPhase[iPhase][iCode];         
+            configFile >> word;
           }
-          configFile >> aux;
+          configFile >> word;
         }
         
         // TEST
@@ -339,133 +237,156 @@ void Parser::parseInputOld(System* sys, Evolution* evol, Solver* sol)
         //~ exit(1);        
       }
            
-			
+            
       // Parsing code specific
       
-      if(aux=="CODE_SPECIFIC"){
-				configFile >> aux;
-        while(aux!="END_CODE"){
+      if(word=="CODE_SPECIFIC"){
+                configFile >> word;
+        while(word!="END_CODE"){
           
-          if(aux=="CODE_ID"){
-            configFile >> aux;
-            stringstream(aux) >> sys->code[jCode].id;
+          if(word=="CODE_ID"){
+            configFile >> word;
+            stringstream(word) >> sys->code[codeReaded].id;
           }          
-          if(aux=="TYPE"){
-            configFile >> aux;
-            if(aux == "TEST" || aux == "test" || aux == "Test"){
-              sys->code[jCode].type = TEST;
+          if(word=="TYPE"){
+            configFile >> word;
+            if(word == "TEST" || word == "test" || word == "Test"){
+              sys->code[codeReaded].type = TEST;
             }
-            else if(aux == "RELAP_POW2TH" || aux == "relap_pow2th" || aux == "Relap_pow2th"){
-              sys->code[jCode].type = RELAP_POW2TH;
+            else if(word == "RELAP_POW2TH" || word == "relap_pow2th" || word == "Relap_pow2th"){
+              sys->code[codeReaded].type = RELAP_POW2TH;
             }
-            else if(aux == "FERMI_XS2POW" || aux == "fermi_xs2pow" || aux == "Fermi_xs2pow"){
-              sys->code[jCode].type = FERMI_XS2POW;
+            else if(word == "FERMI_XS2POW" || word == "fermi_xs2pow" || word == "Fermi_xs2pow"){
+              sys->code[codeReaded].type = FERMI_XS2POW;
             }
-            else if(aux == "USER_CODE" || aux == "user_code" || aux == "User_code"){
-              sys->code[jCode].type = USER_CODE;
+            else if(word == "USER_CODE" || word == "user_code" || word == "User_code"){
+              sys->code[codeReaded].type = USER_CODE;
             }
             else{
               error = NEWTON_ERROR;
-              checkError(error,("Error reading TYPE card for code: "+jCode));
+              checkError(error,("Error reading TYPE card for code: "+codeReaded));
             }
             // TEST
-            //~ cout<<"Type: "<<sys->code[jCode].id<<endl;
+            //~ cout<<"Type: "<<sys->code[codeReaded].id<<endl;
             //~ exit(1);
           }
-          if(aux=="CONNECTION"){
-            configFile >> aux;
-            if(aux == "MPI" || aux == "mpi" || aux == "Mpi"){
-              sys->code[jCode].connection = NEWTON_MPI_COMMUNICATION;
+          if(word=="CONNECTION"){
+            configFile >> word;
+            if(word == "MPI" || word == "mpi" || word == "Mpi"){
+              sys->code[codeReaded].connection = NEWTON_MPI_COMMUNICATION;
             }
-            else if(aux == "SPAWN" || aux == "spawn" || aux == "Spawn"){
-              sys->code[jCode].connection = NEWTON_SPAWN;
+            else if(word == "SPAWN" || word == "spawn" || word == "Spawn"){
+              sys->code[codeReaded].connection = NEWTON_SPAWN;
             }
-            else if(aux == "PPLEP" || aux == "pplep" || aux == "Pplep"){
-              sys->code[jCode].connection = NEWTON_PPLEP;
+            else if(word == "PPLEP" || word == "pplep" || word == "Pplep"){
+              sys->code[codeReaded].connection = NEWTON_PPLEP;
             }
             else{
-              sys->code[jCode].connection = NEWTON_UNKNOWN_CONNECTION;
+              sys->code[codeReaded].connection = NEWTON_UNKNOWN_CONNECTION;
               error = NEWTON_ERROR;
-              checkError(error,("Error reading CONNECTION card for code: "+jCode));
+              checkError(error,("Error reading CONNECTION card for code: "+codeReaded));
             }
           }
-          if(aux=="N_PROCS"){
-            configFile >> aux;
-            stringstream(aux) >> sys->code[jCode].nProcs;
+          if(word=="N_PROCS"){
+            configFile >> word;
+            stringstream(word) >> sys->code[codeReaded].nProcs;
           }          
-          if(aux=="FROM_CODE_ID"){
+          if(word=="FROM_CODE_ID"){
             int iCode;
-            configFile >> aux;
-            stringstream(aux) >> iCode;
+            configFile >> word;
+            stringstream(word) >> iCode;
             // Dummy word VAR
-            configFile >> aux;
-            configFile >> aux;
-            stringstream(aux) >> sys->code[jCode].nCalculationsFromCode[iCode];
+            configFile >> word;
+            configFile >> word;
+            stringstream(word) >> sys->code[codeReaded].nCalculationsFromCode[iCode];
           }
-          if(aux=="TO_CODE_ID"){
+          if(word=="TO_CODE_ID"){
             int iCode;
-            configFile >> aux;
-            stringstream(aux) >> iCode;
+            configFile >> word;
+            stringstream(word) >> iCode;
             // Dummy word VAR
-            configFile >> aux;
-            configFile >> aux;
-            stringstream(aux) >> sys->code[jCode].nCalculations2Code[iCode];
+            configFile >> word;
+            configFile >> word;
+            stringstream(word) >> sys->code[codeReaded].nCalculations2Code[iCode];
           }
-          if(aux=="GUESS_MAP"){
-            configFile >> sys->code[jCode].map[NEWTON_PRE_SEND];
+          if(word=="GUESS_MAP"){
+            configFile >> sys->code[codeReaded].map[NEWTON_PRE_SEND];
           }
-          if(aux=="CALC_MAP"){
-            configFile >> sys->code[jCode].map[NEWTON_POST_RECV];
+          if(word=="CALC_MAP"){
+            configFile >> sys->code[codeReaded].map[NEWTON_POST_RECV];
           }
           // Strings
-          if(aux=="INPUT_NAME"){
-            configFile >> sys->code[jCode].inputModelName;
+          if(word=="INPUT_NAME"){
+            configFile >> sys->code[codeReaded].inputModelName;
           }
-          if(aux=="INPUT_EXT"){
-            configFile >> sys->code[jCode].inputExt;
+          if(word=="INPUT_EXT"){
+            configFile >> sys->code[codeReaded].inputExt;
           }
-          if(aux=="RESTART_NAME"){
-            configFile >> sys->code[jCode].restartName;
+          if(word=="RESTART_NAME"){
+            configFile >> sys->code[codeReaded].restartName;
           }
-          if(aux=="RESTART_EXT"){
-            configFile >> sys->code[jCode].restartExt;
+          if(word=="RESTART_EXT"){
+            configFile >> sys->code[codeReaded].restartExt;
           }
-          if(aux=="RESTART_PATH"){
-            configFile >> sys->code[jCode].restartPath;
+          if(word=="RESTART_PATH"){
+            configFile >> sys->code[codeReaded].restartPath;
           }
-          if(aux=="OUTPUT_NAME"){
-            configFile >> sys->code[jCode].outputName;
+          if(word=="OUTPUT_NAME"){
+            configFile >> sys->code[codeReaded].outputName;
           }
-          if(aux=="OUTPUT_EXT"){
-            configFile >> sys->code[jCode].outputExt;
+          if(word=="OUTPUT_EXT"){
+            configFile >> sys->code[codeReaded].outputExt;
           }
-          if(aux=="OUTPUT_PATH"){
-            configFile >> sys->code[jCode].outputPath;
+          if(word=="OUTPUT_PATH"){
+            configFile >> sys->code[codeReaded].outputPath;
           }
-          if(aux=="BIN_COMMAND"){
-            configFile >> sys->code[jCode].binCommand;
+          if(word=="BIN_COMMAND"){
+            configFile >> sys->code[codeReaded].binCommand;
           }
-          if(aux=="ARGS"){
-            for(int iArg=0; iArg<sys->code[jCode].nArgs; iArg++){
-              configFile >> sys->code[jCode].arg[iArg];
+          if(word=="ARGS"){
+            for(int iArg=0; iArg<sys->code[codeReaded].nArgs; iArg++){
+              configFile >> sys->code[codeReaded].arg[iArg];
             }
           }
           
-          configFile >> aux;
+          configFile >> word;
         }
-        jCode++;
-			}
+        codeReaded++;
+            }
       
       // Next word
-			configFile >> aux;
-		}
-	}
-	else{
-		error = NEWTON_ERROR;
-		checkError(error,"Error opening \"newton.config\"");
-	}
+            configFile >> word;
+        }
+    }
+    else{
+        error = NEWTON_ERROR;
+        checkError(error,"Error opening \"newton.config\"");
+    }
   configFile.close();
 }
+
+/* Parser::isAComment
+
+Analyze if the string is a comment.
+
+input: string
+output: true if it is a comment, negative other case
+
+*/
+
+bool Parser::isAComment(string word)
+{
+  if( word=="newton" ||
+      word[0]=='#' ||
+      word[0]=='@' ||
+      word[0]=='%' ||
+      word[0]=='_' ||
+      word[0]=='-'){
+    return true;
+  }
+  return false;
+}
+
 
 /* Parser::checkConsistency
 Check if the data readed is consistent.
@@ -478,14 +399,14 @@ void Parser::checkConsistency(System* sys)
 {
   // Checking guesses and calculations
   for(int iCode=0; iCode<sys->nCodes; iCode++){
-    for(int jCode=0; jCode<sys->nCodes; jCode++){
-      if(sys->code[iCode].nCalculations2Code[jCode]
-      != sys->code[jCode].nCalculationsFromCode[iCode]){
-        rootPrints("Incompatible guesses and calculations.Check: "+int2str(iCode)+" -> "+int2str(jCode));
+    for(int codeReaded=0; codeReaded<sys->nCodes; codeReaded++){
+      if(sys->code[iCode].nCalculations2Code[codeReaded]
+      != sys->code[codeReaded].nCalculationsFromCode[iCode]){
+        rootPrints("Incompatible guesses and calculations.Check: "+int2str(iCode)+" -> "+int2str(codeReaded));
       }
     }
   }
    
   
-	checkError(error,"Error checking consistency in config data");
+    checkError(error,"Error checking consistency in config data");
 }
