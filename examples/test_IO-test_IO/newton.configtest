@@ -3,55 +3,53 @@ ________________________________________________________________________
                             NEWTON INPUT
 ________________________________________________________________________
 
-Numerical methods
+# Numerical methods
 
-ABS_TOL 1e-07 MAX_ITER 10
-METHOD explicit_serial linear1; linear2;
-DX_IN_JAC_CALC 0.01
+METHOD explicit_serial
+phases linear1 & linear2 &
+abs_tol 1e-07
+max_iter 10
 ________________________________________________________________________
 
-Client code specifications
+# Client code specifications
 
-CLIENT linear1{ 
-  CALC x y z;
-  GUESS w;
-}
-CLIENT linear2{ 
-  CALC w; 
-  GUESS x y z;
-}
-
+CLIENT linear1 CALCS x y z GUESSES w
+CLIENT linear2 CALCS w GUESSES x y z
 ________________________________________________________________________
 
 CLIENT RELAP
-{
-  GUESS
-    pow_z1
-    pow_z2
-    pow_z3
-    pow_z4
-    pow_z5;
-  CALC
+  GUESSES # nombres de variables enviadas previas al mapeo, si lo hubiera
+    fpow_z1
+    fpow_z2
+    fpow_z3
+    fpow_z4
+    fpow_z5
+  MAP none
+
+  CALCS # nombres de variables recibidas posterior al mapeo, si lo hubiera
     tref_z1 tfuel_z1 void_z1
     tref_z2 tfuel_z2 void_z2
     tref_z3 tfuel_z3 void_z3
     tref_z4 tfuel_z4 void_Z4
-    tref_z5 tfuel_z5 void_z5;
-}
+    tref_z5 tfuel_z5 void_z5
+  MAP none
 
 CLIENT FERMI
-{
-  GUESS
+  GUESSES 
     tref_z1 tfuel_z1 void_z1
     tref_z2 tfuel_z2 void_z2
     tref_z3 tfuel_z3 void_z3
     tref_z4 tfuel_z4 void_Z4
-    tref_z5 tfuel_z5 void_z5;
-  GUESS_MAP th2xs
-  CALC
-    pow_z1
-    pow_z2
-    pow_z3
-    pow_z4
-    pow_z5;
-}
+    tref_z5 tfuel_z5 void_z5
+  MAP th2xs
+  GUESSES_MAPPED 300
+
+  CALCS
+    fpow_z1
+    fpow_z2
+    fpow_z3
+    fpow_z4
+    fpow_z5
+  MAP pow2fpowc
+  CALCS_PRE_MAP 5
+    

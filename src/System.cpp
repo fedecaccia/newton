@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
-Implicit coupling 		|	CLASS
-in nonlinear			|	SYSTEM
-calculations			|
-						|
+NEWTON					       |
+						           |
+Implicit coupling 		 |	CLASS
+in nonlinear			     |	SYSTEM
+calculations			     |
+						           |
 
 -------------------------------------------------------------------------------
 
@@ -371,7 +371,7 @@ int System::setFilesAndCommands(int step)
   
   for(int iCode=0; iCode<nCodes; iCode++){
     // Input file
-    code[iCode].actualInputName = code[iCode].inputModelName+"_step"+boost::lexical_cast<string>(step);
+    code[iCode].actualInputName = code[iCode].inputModelName+"_step"+int2str(step);
     code[iCode].actualInput = code[iCode].actualInputName+"."+code[iCode].inputExt;
     // Ouput file
     if(code[iCode].outputName=="FROM_INPUT" || 
@@ -382,7 +382,7 @@ int System::setFilesAndCommands(int step)
       code[iCode].actualOutput = code[iCode].actualOutputName+"."+code[iCode].outputExt;
     }
     else{
-      code[iCode].actualOutputName = code[iCode].outputName+"_step"+boost::lexical_cast<string>(step);
+      code[iCode].actualOutputName = code[iCode].outputName+"_step"+int2str(step);
       code[iCode].actualOutput = code[iCode].actualOutputName+"."+code[iCode].outputExt;
     }
     // Restart file
@@ -394,7 +394,7 @@ int System::setFilesAndCommands(int step)
       code[iCode].actualRestart = code[iCode].actualRestartName+code[iCode].restartExt;
     }
     else{
-      code[iCode].actualRestartName = code[iCode].restartName+"_step"+boost::lexical_cast<string>(step);
+      code[iCode].actualRestartName = code[iCode].restartName+"_step"+int2str(step);
       code[iCode].actualRestart = code[iCode].actualRestartName+"."+code[iCode].restartExt;
     }
     // Command to run
