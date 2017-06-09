@@ -54,6 +54,7 @@ Date: 3 June 2017
 #define NEWTON_INCOMPLETE			      1
     
 // Numerial method in non linear iteration
+#define NO_METHOD                  -1
 #define EXPLICIT_SERIAL             0
 #define EXPLICIT_PARALLEL           1
 #define NEWTON                      2

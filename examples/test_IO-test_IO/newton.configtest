@@ -13,42 +13,73 @@ ________________________________________________________________________
 
 # Client code specifications
 
-CLIENT linear1 CALCS x y z GUESSES w
-CLIENT linear2 CALCS w GUESSES x y z
+CLIENT linear1 
+CALCS x y z GUESSES w
+INPUT_NAME test0
+INPUT_EXT dat
+OUTPUT_NAME from_input
+OUTPUT_EXT out
+CONNECTION io
+
+CLIENT linear2 
+CALCS w GUESSES x y z
+INPUT_NAME test1
+INPUT_EXT dat
+OUTPUT_NAME from_input
+OUTPUT_EXT out
+CONNECTION io
 ________________________________________________________________________
 
-CLIENT RELAP
-  GUESSES # nombres de variables enviadas previas al mapeo, si lo hubiera
-    fpow_z1
-    fpow_z2
-    fpow_z3
-    fpow_z4
-    fpow_z5
-  MAP none
-
-  CALCS # nombres de variables recibidas posterior al mapeo, si lo hubiera
-    tref_z1 tfuel_z1 void_z1
-    tref_z2 tfuel_z2 void_z2
-    tref_z3 tfuel_z3 void_z3
-    tref_z4 tfuel_z4 void_Z4
-    tref_z5 tfuel_z5 void_z5
-  MAP none
-
-CLIENT FERMI
-  GUESSES 
-    tref_z1 tfuel_z1 void_z1
-    tref_z2 tfuel_z2 void_z2
-    tref_z3 tfuel_z3 void_z3
-    tref_z4 tfuel_z4 void_Z4
-    tref_z5 tfuel_z5 void_z5
-  MAP th2xs
-  GUESSES_MAPPED 300
-
-  CALCS
-    fpow_z1
-    fpow_z2
-    fpow_z3
-    fpow_z4
-    fpow_z5
-  MAP pow2fpowc
-  CALCS_PRE_MAP 5
+#CLIENT RELAP
+#  N_PROCS 1
+#  INPUT_NAME core
+#  INPUT_EXT i
+#  RESTART_NAME from_imput
+#  RESTART_EXT r
+#  RESTART_PATH 
+#  /run/user/1738/gvfs/smb-share:server=10.73.96.200,share=archivosrelap7/
+#  OUTPUT_NAME from_input
+#  OUTPUT_EXT o
+#  OUTPUT_PATH 
+#  /run/user/1738/gvfs/smb-share:server=10.73.96.200,share=archivosrelap7/
+#  
+#  GUESSES
+#    fpow_z1
+#    fpow_z2
+#    fpow_z3
+#    fpow_z4
+#    fpow_z5
+#  MAP none  
+#
+#  CALCS
+#    tref_z1 tfuel_z1 void_z1
+#    tref_z2 tfuel_z2 void_z2
+#    tref_z3 tfuel_z3 void_z3
+#    tref_z4 tfuel_z4 void_Z4
+#    tref_z5 tfuel_z5 void_z5
+#  MAP none
+#
+#CLIENT FERMI
+#  N_PROCS 1
+#  INPUT_NAME fuel_z5
+#  INPUT_EXT fer
+#  OUTPUT_NAME power_integrated
+#  OUTPUT_EXT out
+#  
+#  GUESSES 
+#    tref_z1 tfuel_z1 void_z1
+#    tref_z2 tfuel_z2 void_z2
+#    tref_z3 tfuel_z3 void_z3
+#    tref_z4 tfuel_z4 void_Z4
+#    tref_z5 tfuel_z5 void_z5  
+#  MAP th2xs
+#  GUESSES_MAPPED 300
+#
+#  CALCS
+#    fpow_z1
+#    fpow_z2
+#    fpow_z3
+#    fpow_z4
+#    fpow_z5
+#  MAP pow2fpowc
+#  CALCS_PRE_MAP 5

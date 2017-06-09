@@ -12,7 +12,7 @@ int main(int argc,char **argv)
     (*Coupling).initialize();
   }
   catch(int e){
-    rootPrints("FATAL ERROR. ABORTING.");
+    return 0;
   }  
 
   try{
@@ -20,14 +20,14 @@ int main(int argc,char **argv)
   }
   catch(int e){
     //Coupling->NewtonComm->disconnect();
-    rootPrints("FATAL ERROR. ABORTING.");
+    return 0;
   }
 
   try{
     (*Coupling).finish();
   }
   catch(int e){
-    rootPrints("FATAL ERROR. ABORTING.");
+    return 0;
   }
 
   return 0;

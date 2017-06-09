@@ -2,17 +2,18 @@
 
 NEWTON                 |
                        |
-Implicit coupling      s|  CLASS
+Implicit coupling      |  CLASS
 in nonlinear           |  SYSTEM
 calculations           |
                        |
 
 -------------------------------------------------------------------------------
 
-System contains all the usefull information of the strucure of the problem, like number of unknowns, connectivities, etc.
+System contains all the usefull information of the strucure of the problem, 
+like number of unknowns, connectivities, etc.
 
 Author: Federico A. Caccia
-Date: 4 June 2017
+Date: 9 June 2017
 
 \*****************************************************************************/
 
@@ -39,7 +40,6 @@ class System
     
     struct client{
       int id;
-      //std::string name;
       int type;
       int connection;
       string* map;
@@ -82,6 +82,51 @@ class System
     int** codeToConnectInPhase;
     client* code;
     int nUnk;
+    int nRes;
+    
+    
+    
+    double* beta;
+    double* gamma;
+    int* beta2linkInRes;
+    int* x2linkInRes;
+    string* xName;
+    string* resName;
+    int* beta2linkInGamma;
+    struct client2{
+      string name;
+      int connection;
+      int nProcs;
+      int nArgs;
+      int nAlpha;
+      double* alpha;
+      int nBeta;
+      int betaFirstValuePos;
+      int nGamma;
+      int gammaFirstValuePos;
+      int nDelta;
+      double* delta;
+      string alphaMap;
+      string gammaMap;
+      
+      string inputModelName;
+      string actualInputName;      
+      string actualInput;
+      string inputExt;
+      string restartName;
+      string actualRestartName;
+      string actualRestart;
+      string restartExt;
+      string restartPath;
+      string outputName;
+      string actualOutputName;
+      string actualOutput;
+      string outputExt;
+      string outputPath;
+      string binCommand;
+      string commandToRun;      
+    };
+    client2* code2;
 		
 	private:
 		int error;

@@ -26,6 +26,8 @@ Solver::Solver()
 {
   // Default values
   
+  // Non linear method
+  method = NO_METHOD;
   // Non linear tolerance
   nltol = 1e-07;
   // Non linear iterations
@@ -35,7 +37,7 @@ Solver::Solver()
   // Delta x in Jacobian calculation by finitte difference method
   dxJacCalc = 0.1;
   // Steps between Jacobian calculation by finite difference method
-  fJacCalc = 0;    
+  sJacCalc = 0;    
   // Math object
   math = new MathLib();
   // client code object

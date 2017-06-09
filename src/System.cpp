@@ -9,10 +9,11 @@ calculations			     |
 
 -------------------------------------------------------------------------------
 
-System contains all the usefull information of the strucure of the problem, like number of unknowns, connectivities, etc.
+System contains all the usefull information of the strucure of the problem, 
+like number of unknowns, connectivities, etc.
 
 Author: Federico A. Caccia
-Date: 4 June 2017
+Date: 9 June 2017
 
 \*****************************************************************************/
 
@@ -48,6 +49,46 @@ output: -
 void System::allocate1()
 { 
   // Client data
+  code2 = new client2[nCodes];
+  for(int  iCode=0; iCode<nCodes; iCode++){
+      code2[iCode].name = "";
+      code2[iCode].connection = NEWTON_UNKNOWN_CONNECTION;
+      code2[iCode].nProcs = 1;
+      code2[iCode].nArgs = 0;
+      code2[iCode].nAlpha = 0;
+      //code[iCode].alpha = new
+      code2[iCode].nBeta = 0;
+      code2[iCode].betaFirstValuePos = 0;
+      code2[iCode].nGamma = 0;
+      code2[iCode].gammaFirstValuePos = 0;
+      code2[iCode].nDelta = 0;
+      //code[iCode].delta = new
+      code2[iCode].alphaMap = "";
+      code2[iCode].gammaMap = "";
+      
+      code2[iCode].inputModelName = "";
+      code2[iCode].actualInputName = "";      
+      code2[iCode].actualInput = "";
+      code2[iCode].inputExt = "";
+      code2[iCode].restartName = "";
+      code2[iCode].actualRestartName = "";
+      code2[iCode].actualRestart = "";
+      code2[iCode].restartExt = "";
+      code2[iCode].restartPath = "";
+      code2[iCode].outputName = "";
+      code2[iCode].actualOutputName = "";
+      code2[iCode].actualOutput = "";
+      code2[iCode].outputExt = "";
+      code2[iCode].outputPath = "";
+      code2[iCode].binCommand = "";
+      code2[iCode].commandToRun = "";
+    
+  }
+  
+  
+  
+  
+  
   code = new client[nCodes];
   
   // Initialization
@@ -136,6 +177,11 @@ void System::allocate2()
       code[iCode].arg[iArg] = "";
     }
   }
+  
+  /* Allocate unknowns as residuals. If unknows set by input are
+   * different, then parser puts NEWTON_ERROR. */
+  xName = new string[nRes];
+  
 }
 
 /* System::allocate3

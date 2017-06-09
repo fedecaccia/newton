@@ -1,6 +1,6 @@
 # INPUT SPECIFICATIONS
 
-Comments with: '#' '@' '%' '_' '-' or everything that starts with "NEWTON".
+Comment the rest of the line with: '#' '@' '%' '_' '-' or everything that starts with "NEWTON".
 
 Parser is not case sensitive, but is a good practise to use upercase letters for cards and lowercase letters for names, strings and other values.
 

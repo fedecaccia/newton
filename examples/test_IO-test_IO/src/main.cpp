@@ -46,8 +46,6 @@ Date: 7 June 2017
 #undef __FUNCT__
 #define __FUNCT__ "main"
 
-//#include "MathLib.h"
-
 #include <sstream> 
 #include <fstream> 
 #include <iostream>
@@ -75,8 +73,6 @@ int main(int argc,char **argv)
   string fileInput = file+".dat";
   string fileOutput = file+".out";
   
-  // Math object
-  //MathLib* math = new MathLib;
   
   // Variables
   double w, x, y, z;

@@ -71,6 +71,7 @@ void checkError(int error, string errorPhrase)
 
 	if(error!=NEWTON_SUCCESS || mpierror != MPI_SUCCESS){
 		rootPrints(errorPhrase);
+    rootPrints("FATAL ERROR. ABORTING.");
 		throw error;
 	}
 }

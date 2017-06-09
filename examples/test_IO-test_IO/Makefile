@@ -4,8 +4,7 @@ DEP_DIR=$(MAIN_DIR)/inc
 SRC_DIR=$(EXAMPLE_DIR)/src
 OBJ_DIR=$(EXAMPLE_DIR)/obj
 BIN_DIR=$(EXAMPLE_DIR)/bin
-OBJELEM = $(OBJ_DIR)/main.o 						\
-					$(OBJ_DIR)/MathLib.o
+OBJELEM = $(OBJ_DIR)/main.o 						
 EXE=$(BIN_DIR)/Test
 MPICC=mpic++
 

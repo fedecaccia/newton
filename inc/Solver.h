@@ -40,7 +40,7 @@ class Solver
     int maxIter;
     int method;
     double dxJacCalc;
-    int fJacCalc;
+    int sJacCalc;
 		
 	private:
     int runCode(int, System*, Mapper*);
