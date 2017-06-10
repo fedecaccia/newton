@@ -37,19 +37,24 @@ class Parser
 		Parser();
 		void parseInput(System*, Evolution*, Solver*);
 		void checkConsistency(System*);
-    
-    std::string takeNextWord();
-    bool wordIsCard(string, string);
-    void checkImportantCards(System*, Solver*);
-    void checkImportantProperties(System*);
-		
+
 	private:
 		bool isAComment(std:: string);
+		std::string takeNextWord();
+	    bool wordIsCard(std::string, std::string);
+	    bool wordIsForbidden(std::string);
+
+	    void checkImportantCards(System*, Solver*);
+	    void checkClientProperties(System*, int);
+
+		std::string loadClientAndTakeWord(System*);
+		std::string loadCalcsAndTakeWord(System*);
+		std::string loadGuessesAndTakeWord(System*);
 
 		int error;
-    string delim;
-    int clientReaded;
-    bool unkSaved;
+	    string delim;
+	    int clientReaded;
+	    bool unkSaved;
 		std::string word;
 		std::ifstream configFile;
 

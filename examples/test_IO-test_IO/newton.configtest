@@ -6,28 +6,31 @@ ________________________________________________________________________
 # Numerical methods
 
 METHOD explicit_serial
-phases linear1 & linear2 &
-abs_tol 1e-07
-max_iter 10
+PHASES linear1 & linear2 &
+ABS_TOL 1e-07 MAX_ITER 10
+
 ________________________________________________________________________
 
 # Client code specifications
 
-CLIENT linear1 
-CALCS x y z GUESSES w
+CLIENT linear1
+CALCS x y z GUESSES w GUESSES_MAPPED 1 MAP asdasd
 INPUT_NAME test0
 INPUT_EXT dat
 OUTPUT_NAME from_input
 OUTPUT_EXT out
 CONNECTION io
-
+BIN_COMMAND bin/Test
+asd
 CLIENT linear2 
 CALCS w GUESSES x y z
 INPUT_NAME test1
 INPUT_EXT dat
 OUTPUT_NAME from_input
 OUTPUT_EXT out
-CONNECTION io
+CONNECTION io 
+BIN_COMMAND bin/Test
+
 ________________________________________________________________________
 
 #CLIENT RELAP
