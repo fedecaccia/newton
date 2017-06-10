@@ -53,10 +53,12 @@ class Parser
 
 		int error;
 	    string delim;
-	    int clientReaded;
 	    bool unkSaved;
 		std::string word;
 		std::ifstream configFile;
+		int clientReaded;
+		int betaLoaded;
+		int gammaLoaded;
 
 };
 

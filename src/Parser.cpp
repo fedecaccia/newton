@@ -394,7 +394,7 @@ string Parser::loadClientAndTakeWord(System* sys)
   }
   else{
     error = NEWTON_ERROR;
-    checkError(error, "Select a correct name for client. Word "+word+" is avoided - Parser::parseInput");
+    checkError(error, "Select a correct name for client. Word "+word+" is avoided - Parser::loadClientAndTakeWord");
   }
   
   // Take properties
@@ -478,7 +478,7 @@ string Parser::loadClientAndTakeWord(System* sys)
       }
       else{
         error = NEWTON_ERROR;
-        checkError(error, "Unknown connection type: "+word+" - Parser::parseInput");
+        checkError(error, "Unknown connection type: "+word+" - Parser::loadClientAndTakeWord");
       }
       word = takeNextWord();
     }
@@ -492,7 +492,7 @@ string Parser::loadClientAndTakeWord(System* sys)
         }
         else{
           error = NEWTON_ERROR;                  
-          checkError(error, "Set arguments after ARGS property in CLIENT - Parser::parseInput");
+          checkError(error, "Set arguments after ARGS property in CLIENT - Parser::loadClientAndTakeWord");
         }
       }while(!wordIsForbidden(word));
     }
@@ -521,7 +521,7 @@ string Parser::loadClientAndTakeWord(System* sys)
   if(wordIsCard(word, "GUESSES") ||
      wordIsCard(word, "CALCS")){
     error = NEWTON_ERROR;
-    checkError(error, "Bad place for input card: \""+word+"\" - Parser::parseInput");
+    checkError(error, "Bad place for input card: \""+word+"\" - Parser::loadClientAndTakeWord");
   }
   
   checkClientProperties(sys, clientReaded);
@@ -688,7 +688,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
         }
       }
       
-      // Count amount of residuals
+      // Count amount of residuals (and total betas)
       
       else if(word=="CALCS"){
         word = takeNextWord();
@@ -698,6 +698,21 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
             checkError(error, "Bad CALCS enumeration - Parser::parseInput");
           }
           sys->nRes++;
+          sys->nBeta++;
+          word = takeNextWord();
+        }while(!wordIsForbidden(word));
+      }
+
+      // Count amount of guesses (and total gammas)
+      
+      else if(word=="GUESSES"){
+        word = takeNextWord();
+        do{
+          if(wordIsForbidden(word)){
+            error = NEWTON_ERROR;
+            checkError(error, "Bad GUESSES enumeration - Parser::parseInput");
+          }
+          sys->nGamma++;
           word = takeNextWord();
         }while(!wordIsForbidden(word));
       }
@@ -751,7 +766,11 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
           }
         }
         word = takeNextWord();
-      }      
+      }
+
+      else if(word=="X_ORDER"){
+        word = takeNextWord(); 
+      }
       
       // Analyze all properties of the client and return the word out of that
 
@@ -836,7 +855,12 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
   //   cout<<" - Output extension: "<<sys->code2[iCode].outputExt<<endl;
   // }
 
-  // Third input file opening
+  // Reinitialization
+  betaLoaded = 0;
+  gammaLoaded = 0;
+  clientReaded =0;
+
+  // Third input file opening  
 
   configFile.open("newton.configtest");
   if (configFile.is_open()){
@@ -845,13 +869,40 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
       // Read clients that run in each phase
       
       if(word=="PHASES"){
+        for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+          for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
+            word = takeNextWord();
+            sys->codeToConnectInPhase2[iPhase][iCode] = word;
+          }
+          // Take "&"
+          word = takeNextWord();
+        }
         word = takeNextWord();
       }      
       
-      // Construct links betweeen variables
+      // Read variables
 
-      else if(word=="CLIENT"){        
-        word = takeNextWord();
+      else if(word=="CLIENT"){
+        for(int loading=0; loading<2; loading++){
+          while(word!="CALCS" && word!= "GUESSES"){
+            word = takeNextWord();
+          }
+          if(word=="CALCS"){
+            for(int iBeta=0; iBeta<sys->code2[clientReaded].nBeta; iBeta++){
+              word = takeNextWord();
+              sys->betaName[betaLoaded] = word;
+              betaLoaded++;
+            }
+          }
+          else if(word=="GUESSES"){
+            for(int iGamma=0; iGamma<sys->code2[clientReaded].nGamma; iGamma++){
+              word = takeNextWord();
+              sys->gammaName[gammaLoaded] = word;
+              gammaLoaded++;
+            }
+          }
+        }        
+        clientReaded++;
       }
     
       // Unknown or empty word
@@ -869,6 +920,75 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
   }
   configFile.close();
 
+  // Reinitialization
+
+  clientReaded = 0;
+
+  // Fourth input file opening  
+
+  configFile.open("newton.configtest");
+  if (configFile.is_open()){
+    while(!configFile.eof()){
+
+      // Read args
+      if(word=="CLIENT"){
+        if(sys->code2[clientReaded].nArgs>0){          
+          while(word!="ARGS"){
+            word = takeNextWord();
+          }
+          if(word=="ARGS"){
+            for(int iArg=0; iArg<sys->code2[clientReaded].nArgs; iArg++){
+              word = takeNextWord();
+              sys->code2[clientReaded].arg[iArg] = word;
+            }
+          }
+        }
+        word = takeNextWord();
+        clientReaded++;
+      }
+
+      // Unknown or empty word
+
+      else{        
+        word = takeNextWord();
+      }
+    
+    } // Finish while(!EOF)
+
+  } 
+  else{
+      error = NEWTON_ERROR;
+      checkError(error,"Error opening \"newton.config\"");
+  }
+  configFile.close();
+
+  // TEST
+
+  cout<<"Codes to connect in each phase in EXPLICIT_SERIAL"<<endl;
+  for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+    for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
+      cout<<" - "<<sys->codeToConnectInPhase2[iPhase][iCode]<<" ";
+    }
+    cout<<endl;
+  }
+
+  cout<<"Global betas: "<<sys->nBeta<<endl;
+  for(int iBeta=0; iBeta<sys->nBeta; iBeta++){
+    cout<<" - "<<sys->betaName[iBeta]<<": "<<sys->beta[iBeta]<<endl;
+  }
+  cout<<"Global gammas: "<<sys->nGamma<<endl;
+  for(int iGamma=0; iGamma<sys->nGamma; iGamma++){
+    cout<<" - "<<sys->gammaName[iGamma]<<": "<<sys->gamma[iGamma]<<endl;
+  }
+
+  cout<<" Arguments"<<endl;
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+    cout<<" ("<<sys->code2[iCode].nArgs<<"): ";
+    for(int iArg=0; iArg<sys->code2[iCode].nArgs; iArg++){
+      cout<<sys->code2[iCode].arg[iArg]<<" ";
+    }
+    cout<<endl;
+  }
 
 
 
@@ -1026,7 +1146,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
         configFile >> word;
         for (int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
           for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
-            stringstream(word) >> sys->codeToConnectInPhase[iPhase][iCode];         
+            //stringstream(word) >> sys->codeToConnectInPhase2[iPhase][iCode];         
             configFile >> word;
           }
           configFile >> word;
@@ -1035,7 +1155,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
         // TEST
         //~ for (int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
           //~ for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
-            //~ cout<< sys->codeToConnectInPhase[iPhase][iCode]<<" ";
+            //~ cout<< sys->codeToConnectInPhase2[iPhase][iCode]<<" ";
           //~ }
           //~ cout<<endl;
         //~ }

@@ -76,18 +76,24 @@ class System
       string commandToRun;
     };
     
+
+
+
     int nCodes;
     int nPhasesPerIter;
     int* nCodesInPhase;
     int** codeToConnectInPhase;
+    std::string** codeToConnectInPhase2;
     client* code;
     int nUnk;
     int nRes;
     
-    
-    
     double* beta;
+    int nBeta;
+    string* betaName;
     double* gamma;
+    int nGamma;
+    string* gammaName;
     int* beta2linkInRes;
     int* x2linkInRes;
     string* xName;
@@ -98,6 +104,7 @@ class System
       int connection;
       int nProcs;
       int nArgs;
+      string* arg;
       int nAlpha;
       double* alpha;
       int nBeta;

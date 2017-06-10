@@ -27,8 +27,14 @@ System::System()
 {
   // Number of client codes
   nCodes = 0;
-  // Number of unknowns
+  // Number of unknowns (equal to residuals and betas)
   nUnk = 0;
+  // Number of residuals (equal to unknowns and betas)
+  nRes = 0;
+  // Number of betas (equal to unknowns and residuals)
+  nBeta = 0;
+  // Number of gammas
+  nGamma = 0;
   // Number of phases in explicit serial method
   nPhasesPerIter = 0;
   // Math object
@@ -87,6 +93,13 @@ void System::allocate1()
   
   
   
+
+
+
+
+
+
+  // VIEJOOOOOOOOOOOOOOOO
   
   
   code = new client[nCodes];
@@ -126,6 +139,7 @@ void System::allocate1()
       code[iCode].nCalculationsFromCode[jCode] = 0;
       code[iCode].calculationPossitions[jCode] = 0;
     }
+
     // File strings    
     code[iCode].id = 0;    
     code[iCode].inputModelName = ""; // string model file input without extension
@@ -163,20 +177,11 @@ void System::allocate2()
   // Number of codes per phase
   nCodesInPhase = new int[nPhasesPerIter];
   // Code ID (col) to connect in each phase (row)
-  codeToConnectInPhase = new int*[nPhasesPerIter];
+  codeToConnectInPhase2 = new string*[nPhasesPerIter];
   // Initialization
   for(int iPhase=0; iPhase<nPhasesPerIter; iPhase++){
     nCodesInPhase[iPhase] = 0;    
   } 
-  
-  // Number of arguments of each client code
-  for(int iCode=0; iCode<nCodes; iCode++){
-    code[iCode].arg = new string[code[iCode].nArgs];
-    // Initialization
-    for(int iArg=0; iArg<code[iCode].nArgs; iArg++){
-      code[iCode].arg[iArg] = "";
-    }
-  }
   
   /* Allocate unknowns as residuals. If unknows set by input are
    * different, then parser puts NEWTON_ERROR. */
@@ -186,7 +191,7 @@ void System::allocate2()
 
 /* System::allocate3
 
-Allocate number of codes (col) in each phase in codeToConnectInPhase.
+Allocate number of codes (col) in each phase in codeToConnectInPhase2.
 
 input: -
 output: -
@@ -194,12 +199,38 @@ output: -
 */
 
 void System::allocate3()
-{  
+{ 
+  
+  // Number of arguments of each client code
+  
+  for(int iCode=0; iCode<nCodes; iCode++){
+    code2[iCode].arg = new string[code2[iCode].nArgs];
+    // Initialization
+    for(int iArg=0; iArg<code2[iCode].nArgs; iArg++){
+      code2[iCode].arg[iArg] = "";
+    }
+  }
+
+  // System variables
+  
+  beta = new double[nBeta];
+  betaName = new string[nBeta];
+  gamma = new double[nGamma];
+  gammaName = new string[nGamma];
+
+  for(int iUnk=0; iUnk<nUnk; iUnk++){
+    beta[iUnk] = 0;
+    gamma[iUnk] = 0;
+    betaName[iUnk]="";
+    gammaName[iUnk]="";
+  }
+
+
   // Code ID (col) to connect in each phase (row)
   for(int iPhase=0; iPhase<nPhasesPerIter; iPhase++){
-    codeToConnectInPhase[iPhase] = new int[nCodesInPhase[iPhase]];
+    codeToConnectInPhase2[iPhase] = new string[nCodesInPhase[iPhase]];
     for(int iCode=0; iCode<nCodesInPhase[iPhase]; iCode++){
-      codeToConnectInPhase[iPhase][iCode] = 0;
+      codeToConnectInPhase2[iPhase][iCode] = "";
     }
   }
 }

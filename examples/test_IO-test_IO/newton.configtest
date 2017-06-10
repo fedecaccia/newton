@@ -21,7 +21,8 @@ OUTPUT_NAME from_input
 OUTPUT_EXT out
 CONNECTION io
 BIN_COMMAND bin/Test
-asd
+ARGS arg1 arg2 arg3
+
 CLIENT linear2 
 CALCS w GUESSES x y z
 INPUT_NAME test1
