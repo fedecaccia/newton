@@ -2,7 +2,7 @@
 
 NEWTON					      |
                       |
-Implicit coupling 		|	FUNCTION
+Implicit coupling 		|	CLASS
 in nonlinear			    |	NEWTON
 calculations			    |
                       |
@@ -77,7 +77,7 @@ void Newton::initialize()
 	
 	NewtonSystem->construct();
 
-	NewtonComm->initialize();	
+	NewtonComm->initialize(NewtonSystem);	
 }
 
 /* Newton::run

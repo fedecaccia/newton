@@ -1,15 +1,15 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
+NEWTON					      |
+                      |
 Implicit coupling 		|	CLASS
-in nonlinear			|	COMMUNICATOR
-calculations			|
-						|
+in nonlinear			    |	COMMUNICATOR
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 
-Evolution updates the evolution parameter and other problem dependent variables and configurations.
+Stablish mpi communitaction with clients.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
@@ -32,14 +32,48 @@ Communicator::Communicator()
 /* Communicator::initialize
 Starts the communication.
 
-input: -
+input: System pointer
 output: -
 
 */
-void Communicator::initialize()
+void Communicator::initialize(System* sys)
 {
   rootPrints("Checking communication with clients...");
-	checkError(error,"Error starting communication.");
+  
+  // Only roots stablish communication
+  if(irank==NEWTON_ROOT){
+    Port_Name = new char*[sys->nCodes];
+    
+    for(int iCode=0; iCode<sys->nCodes; iCode++){
+      
+      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+        error = MPI_Open_port(MPI_INFO_NULL, Port_Name[iCode]);
+        cout<<"******aa"<<endl;
+        string Srvc_NameCPP= "('Coupling_C', I0)"+int2str(sys->code[iCode].id);
+        char* Srvc_Name=(char*)Srvc_NameCPP.c_str();
+        cout<<"******bb"<<endl;
+        error += MPI_Publish_name(Srvc_Name, MPI_INFO_NULL, Port_Name[iCode]);
+        cout<<"******cc"<<endl;
+      }    
+    }
+  }
+  
+  checkError(error, "Error publishing services with clients by MPI");
+  
+  if(irank==NEWTON_ROOT){
+    Coupling_Comm = new MPI_Comm[sys->nCodes];
+    
+    for(int iCode=0; iCode<sys->nCodes; iCode++){
+      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+        error = MPI_Comm_accept(Port_Name[iCode], MPI_INFO_NULL, 0, MPI_COMM_SELF, &Coupling_Comm[iCode]);
+        string Srvc_NameCPP= ("('Coupling_C', I0)"+int2str(sys->code[iCode].id));
+        char* Srvc_Name=(char*)Srvc_NameCPP.c_str();
+        error += MPI_Unpublish_name(Srvc_Name, MPI_INFO_NULL, Port_Name[iCode]);
+      }
+    }
+  }
+  checkError(error, "Error accepting communication with clients by MPI");  
+  
 }
 
 /* Communicator::disconnnect

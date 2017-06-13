@@ -1,15 +1,15 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
+NEWTON					      |
+                      |
 Implicit coupling 		|	CLASS
-in nonlinear			|	COMMUNICATOR
-calculations			|
-						|
+in nonlinear			    |	COMMUNICATOR
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 
-Evolution updates the evolution parameter and other problem dependent variables and configurations.
+Stablish mpi communitaction with clients.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
@@ -20,17 +20,22 @@ Date: 4 June 2017
 #define COMMUNICATOR_H
 
 #include "global.h"
+#include "System.h"
+
+#include "mpi.h"
 
 class Communicator
 {
 	public:
 		Communicator();
-		void initialize();
+		void initialize(System*);
 		void disconnect();
 		
 	private:
 		int error;
 		int isConnectedByMPI;
+    char** Port_Name;
+    MPI_Comm* Coupling_Comm;
 
 };
 

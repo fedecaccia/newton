@@ -1,0 +1,25 @@
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    Newton    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                    Implicit coupling
+                                in nonlinear calculations
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+Parsing configuration file...
+Building system...
+Checking for mappers...
+Checking communication with clients...
+******aa
+[0]PETSC ERROR: ------------------------------------------------------------------------
+[0]PETSC ERROR: Caught signal number 11 SEGV: Segmentation Violation, probably memory access out of range
+[0]PETSC ERROR: Try option -start_in_debugger or -on_error_attach_debugger
+[0]PETSC ERROR: or see http://www.mcs.anl.gov/petsc/documentation/faq.html#valgrind
+[0]PETSC ERROR: or try http://valgrind.org on GNU/linux and Apple Mac OS X to find memory corruption errors
+[0]PETSC ERROR: configure using --with-debugging=yes, recompile, link, and run 
+[0]PETSC ERROR: to get more information on the crash.
+[0]PETSC ERROR: --------------------- Error Message --------------------------------------------------------------
+[0]PETSC ERROR: Signal received
+[0]PETSC ERROR: See http://www.mcs.anl.gov/petsc/documentation/faq.html for trouble shooting.
+[0]PETSC ERROR: Petsc Release Version 3.6.1, Jul, 22, 2015 
+[0]PETSC ERROR: Unknown Name on a d8-opt named mecom22 by cacciaf Tue Jun 13 20:34:49 2017
+[0]PETSC ERROR: Configure options --prefix=/usr/local/petsc-201508-d8-opt --with-petsc-arch=d8-opt --with-make-np=4 --with-debugging=0 --with-pastix=1 --download-pastix=yes --with-ptscotch=1 --download-ptscotch=yes --with-metis=1 --download-metis=yes --with-parmetis=1 --download-parmetis=yes --with-hypre=1 --download-hypre=yes --with-scalapack=1 --download-scalapack=yes --with-spai=1 --download-spai=yes --with-superlu=1 --download-superlu=yes --with-mumps=1 --download-mumps=yes --with-ml=1 --download-ml=yes --with-superlu_dist=1 --download-superlu_dist=yes --doCleanup=0
+[0]PETSC ERROR: #1 User provided function() line 0 in  unknown file
