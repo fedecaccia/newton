@@ -39,6 +39,8 @@ System::System()
   nPhasesPerIter = 0;
   // Math object
   math = new MathLib();
+  // Mapper object
+  NewtonMap = new Mapper();
   // Initial error value
 	error = NEWTON_SUCCESS;
 }
@@ -46,148 +48,97 @@ System::System()
 
 /* System::allocate1
 Allocates main variables of the system.
-Called by Parser.
-
-input: -
-output: -
-
-*/
-void System::allocate1()
-{ 
-  // Client data
-  code2 = new client2[nCodes];
-  for(int  iCode=0; iCode<nCodes; iCode++){
-      code2[iCode].name = "";
-      code2[iCode].connection = NEWTON_UNKNOWN_CONNECTION;
-      code2[iCode].nProcs = 1;
-      code2[iCode].nArgs = 0;
-      code2[iCode].nAlpha = 0;
-      //code[iCode].alpha = new
-      code2[iCode].nBeta = 0;
-      code2[iCode].betaFirstValuePos = 0;
-      code2[iCode].nGamma = 0;
-      code2[iCode].gammaFirstValuePos = 0;
-      code2[iCode].nDelta = 0;
-      //code[iCode].delta = new
-      code2[iCode].alphaMap = "";
-      code2[iCode].gammaMap = "";
-      
-      code2[iCode].inputModelName = "";
-      code2[iCode].actualInputName = "";      
-      code2[iCode].actualInput = "";
-      code2[iCode].inputExt = "";
-      code2[iCode].restartName = "";
-      code2[iCode].actualRestartName = "";
-      code2[iCode].actualRestart = "";
-      code2[iCode].restartExt = "";
-      code2[iCode].restartPath = "";
-      code2[iCode].outputName = "";
-      code2[iCode].actualOutputName = "";
-      code2[iCode].actualOutput = "";
-      code2[iCode].outputExt = "";
-      code2[iCode].outputPath = "";
-      code2[iCode].binCommand = "";
-      code2[iCode].commandToRun = "";
-    
-  }
-  
-  
-  
-
-
-
-
-
-
-  // VIEJOOOOOOOOOOOOOOOO
-  
-  
-  code = new client[nCodes];
-  
-  // Initialization
-  for(int iCode=0; iCode<nCodes; iCode++){
-    // Code name in number
-    code[iCode].type = USER_CODE;
-    // Type of connection
-    code[iCode].connection = NEWTON_UNKNOWN_CONNECTION;
-    // Mapper ID of values in each stage(pre_send and post_receive)
-    code[iCode].map = new string[2];
-    code[iCode].map[NEWTON_PRE_SEND] = "";
-    code[iCode].map[NEWTON_POST_RECV] = "";
-    // Number of arguments that bin has to take
-    code[iCode].nArgs = 0;
-    // Number of processes to spawn
-    code[iCode].nProcs = 0;
-    // Number of unknowns guesses
-    code[iCode].nGuesses = 0;
-    // Number of unknowns guesses mapped before send
-    code[iCode].nGuessesMapped = 0;
-    // Number of unknowns received without map
-    code[iCode].nCalculationsWMap = 0;
-    // Number of unknowns received and mapped
-    code[iCode].nCalculations = 0;
-    // Numer of unknowns wich are guesses to each code
-    code[iCode].nCalculations2Code = new int[nCodes];
-    // Numer of unknowns wich are guesses from another codes
-    code[iCode].nCalculationsFromCode = new int[nCodes];
-    // First possition of guesses in x vector
-    code[iCode].firstGuessPossition = 0;
-    // First possition of calculations in x vector, per code that receives
-    code[iCode].calculationPossitions = new int[nCodes];
-    for(int jCode=0; jCode<nCodes; jCode++){
-      code[iCode].nCalculations2Code[jCode] = 0;
-      code[iCode].nCalculationsFromCode[jCode] = 0;
-      code[iCode].calculationPossitions[jCode] = 0;
-    }
-
-    // File strings    
-    code[iCode].id = 0;    
-    code[iCode].inputModelName = ""; // string model file input without extension
-    code[iCode].actualInputName = ""; // string actual file input without extension
-    code[iCode].actualInput = ""; // string actual file input with extension
-    code[iCode].inputExt = ""; // string input extension
-    code[iCode].restartName = "";
-    code[iCode].actualRestartName = "";
-    code[iCode].actualRestart = "";
-    code[iCode].restartExt = "";
-    code[iCode].restartPath = ".";
-    code[iCode].actualOutputName = "";
-    code[iCode].actualOutput = "";
-    code[iCode].outputExt = "";
-    code[iCode].outputPath = ".";
-    code[iCode].binCommand = "";
-    code[iCode].commandToRun = "";
-  }  
-
-}
-
-/* System::allocate2
 Set number of phases(rows) in wich codes ID(col) run in each phase 
 (in explicit serial method).
 After each phase, guesses are updated with previous calculations.
 Also, set number of arguments that each bin has to take.
+Called by Parser.
 
-input: -
+input: method integer
 output: -
 
 */
-
-void System::allocate2()
-{  
+void System::allocate1(int method)
+{ 
+  // Client data
+  code = new client[nCodes];
+  for(int  iCode=0; iCode<nCodes; iCode++){
+      code[iCode].name = "";
+      code[iCode].connection = NEWTON_UNKNOWN_CONNECTION;
+      code[iCode].nProcs = 1;
+      code[iCode].nArgs = 0;
+      code[iCode].nAlpha = 0;
+      //code[iCode].alpha = new
+      code[iCode].nBeta = 0;
+      code[iCode].betaFirstValuePos = 0;
+      code[iCode].nGamma = 0;
+      code[iCode].gammaFirstValuePos = 0;
+      code[iCode].nDelta = 0;
+      //code[iCode].delta = new
+      code[iCode].alphaMap = "";
+      code[iCode].gammaMap = "";
+      
+      code[iCode].inputModelName = "";
+      code[iCode].actualInputName = "";      
+      code[iCode].actualInput = "";
+      code[iCode].inputExt = "";
+      code[iCode].restartName = "";
+      code[iCode].actualRestartName = "";
+      code[iCode].actualRestart = "";
+      code[iCode].restartExt = "";
+      code[iCode].restartPath = "";
+      code[iCode].outputName = "";
+      code[iCode].actualOutputName = "";
+      code[iCode].actualOutput = "";
+      code[iCode].outputExt = "";
+      code[iCode].outputPath = "";
+      code[iCode].binCommand = "";
+      code[iCode].commandToRun = "";
+    
+  }
+  
+  // Method is not EXPLICI_SERIAL
+  if(method!=EXPLICIT_SERIAL){
+    nPhasesPerIter = 1;
+  }  
+  
   // Number of codes per phase
   nCodesInPhase = new int[nPhasesPerIter];
+
   // Code ID (col) to connect in each phase (row)
-  codeToConnectInPhase2 = new string*[nPhasesPerIter];
+  codeToConnectInPhase = new string*[nPhasesPerIter];
   // Initialization
   for(int iPhase=0; iPhase<nPhasesPerIter; iPhase++){
-    nCodesInPhase[iPhase] = 0;    
+    nCodesInPhase[iPhase] = 0;
   } 
+  if(method!=EXPLICIT_SERIAL){
+    nCodesInPhase[0] = nCodes;
+  }
   
-  /* Allocate unknowns as residuals. If unknows set by input are
-   * different, then parser puts NEWTON_ERROR. */
+  /* Allocate unknowns as residuals, and residuals names.
+   If unknows set by input are different, 
+   * then parser puts NEWTON_ERROR. */
   xName = new string[nRes];
+  resName = new string[nRes];
+  // Initialization
+  for(int iRes=0; iRes<nRes; iRes++){
+    xName[iRes] = "";    
+    resName[iRes] = "";    
+  }
   
+  // Links
+  x2linkInRes = new int[nRes];
+  beta2linkInRes = new int[nRes];
+  beta2linkInX = new int[nRes];
+  // Secure initialization
+  for(int iRes =0; iRes<nRes; iRes++){
+    x2linkInRes[iRes]= -1;
+    beta2linkInRes[iRes]= -1;
+    beta2linkInX[iRes] = -1;
+  }
+
 }
+
 
 /* System::allocate3
 
@@ -204,10 +155,10 @@ void System::allocate3()
   // Number of arguments of each client code
   
   for(int iCode=0; iCode<nCodes; iCode++){
-    code2[iCode].arg = new string[code2[iCode].nArgs];
+    code[iCode].arg = new string[code[iCode].nArgs];
     // Initialization
-    for(int iArg=0; iArg<code2[iCode].nArgs; iArg++){
-      code2[iCode].arg[iArg] = "";
+    for(int iArg=0; iArg<code[iCode].nArgs; iArg++){
+      code[iCode].arg[iArg] = "";
     }
   }
 
@@ -217,22 +168,45 @@ void System::allocate3()
   betaName = new string[nBeta];
   gamma = new double[nGamma];
   gammaName = new string[nGamma];
+  x2linkInGamma = new int[nGamma];
+  beta2linkInGamma = new int[nGamma];
 
-  for(int iUnk=0; iUnk<nUnk; iUnk++){
-    beta[iUnk] = 0;
-    gamma[iUnk] = 0;
-    betaName[iUnk]="";
-    gammaName[iUnk]="";
+  // Initialization
+  for(int iBeta=0; iBeta<nBeta; iBeta++){
+    beta[iBeta] = 0;    
+    betaName[iBeta]="";    
+  }
+  
+  for(int iGamma=0; iGamma<nGamma; iGamma++){
+    gamma[iGamma] = 0;
+    gammaName[iGamma]="";
+    // Secure initialization
+    x2linkInGamma[iGamma] = -1;
+    beta2linkInGamma[iGamma] = -1;
   }
 
 
-  // Code ID (col) to connect in each phase (row)
+  // Code name (col) to connect in each phase (row)
   for(int iPhase=0; iPhase<nPhasesPerIter; iPhase++){
-    codeToConnectInPhase2[iPhase] = new string[nCodesInPhase[iPhase]];
+    codeToConnectInPhase[iPhase] = new string[nCodesInPhase[iPhase]];
     for(int iCode=0; iCode<nCodesInPhase[iPhase]; iCode++){
-      codeToConnectInPhase2[iPhase][iCode] = "";
+      if(nPhasesPerIter>1){
+        codeToConnectInPhase[iPhase][iCode] = "";
+      }
+      else{
+        codeToConnectInPhase[0][iCode] = code[iCode].name;
+      }
     }
   }
+  
+  // Alphas and Deltas
+  for(int iCode=0; iCode<nCodes; iCode++){
+    code[iCode].alpha = new double[code[iCode].nAlpha];
+    code[iCode].delta = new double[code[iCode].nDelta];
+    math->zeros(code[iCode].alpha, code[iCode].nAlpha);
+    math->zeros(code[iCode].delta, code[iCode].nDelta);
+  }
+  
 }
 
 /* System::construct
@@ -247,190 +221,99 @@ void System::construct()
   
   rootPrints("Building system...");
   
-  /* Main variables in client struct:
-   * 
-   * nCalculations2Code: amount of variables that each code (row)
-   *  send to each code (column). Diagonals should be with zeros.
-   * 
-   * nGuesses: number of guesses per code, which are solved by coupling.
-   * nGuessesMapped: number of guesses per code, which are effectively sended.
-   * 
-   * firstGuessPossition: possition in x of the first guess to the code.
-   *  Guesses to the same code are contiguous.
-   * 
-   * nCalculationsWMap: amount of calculations received from the code.
-   * nCalculations: amount of calculations mapped, which are used in coupling.
-   * 
-   * nCalculations2Code: amount of calculations by the code that
-   *  are inputs to another code (row). Zeros t the same code.
-   * 
-   * nCalculationPossitions: possition in x of the first calculation
-   *  of the code that is input to another code (row).
-   * 
-   * x guess vector is organized as following:
-   *  first all guesses of code with ID 0, and inside:
-   *    first all guesses that come from code with ID 1,
-   *    then guesses that come from code with ID 2,
-   *    ...
-   *    at the end guesses that come from the last code,
-   *  second all guesses of code with ID 1, and inside:
-   *    first all guesses that come from code with ID 0,
-   *    then guesses that come from code with ID 2, 
-   *    ...
-   *    at the end guesses that come from the last code,
-   *  ...
-   *  at last all guesses of code with the greatest ID, and inside:
-   *    first all guesses that come from code with ID 0,
-   *    ...
-   */
+  // Construct the correct links
   
-  // Supossing that code[x].nCalculations2Code[...] was loaded by Parser 
-  
-  /* Seting amount of variables:
-   * 
-   * 
-   * 
-   * 
-   * 
-   */
-   
-  for(int iCode=0; iCode<nCodes; iCode++){
-    for(int jCode=0; jCode<nCodes; jCode++){
-      code[iCode].nGuesses += code[iCode].nCalculationsFromCode[jCode];
-      code[iCode].nGuessesMapped += code[iCode].nCalculationsFromCode[jCode];
-      code[iCode].nCalculations += code[iCode].nCalculations2Code[jCode];
-      code[iCode].nCalculationsWMap += code[iCode].nCalculations2Code[jCode];
-    }
-  }
-  
-  // Setting guess possitions
-  int nPos = 0;
-  for (int iCode=0; iCode<nCodes; iCode++){
-    code[iCode].firstGuessPossition = nPos;
-    nPos += code[iCode].nGuesses;
-  }
-  
-  // Setting calculation possitions
-  nPos = 0;
-  for (int iCode=0; iCode<nCodes; iCode++){
-    for (int jCode=0; jCode<nCodes; jCode++){
-      code[jCode].calculationPossitions[iCode] = nPos;
-      if(iCode==jCode){
-        // This element is avoided. -1 to show errors if it is tried to be used!
-        code[jCode].calculationPossitions[iCode] = -1;
+  // Beta to link in residuals
+  for(int iRes=0; iRes<nRes; iRes++){
+    bool resLinked = false;
+    for(int iBeta=0; iBeta<nBeta; iBeta++){
+      if(betaName[iBeta]==resName[iRes]){
+        beta2linkInRes[iRes] = iBeta;
+        resLinked = true;
       }
-      nPos += code[jCode].nCalculations2Code[iCode];
+    }
+    if(resLinked == false){
+      error = NEWTON_ERROR;
+      checkError(error, "Bad beta names - System::construct");
     }
   }
   
-  // Total unknowns
-  for(int iCode=0; iCode<nCodes; iCode++){
-    for(int jCode=0; jCode<nCodes; jCode++){
-      nUnk += code[iCode].nCalculations2Code[jCode]; 
+  // x to link in residuals
+  for(int iRes=0; iRes<nRes; iRes++){
+    bool xLinked = false;
+    for(int iX=0; iX<nUnk; iX++){
+      if(xName[iX]==resName[iRes]){
+        x2linkInRes[iRes] = iX;
+        xLinked = true;
+      }
+    }
+    if(xLinked == false){
+      error = NEWTON_ERROR;
+      checkError(error, "Bad x names - System::construct");
+    }
+  } 
+  
+  // Beta to link in gamma
+  for(int iGamma=0; iGamma<nGamma; iGamma++){
+    bool gammaLinked = false;
+    for(int iBeta=0; iBeta<nBeta; iBeta++){
+      if(betaName[iBeta]==gammaName[iGamma]){
+        beta2linkInGamma[iGamma] = iBeta;
+        gammaLinked = true;
+      }
+    }
+    if(gammaLinked == false){
+      error = NEWTON_ERROR;
+      checkError(error, "Bad beta or gamma names - System::construct");
+    }
+  }
+
+  // Beta to link in X
+  for(int iX=0; iX<nUnk; iX++){
+    bool xLinked = false;
+    for(int iBeta=0; iBeta<nBeta; iBeta++){
+      if(betaName[iBeta]==xName[iX]){
+        beta2linkInX[iX] = iBeta;
+        xLinked = true;
+      }
+    }
+    if(xLinked == false){
+      error = NEWTON_ERROR;
+      checkError(error, "Bad beta or x names - System::construct");
+    }
+  }
+
+  // x to link in gamma
+  for(int iGamma=0; iGamma<nGamma; iGamma++){
+    bool gammaLinked = false;
+    for(int iX=0; iX<nUnk; iX++){
+      if(xName[iX]==gammaName[iGamma]){
+        x2linkInGamma[iGamma] = iX;
+        gammaLinked = true;
+      }
+    }
+    if(gammaLinked == false){
+      error = NEWTON_ERROR;
+      checkError(error, "Bad x or gamma names - System::construct");
     }
   }
   
-  
-  //~ // TEST
-  //~ cout<<"nGuesses"<<endl;
-  //~ for(int i=0; i<nCodes; i++){
-    //~ cout<<i<<" "<<code[i].nGuesses<<endl;
-  //~ }
-  //~ cout<<"nGuessesMapped"<<endl;
-  //~ for(int i=0; i<nCodes; i++){
-    //~ cout<<i<<" "<<code[i].nGuessesMapped<<endl;
-  //~ }
-  //~ cout<<"nCalculationsWMap"<<endl;
-  //~ for(int i=0; i<nCodes; i++){
-    //~ cout<<i<<" "<<code[i].nCalculationsWMap<<endl;
-  //~ }
-  //~ cout<<"nCalculations"<<endl;
-  //~ for(int i=0; i<nCodes; i++){
-    //~ cout<<i<<" "<<code[i].nCalculations<<endl;
-  //~ }
-  //~ cout<<"first guess"<<endl;
-  //~ for(int i=0; i<nCodes; i++){
-    //~ cout<<i<<" "<<code[i].firstGuessPossition<<endl;
-  //~ }
-  //~ cout<<"n calc 2 code"<<endl;
-  //~ for(int i=0; i<nCodes; i++){
-    //~ for(int j=0; j<nCodes; j++){
-      //~ cout<<i<<" "<<j<<" "<<code[i].nCalculations2Code[j]<<endl;
-    //~ }
-  //~ }
-  //~ cout<<"n calc from code"<<endl;
-  //~ for(int i=0; i<nCodes; i++){
-    //~ for(int j=0; j<nCodes; j++){
-      //~ cout<<i<<" "<<j<<" "<<code[i].nCalculationsFromCode[j]<<endl;
-    //~ }
-  //~ }  
-  //~ cout<<"first calc per code"<<endl;
-  //~ for(int i=0; i<nCodes; i++){
-    //~ for(int j=0; j<nCodes; j++){
-      //~ cout<<i<<" "<<j <<" "<<code[i].calculationPossitions[j]<<endl;
-    //~ }
-  //~ }
-  //~ cout<<"Total unknowns: "<<nUnk<<endl;
-  //~ exit(1);
-  
-  // Vector of values of x that are guesses to a particular code, without mapping
-  for(int iCode=0; iCode<nCodes; iCode++){
-    code[iCode].xValuesToMap = new double[code[iCode].nGuesses];
+  // Set position of first values of local betas and gammas in global
+  int betaPos = 0;
+  int gammaPos = 0;
+  for (int iCode=0; iCode<nCodes; iCode++){
+    code[iCode].betaFirstValuePos = betaPos;
+    betaPos += code[iCode].nBeta;
+    code[iCode].gammaFirstValuePos = gammaPos;
+    gammaPos += code[iCode].nGamma;
   }
-  
-  // Vector of values of x that are guesses to a particular code, mapped
-  for(int iCode=0; iCode<nCodes; iCode++){
-    code[iCode].xValuesToSend = new double[code[iCode].nGuessesMapped];
-  }
-  
-  // Vector of values of y that are received from a particular code
-  for(int iCode=0; iCode<nCodes; iCode++){
-    code[iCode].yValuesReceived = new double[code[iCode].nCalculationsWMap];
-  }
-  
-  // Vector of values of y that are received from a particular code, mapped
-  for(int iCode=0; iCode<nCodes; iCode++){
-    code[iCode].yValuesMapped = new double[code[iCode].nCalculations];
-  }
-  
-  for(int iCode=0; iCode<nCodes; iCode++){
-    if(code[iCode].map[NEWTON_PRE_SEND]!=""){
-      error = NEWTON_ERROR;
-      rootPrints("You have to change amount of nGuessesMapped & nCalculationsWMap");      
-    }    
-    if(code[iCode].map[NEWTON_POST_RECV]!=""){
-      error = NEWTON_ERROR;
-      rootPrints("You have to change amount of nGuessesMapped & nCalculationsWMap");      
-    }    
-  }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   // Initialize file names and command args in I/O case
   error = setFilesAndCommands(0);
-    
+  
+  // Load mappers
+  NewtonMap->config();
+  
 	checkError(error,"Error setting system structure.");
 }
 
@@ -517,63 +400,73 @@ int System::setFilesAndCommands(int step)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* System::extractToMap()
-Extracts from x all values of interest of code iCode.
-
-input: code ID, x vector
-output: error
-
-*/
-int System::extractToMap(int iCode, double* x)
+void System::alpha2beta(int iCode)
 {
-  math->copyInVector(code[iCode].xValuesToMap, 0, x, code[iCode].firstGuessPossition, code[iCode].nGuesses);
-  error = NEWTON_SUCCESS;
-  return error;
+  error= NewtonMap->map(iCode, code[iCode].alphaMap, code[iCode].nAlpha, code[iCode].alpha, code[iCode].nBeta, &(beta[code[iCode].betaFirstValuePos]));
+  checkError(error, "Error building beta - System::alpha2beta");
 }
 
-/* System::setMapped()
-Set on y all values mapped calculated by code iCode.
 
-input: code ID, y vector
-output: error
+void System::computeResiduals(double* res, double* x)
+{
+  for(int iRes=0; iRes<nRes; iRes++){
+    res[iRes] = -x[x2linkInRes[iRes]] + beta[beta2linkInRes[iRes]];
+  }
+}
+
+
+void System::x2gamma(double* x)
+{  
+  for(int iGamma=0; iGamma<nGamma; iGamma++){
+    gamma[iGamma] = x[x2linkInGamma[iGamma]];
+    //cout<<gamma[iGamma]<<endl;
+  }
+}
+
+
+void System::beta2x(double* x)
+{  
+  for (int iX=0; iX<nUnk; iX++){
+    x[iX] = beta[beta2linkInX[iX]];
+  }
+}
+
+
+void System::beta2gamma()
+{
+  for(int iGamma=0; iGamma<nGamma; iGamma++){
+    gamma[iGamma] = beta[beta2linkInGamma[iGamma]];
+  }
+}
+
+
+void System::gamma2delta(int iCode)
+{
+  error= NewtonMap->map(iCode, code[iCode].gammaMap, code[iCode].nGamma, &(gamma[code[iCode].gammaFirstValuePos]), code[iCode].nDelta, code[iCode].delta);
+  checkError(error, "Error building delta from gamma - System::gamma2delta");
+}
+
+/* System::findCodeInPhase
+
+Returns the code number that run in phase.
+
+input: numebr of phase, number of code in phase
+output: integer code number
 
 */
-int System::setMappedOnY(int iCode, double* y)
+int System::findCodeInPhase(int iPhase, int iPhaseCode)
 {
-  // Lecture possition in yValuesMapped
-  int pos = 0;
+  string codeName = codeToConnectInPhase[iPhase][iPhaseCode];
+  int iCode=-1;
   for(int jCode=0; jCode<nCodes; jCode++){
-    math->copyInVector(y, code[iCode].calculationPossitions[jCode], // vector to save the copy, possition of first element
-                       code[iCode].yValuesMapped, pos, // vector to copy, possition of first element
-                       code[iCode].nCalculations2Code[jCode]); // number of elements to copy
-    // Lecture possition incremented
-    pos+=code[iCode].nCalculations2Code[jCode];
-  }  
-  
-  error = NEWTON_SUCCESS;
-  return error;
+    if(code[jCode].name==codeName){
+      iCode = jCode;
+    }
+  }
+  if(iCode==-1){
+    error = NEWTON_ERROR;
+    checkError(error, "Bad name for code in phase: \""+codeName+"\" - System::findCodeInPhase");
+  }
+
+  return iCode;
 }

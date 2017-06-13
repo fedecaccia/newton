@@ -35,32 +35,27 @@ Client::Client()
 This function selects the appropiate input preparing routine based on code name. 
 New code name switches have to be added here, also their definitions in global.h.
 
-input: code ID and System
+input: code type, code name, number of elements in array of values to send,
+array of values to send, string of the input to write in the actual step
 output: error
 
 */
-int Client::prepareInput(int iCode, System* sys)
+int Client::prepareInput(int type, string name, int nDelta, double* delta, string actualInput)
 { 
-  switch (sys->code[iCode].type){
+  switch (type){
     
     case TEST:
-      error = prepareTestClientInput(sys->code[iCode].id, 
-                                     sys->code[iCode].nGuessesMapped, 
-                                     sys->code[iCode].xValuesToSend, 
-                                     sys->code[iCode].actualInput);    
+      error = prepareTestClientInput(name, nDelta, delta, actualInput);
       break;
     
     case USER_CODE:
-      error = prepareUserClientInput(sys->code[iCode].id, 
-                                     sys->code[iCode].nGuessesMapped, 
-                                     sys->code[iCode].xValuesToSend, 
-                                     sys->code[iCode].actualInput);    
+      error = prepareUserClientInput(name, nDelta, delta, actualInput);
       break;
       
     default:
       error = NEWTON_ERROR;
-      cout<<"Client code name not founded - Client::prepareInput"<<endl;
-      break; 
+      cout<<"Client code type:\""<< type<<"\" not founded - Client::prepareInput"<<endl;
+      break;
   }
  
  return error; 
@@ -71,31 +66,26 @@ int Client::prepareInput(int iCode, System* sys)
 This function selects the appropiate output reading routine based on code name. 
 New code name switches have to be added here, also their definitions in global.h.
 
-input: code ID and System
+input: code type, code name, number of elements in array of values to receive,
+array of values to receive, string of the output to read in the actual step
 output: error
 
 */
-int Client::readOutput(int iCode, System* sys)
+int Client::readOutput(int type, string name, int nAlpha, double* alpha, string actualOutput)
 { 
-  switch (sys->code[iCode].type){
+  switch (type){
     
     case TEST:
-      error = readTestClientOutput(sys->code[iCode].id, 
-                                   sys->code[iCode].nCalculationsWMap, 
-                                   sys->code[iCode].yValuesReceived, 
-                                   sys->code[iCode].actualOutput);    
+      error = readTestClientOutput(name, nAlpha , alpha, actualOutput);
       break;
     
     case USER_CODE:
-      error = readUserClientOutput(sys->code[iCode].id, 
-                                   sys->code[iCode].nCalculationsWMap, 
-                                   sys->code[iCode].yValuesReceived, 
-                                   sys->code[iCode].actualOutput);    
+      error = readUserClientOutput(name, nAlpha , alpha, actualOutput);
       break;
       
     default:
       error = NEWTON_ERROR;
-      cout<<"Client code name not founded - Client::readOutput"<<endl;
+      cout<<"Client code type:\""<< type<<"\" not founded - Client::readOutput"<<endl;
       break; 
   } 
   

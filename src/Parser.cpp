@@ -34,6 +34,9 @@ Parser::Parser()
   // Initial state for any guess
   unkSaved = false;
   
+  // Initial amount of residuals loaded
+  globalRes = 0;
+  
   // Initial error value
   error = NEWTON_SUCCESS;
 }
@@ -86,6 +89,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="CALCS"){
       return true;
     }
+    if(word=="X_INI"){
+      return true;
+    }
   }
   else if(parent=="CLIENT"){
     if(word=="GUESSES"){
@@ -129,7 +135,16 @@ bool Parser::wordIsCard(string word, string parent)
     } 
     if(word=="CONNECTION"){
       return true;
-    }   
+    }
+    if(word=="X_INI"){
+      return true;
+    }
+    if(word=="TYPE"){
+      return true;
+    }
+    if(word=="ID"){
+      return true;
+    }
   }
   else if(parent=="GUESSES"){
     if(word=="MAP"){
@@ -255,8 +270,8 @@ string Parser::loadCalcsAndTakeWord(System* sys)
   do{
     if(!wordIsForbidden(word)){
         // Add one guess in alphas (default) and betas of the client
-        sys->code2[clientReaded].nAlpha++;
-        sys->code2[clientReaded].nBeta++;
+        sys->code[clientReaded].nAlpha++;
+        sys->code[clientReaded].nBeta++;
         
         unkSaved = false;
         for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
@@ -287,7 +302,7 @@ string Parser::loadCalcsAndTakeWord(System* sys)
     if(word=="MAP"){
       word = takeNextWord();
       if(!wordIsForbidden(word)){
-        sys->code2[clientReaded].alphaMap = word;
+        sys->code[clientReaded].alphaMap = word;
       }
       else{
         error = NEWTON_ERROR;
@@ -297,7 +312,7 @@ string Parser::loadCalcsAndTakeWord(System* sys)
     }
     else if(word=="CALCS_PRE_MAP"){
       word = takeNextWord();
-      stringstream(word)>>sys->code2[clientReaded].nAlpha;
+      stringstream(word)>>sys->code[clientReaded].nAlpha;
       word = takeNextWord();
     }
   }
@@ -323,8 +338,8 @@ string Parser::loadGuessesAndTakeWord(System* sys)
   do{
     if(!wordIsForbidden(word)){
         // Add one guess in gammas and deltas (default) of the client
-        sys->code2[clientReaded].nGamma++;
-        sys->code2[clientReaded].nDelta++;
+        sys->code[clientReaded].nGamma++;
+        sys->code[clientReaded].nDelta++;
         
         unkSaved = false;
         for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
@@ -355,7 +370,7 @@ string Parser::loadGuessesAndTakeWord(System* sys)
     if(word=="MAP"){
       word = takeNextWord();
       if(!wordIsForbidden(word)){
-        sys->code2[clientReaded].alphaMap = word;
+        sys->code[clientReaded].alphaMap = word;
       }
       else{
         error = NEWTON_ERROR;
@@ -365,7 +380,7 @@ string Parser::loadGuessesAndTakeWord(System* sys)
     }
     else if(word=="GUESSES_MAPPED"){
       word = takeNextWord();
-      stringstream(word)>>sys->code2[clientReaded].nDelta;
+      stringstream(word)>>sys->code[clientReaded].nDelta;
       word = takeNextWord();
     }
   }
@@ -389,7 +404,7 @@ string Parser::loadClientAndTakeWord(System* sys)
   // Take name
 
   if(!wordIsForbidden(word)){
-    sys->code2[clientReaded].name = word;
+    sys->code[clientReaded].name = word;
     word = takeNextWord();
   }
   else{
@@ -401,7 +416,36 @@ string Parser::loadClientAndTakeWord(System* sys)
 
   while(wordIsCard(word, "CLIENT") && !configFile.eof()){
 
-    if(word=="CALCS"){
+    if(word=="ID"){
+      word = takeNextWord();
+      stringstream(word) >> sys->code[clientReaded].id;
+      word = takeNextWord();
+    }
+    
+    else if(word=="TYPE"){
+      word = takeNextWord();
+      transform(word.begin(), word.end(), word.begin(), ::tolower);
+      if(word == "test"){
+         sys->code[clientReaded].type = TEST;
+      }
+      else if(word == "user_code"){
+         sys->code[clientReaded].type = USER_CODE;
+      }
+      else if(word == "relap_pow2th"){
+         sys->code[clientReaded].type = RELAP_POW2TH;
+      }
+      else if(word == "fermi_xs2pow"){
+         sys->code[clientReaded].type = FERMI_XS2POW;
+      }
+      else{
+        error = NEWTON_ERROR;
+        cout<<"Client code tye:\""<< word<<"\"not founded - Parser::loadClientAndTakeWord"<<endl;
+      }
+      word = takeNextWord();
+    }
+      
+    
+    else if(word=="CALCS"){
       word = loadCalcsAndTakeWord(sys);
     }
     
@@ -411,55 +455,55 @@ string Parser::loadClientAndTakeWord(System* sys)
     
     else if(word=="INPUT_NAME"){
       word = takeNextWord();
-      sys->code2[clientReaded].inputModelName = word;
+      sys->code[clientReaded].inputModelName = word;
       word = takeNextWord();
     }
     
     else if(word=="INPUT_EXT"){
       word = takeNextWord();
-      sys->code2[clientReaded].inputExt = word;
+      sys->code[clientReaded].inputExt = word;
       word = takeNextWord();
     }
     
     else if(word=="RESTART_NAME"){
       word = takeNextWord();
-      sys->code2[clientReaded].restartName = word;
+      sys->code[clientReaded].restartName = word;
       word = takeNextWord();
     }
     
     else if(word=="RESTART_EXT"){
       word = takeNextWord();
-      sys->code2[clientReaded].restartExt = word;
+      sys->code[clientReaded].restartExt = word;
       word = takeNextWord();
     }
     
     else if(word=="RESTART_PATH"){
       word = takeNextWord();
-      sys->code2[clientReaded].restartPath = word;
+      sys->code[clientReaded].restartPath = word;
       word = takeNextWord();
     }
     
     else if(word=="OUTPUT_NAME"){
       word = takeNextWord();
-      sys->code2[clientReaded].outputName = word;
+      sys->code[clientReaded].outputName = word;
       word = takeNextWord();
     }
     
     else if(word=="OUTPUT_EXT"){
       word = takeNextWord();
-      sys->code2[clientReaded].outputExt = word;
+      sys->code[clientReaded].outputExt = word;
       word = takeNextWord();
     }
     
     else if(word=="OUTPUT_PATH"){
       word = takeNextWord();
-      sys->code2[clientReaded].outputPath = word;
+      sys->code[clientReaded].outputPath = word;
       word = takeNextWord();
     }
     
     else if(word=="BIN_COMMAND"){
       word = takeNextWord();
-      sys->code2[clientReaded].binCommand = word;
+      sys->code[clientReaded].binCommand = word;
       word = takeNextWord();
     }
     
@@ -468,13 +512,13 @@ string Parser::loadClientAndTakeWord(System* sys)
       transform(word.begin(), word.end(), word.begin(), ::toupper);
 
       if(word=="MPI"){
-        sys->code2[clientReaded].connection = NEWTON_MPI_COMMUNICATION;
+        sys->code[clientReaded].connection = NEWTON_MPI_COMMUNICATION;
       }
       else if(word=="IO"){
-        sys->code2[clientReaded].connection = NEWTON_SPAWN;
+        sys->code[clientReaded].connection = NEWTON_SPAWN;
       }
       else if(word=="PPLEP"){
-        sys->code2[clientReaded].connection = NEWTON_PPLEP;
+        sys->code[clientReaded].connection = NEWTON_PPLEP;
       }
       else{
         error = NEWTON_ERROR;
@@ -487,7 +531,7 @@ string Parser::loadClientAndTakeWord(System* sys)
       word = takeNextWord();
       do{
         if(!wordIsForbidden(word)){
-          sys->code2[clientReaded].nArgs++;
+          sys->code[clientReaded].nArgs++;
           word = takeNextWord();
         }
         else{
@@ -499,7 +543,7 @@ string Parser::loadClientAndTakeWord(System* sys)
     
     else if(word=="N_PROCS"){
       word = takeNextWord();
-      stringstream(word) >> sys->code2[clientReaded].nProcs;
+      stringstream(word) >> sys->code[clientReaded].nProcs;
       word = takeNextWord();
     }
 
@@ -542,44 +586,44 @@ void Parser::checkClientProperties(System* sys, int client)
 {
   // Connection type
 
-  if(sys->code2[client].connection==NEWTON_UNKNOWN_CONNECTION){
+  if(sys->code[client].connection==NEWTON_UNKNOWN_CONNECTION){
     error = NEWTON_ERROR;
-    checkError(error, "CONNECTION unknown in client: "+sys->code2[client].name+ " - Parser::checkClientProperties");
+    checkError(error, "CONNECTION unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
   }
 
   // I/O connection type
 
-  if(sys->code2[client].connection==NEWTON_SPAWN){
-    if(sys->code2[client].inputModelName==""){
+  if(sys->code[client].connection==NEWTON_SPAWN){
+    if(sys->code[client].inputModelName==""){
       error = NEWTON_ERROR;
-      checkError(error, "INPUT_NAME unknown in client: "+sys->code2[client].name+ " - Parser::checkClientProperties");
+      checkError(error, "INPUT_NAME unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
     }
-    if(sys->code2[client].inputExt==""){
+    if(sys->code[client].inputExt==""){
       error = NEWTON_ERROR;
-      checkError(error, "INPUT_EXT unknown in client: "+sys->code2[client].name+ " - Parser::checkClientProperties");
+      checkError(error, "INPUT_EXT unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
     }
-    if(sys->code2[client].binCommand==""){
+    if(sys->code[client].binCommand==""){
       error = NEWTON_ERROR;
-      checkError(error, "BIN_COMMAND unknown in client: "+sys->code2[client].name+ " - Parser::checkClientProperties");
+      checkError(error, "BIN_COMMAND unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
     }
   }
 
   // Variables
-    if(sys->code2[client].nAlpha==0){
+    if(sys->code[client].nAlpha==0){
       error = NEWTON_ERROR;
-      checkError(error, "CALCS_PRE_MAP unknown in client: "+sys->code2[client].name+ " - Parser::checkClientProperties");
+      checkError(error, "CALCS_PRE_MAP unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
     }
-    if(sys->code2[client].nBeta==0){
+    if(sys->code[client].nBeta==0){
       error = NEWTON_ERROR;
-      checkError(error, "CALCS unknown in client: "+sys->code2[client].name+ " - Parser::checkClientProperties");
+      checkError(error, "CALCS unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
     }
-    if(sys->code2[client].nGamma==0){
+    if(sys->code[client].nGamma==0){
       error = NEWTON_ERROR;
-      checkError(error, "GUESSES unknown in client: "+sys->code2[client].name+ " - Parser::checkClientProperties");
+      checkError(error, "GUESSES unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
     }
-    if(sys->code2[client].nDelta==0){
+    if(sys->code[client].nDelta==0){
       error = NEWTON_ERROR;
-      checkError(error, "GUESSES_MAPPED unknown in client: "+sys->code2[client].name+ " - Parser::checkClientProperties");
+      checkError(error, "GUESSES_MAPPED unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
     }
 
 }
@@ -644,7 +688,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
           sol->method = EXPLICIT_SERIAL;
         }
         else if(word=="EXPLICIT_PARALLEL"){
-          sol->method = EXPLICIT_SERIAL;
+          sol->method = EXPLICIT_PARALLEL;
         }
         else if(word=="NEWTON"){
           sol->method = NEWTON;
@@ -745,9 +789,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
   checkImportantCards(sys, sol);
   
   // Allocate elements
-  
-  sys->allocate1(); // ********************************************change things
-  sys->allocate2(); // ****************************************************** change names
+  sys->allocate1(sol->method);
 
   // Second input file opening
   
@@ -757,7 +799,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
       // Count amount of codes that run in each phase in EXPLICIT_SERIAL
       
-      if(word=="PHASES"){
+      if(word=="PHASES" && sol->method == EXPLICIT_SERIAL){
         for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
           word = takeNextWord();
           while(word!=delim){
@@ -772,6 +814,10 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
         word = takeNextWord(); 
       }
       
+      else if(word=="RES_ORDER"){
+        word = takeNextWord(); 
+      }
+      
       // Analyze all properties of the client and return the word out of that
 
       else if(word=="CLIENT"){        
@@ -779,7 +825,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
       }
       
       // Properties in bad order
-      else if(wordIsCard(word, "CLIENT")){
+      else if(wordIsCard(word, "CLIENT") && !wordIsCard(word, "INPUT")){
         error = NEWTON_ERROR;
         checkError(error, "Word in bad place. Set "+word+" after CLIENT - Parser::parseInput");
       }
@@ -822,38 +868,38 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
   
   sys->allocate3(); // ********************************************change things
 
-  // TEST
-  // cout<<"Number of clients: "<<sys->nCodes<<endl;
-  // cout<<"Number of unknowns: "<<sys->nUnk<<" - Number of residuals: "<<sys->nRes<<endl;
-  // cout<<"Unknowns order: "<<endl;
-  // for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-  //   cout<<sys->xName[iUnk]<<endl;
-  // }
-  // cout<<"Nonlinear method: "<<sol->method<<endl;
-  // cout<<"Phases: "<<sys->nPhasesPerIter<<endl;
-  // for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
-  //   cout<<" "<<iPhase<<"- n codes in phase: "<<sys->nCodesInPhase[iPhase]<<endl;
-  // }
-  // cout<<"Clients: "<<endl;
-  // for(int iCode=0; iCode<sys->nCodes; iCode++){
-  //   cout<<"Code: "<<sys->code2[iCode].name<<endl;
-  //   cout<<" - nAlpha: "<<sys->code2[iCode].nAlpha<<endl;
-  //   cout<<" - nBeta: "<<sys->code2[iCode].nBeta<<endl;
-  //   cout<<" - nGamma: "<<sys->code2[iCode].nGamma<<endl;
-  //   cout<<" - nDelta: "<<sys->code2[iCode].nDelta<<endl;
-  //   cout<<" - alphaMap: "<<sys->code2[iCode].alphaMap<<endl;
-  //   cout<<" - gammaMap: "<<sys->code2[iCode].gammaMap<<endl;
-  //   cout<<" - n Procs: "<<sys->code2[iCode].nProcs<<endl;
-  //   cout<<" - n Args: "<<sys->code2[iCode].nArgs<<endl;
-  //   cout<<" - connection type: "<<sys->code2[iCode].connection<<endl;
-  //   cout<<" - command to run bin: "<<sys->code2[iCode].binCommand<<endl;
-  //   cout<<" - Input model name: "<<sys->code2[iCode].inputModelName<<endl;
-  //   cout<<" - Input extension: "<<sys->code2[iCode].inputExt<<endl;
-  //   cout<<" - Restart name: "<<sys->code2[iCode].restartName<<endl;
-  //   cout<<" - Restart extension: "<<sys->code2[iCode].restartExt<<endl;
-  //   cout<<" - Output model name: "<<sys->code2[iCode].outputName<<endl;
-  //   cout<<" - Output extension: "<<sys->code2[iCode].outputExt<<endl;
-  // }
+  //TEST
+  cout<<"Number of clients: "<<sys->nCodes<<endl;
+  cout<<"Number of unknowns: "<<sys->nUnk<<" - Number of residuals: "<<sys->nRes<<endl;
+  cout<<"Unknowns order: "<<endl;
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    cout<<sys->xName[iUnk]<<endl;
+  }
+  cout<<"Nonlinear method: "<<sol->method<<endl;
+  cout<<"Phases: "<<sys->nPhasesPerIter<<endl;
+  for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+    cout<<" "<<iPhase<<"- n codes in phase: "<<sys->nCodesInPhase[iPhase]<<endl;
+  }
+  cout<<"Clients: "<<endl;
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+    cout<<"Code: "<<sys->code[iCode].name<<endl;
+    cout<<" - nAlpha: "<<sys->code[iCode].nAlpha<<endl;
+    cout<<" - nBeta: "<<sys->code[iCode].nBeta<<endl;
+    cout<<" - nGamma: "<<sys->code[iCode].nGamma<<endl;
+    cout<<" - nDelta: "<<sys->code[iCode].nDelta<<endl;
+    cout<<" - alphaMap: "<<sys->code[iCode].alphaMap<<endl;
+    cout<<" - gammaMap: "<<sys->code[iCode].gammaMap<<endl;
+    cout<<" - n Procs: "<<sys->code[iCode].nProcs<<endl;
+    cout<<" - n Args: "<<sys->code[iCode].nArgs<<endl;
+    cout<<" - connection type: "<<sys->code[iCode].connection<<endl;
+    cout<<" - command to run bin: "<<sys->code[iCode].binCommand<<endl;
+    cout<<" - Input model name: "<<sys->code[iCode].inputModelName<<endl;
+    cout<<" - Input extension: "<<sys->code[iCode].inputExt<<endl;
+    cout<<" - Restart name: "<<sys->code[iCode].restartName<<endl;
+    cout<<" - Restart extension: "<<sys->code[iCode].restartExt<<endl;
+    cout<<" - Output model name: "<<sys->code[iCode].outputName<<endl;
+    cout<<" - Output extension: "<<sys->code[iCode].outputExt<<endl;
+  }
 
   // Reinitialization
   betaLoaded = 0;
@@ -868,11 +914,11 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
       // Read clients that run in each phase
       
-      if(word=="PHASES"){
+      if(word=="PHASES" && sol->method == EXPLICIT_SERIAL){
         for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
           for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
             word = takeNextWord();
-            sys->codeToConnectInPhase2[iPhase][iCode] = word;
+            sys->codeToConnectInPhase[iPhase][iCode] = word;
           }
           // Take "&"
           word = takeNextWord();
@@ -888,14 +934,17 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
             word = takeNextWord();
           }
           if(word=="CALCS"){
-            for(int iBeta=0; iBeta<sys->code2[clientReaded].nBeta; iBeta++){
+            for(int iBeta=0; iBeta<sys->code[clientReaded].nBeta; iBeta++){
               word = takeNextWord();
               sys->betaName[betaLoaded] = word;
               betaLoaded++;
+              // Save residual name
+              sys->resName[globalRes] = word;
+              globalRes++;
             }
           }
           else if(word=="GUESSES"){
-            for(int iGamma=0; iGamma<sys->code2[clientReaded].nGamma; iGamma++){
+            for(int iGamma=0; iGamma<sys->code[clientReaded].nGamma; iGamma++){
               word = takeNextWord();
               sys->gammaName[gammaLoaded] = word;
               gammaLoaded++;
@@ -932,14 +981,14 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
       // Read args
       if(word=="CLIENT"){
-        if(sys->code2[clientReaded].nArgs>0){          
+        if(sys->code[clientReaded].nArgs>0){          
           while(word!="ARGS"){
             word = takeNextWord();
           }
           if(word=="ARGS"){
-            for(int iArg=0; iArg<sys->code2[clientReaded].nArgs; iArg++){
+            for(int iArg=0; iArg<sys->code[clientReaded].nArgs; iArg++){
               word = takeNextWord();
-              sys->code2[clientReaded].arg[iArg] = word;
+              sys->code[clientReaded].arg[iArg] = word;
             }
           }
         }
@@ -967,7 +1016,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
   cout<<"Codes to connect in each phase in EXPLICIT_SERIAL"<<endl;
   for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
     for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
-      cout<<" - "<<sys->codeToConnectInPhase2[iPhase][iCode]<<" ";
+      cout<<" - "<<sys->codeToConnectInPhase[iPhase][iCode]<<" ";
     }
     cout<<endl;
   }
@@ -983,311 +1032,73 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
   cout<<" Arguments"<<endl;
   for(int iCode=0; iCode<sys->nCodes; iCode++){
-    cout<<" ("<<sys->code2[iCode].nArgs<<"): ";
-    for(int iArg=0; iArg<sys->code2[iCode].nArgs; iArg++){
-      cout<<sys->code2[iCode].arg[iArg]<<" ";
+    cout<<" ("<<sys->code[iCode].nArgs<<"): ";
+    for(int iArg=0; iArg<sys->code[iCode].nArgs; iArg++){
+      cout<<sys->code[iCode].arg[iArg]<<" ";
     }
     cout<<endl;
   }
 
-
-
-
-
-
-  exit(1);
-
-
-  // Number of client codes readed
-  clientReaded = 0;
   
   
-  // Allocates
+  // Load order of x and order of residuals
+  // xName should be updated on second input file opening
+  // (and also resName)
   
-  sys->allocate1();
+  // Load initial conditions
   
-    // Count necessary things in second stage
+  // Allocate x
+  sol->initialize(sys);
   
-    configFile.open("newton.config");
-    if (configFile.is_open()){
-        configFile >> word;
-        while(!configFile.eof()){
-      
-      // Count amount of phases and codes in each phase in explicit 
-      // serial method
-      if(word=="phases"){
-        int nCodesInPhases = 0;        
-        while(word!="&"){
-          configFile >> word;
-          while(word!="&" && word!="END_EXPLICIT"){
-            nCodesInPhases++;
-            configFile >> word;
-          }
-          sys->nPhasesPerIter++;
-        }        
-      }
-      
-      // Count amount of arguments that each binary client code takes
-      if(word=="CODE_SPECIFIC"){
-        configFile >> word;
-        while(word!="END_CODE"){
-        
-          if(word=="N_ARGS"){
-            configFile >> word;
-            stringstream(word) >> sys->code[clientReaded].nArgs;
-          }
-          configFile >> word;
-        }        
-        clientReaded++;
+  // Fifth input file opening  
+
+  configFile.open("newton.configtest");
+  if (configFile.is_open()){
+    while(!configFile.eof()){
+
+      // Load CI on solver values of x and J
+      if(word=="X_INI"){
+        word = takeNextWord();
+        while(!wordIsForbidden(word)){
+          bool ciLoaded = false;
+          for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+            if(word==sys->xName[iUnk]){              
+              word = takeNextWord();
+              stringstream(word) >> sol->x[iUnk];
+              ciLoaded = true;
+              break;
             }
+          }
             
-      // Next word
-            configFile >> word;
+          if(ciLoaded == false){
+            error = NEWTON_ERROR;
+            checkError(error, "Unable to find: \""+word+"\" reading X_INI - Parser::parseInput");
+          }
+          word = takeNextWord();
         }
-    }
-    else{
-        error = NEWTON_ERROR;
-        checkError(error,"Error opening \"newton.config\"");
-    }
-  configFile.close();
-  
-  // Alloocate things  
-  sys->allocate2();
-  // Reinitialize count
-  clientReaded = 0;
-  
-    // Count necessary things in third stage
-
-    configFile.open("newton.config");
-    if (configFile.is_open()){
-        configFile >> word;
-        while(!configFile.eof()){
-      
-      // Count amount of codes in each phase in explicit serial method
-      
-      if(word=="EXPLICIT_SERIAL_ORDER"){
-        int iPhase = 0;
-        
-        while(sys->nCodesInPhase[iPhase] <sys->nCodes && word!="END_EXPLICIT"){
-          configFile >> word;
-          while(word!="&" && word!="END_EXPLICIT"){
-            sys->nCodesInPhase[iPhase]++;
-            configFile >> word;
-          }          
-          iPhase++;
-        }
-      
-        // TEST
-        //~ for(int i=0; i<sys->nPhasesPerIter; i++){
-          //~ cout<<sys->nCodesInPhase[i]<<endl;
-        //~ }
-        //~ exit(1);
       }
-      // Next word
-            configFile >> word;
-        }
-    }
-    else{
-        error = NEWTON_ERROR;
-        checkError(error,"Error opening \"newton.config\"");
-    }
-  configFile.close();
-  
-  
-  // Allocate things
-  sys->allocate3();
+
+      // Unknown or empty word
+
+      else{        
+        word = takeNextWord();
+      }
     
-  // Complete parsing
-  
-    configFile.open("newton.config");
-    if (configFile.is_open()){
-        configFile >> word;
-        while(!configFile.eof()){
-      
-      
-      // Parsing numerical methods
-      
-      if(word=="N_STEPS"){
-                configFile >> word;
-                stringstream(word) >> evol->nSteps;
-            }
-      
-      if(word=="DELTA_STEP"){
-                configFile >> word;
-                stringstream(word) >> evol->deltaStep;
-            }
-      
-      if(word=="NONLINEAR_ABS_TOLERANCE"){
-                configFile >> word;
-                stringstream(word) >> sol->nltol;
-            }
-      
-      if(word=="NONLINEAR_MAX_ITERATIONS"){
-                configFile >> word;
-                stringstream(word) >> sol->maxIter;
-            }
-      
-      if(word=="METHOD"){
-                configFile >> word;
-                stringstream(word) >> sol->method;
-            }
-      
-      if(word=="DX_IN_JAC_CALC"){
-                configFile >> word;
-                stringstream(word) >> sol->dxJacCalc;
-            }
-      
-      if(word=="FREC_IN_JAC_CALC"){
-                configFile >> word;
-                stringstream(word) >> sol->sJacCalc;
-            }
-      
-            if(word=="EXPLICIT_SERIAL_ORDER"){
-        configFile >> word;
-        for (int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
-          for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
-            //stringstream(word) >> sys->codeToConnectInPhase2[iPhase][iCode];         
-            configFile >> word;
-          }
-          configFile >> word;
-        }
-        
-        // TEST
-        //~ for (int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
-          //~ for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
-            //~ cout<< sys->codeToConnectInPhase2[iPhase][iCode]<<" ";
-          //~ }
-          //~ cout<<endl;
-        //~ }
-        //~ exit(1);        
-      }
-           
-            
-      // Parsing code specific
-      
-      if(word=="CODE_SPECIFIC"){
-                configFile >> word;
-        while(word!="END_CODE"){
-          
-          if(word=="CODE_ID"){
-            configFile >> word;
-            stringstream(word) >> sys->code[clientReaded].id;
-          }          
-          if(word=="TYPE"){
-            configFile >> word;
-            if(word == "TEST" || word == "test" || word == "Test"){
-              sys->code[clientReaded].type = TEST;
-            }
-            else if(word == "RELAP_POW2TH" || word == "relap_pow2th" || word == "Relap_pow2th"){
-              sys->code[clientReaded].type = RELAP_POW2TH;
-            }
-            else if(word == "FERMI_XS2POW" || word == "fermi_xs2pow" || word == "Fermi_xs2pow"){
-              sys->code[clientReaded].type = FERMI_XS2POW;
-            }
-            else if(word == "USER_CODE" || word == "user_code" || word == "User_code"){
-              sys->code[clientReaded].type = USER_CODE;
-            }
-            else{
-              error = NEWTON_ERROR;
-              checkError(error,("Error reading TYPE card for code: "+clientReaded));
-            }
-            // TEST
-            //~ cout<<"Type: "<<sys->code[clientReaded].id<<endl;
-            //~ exit(1);
-          }
-          if(word=="CONNECTION"){
-            configFile >> word;
-            if(word == "MPI" || word == "mpi" || word == "Mpi"){
-              sys->code[clientReaded].connection = NEWTON_MPI_COMMUNICATION;
-            }
-            else if(word == "SPAWN" || word == "spawn" || word == "Spawn"){
-              sys->code[clientReaded].connection = NEWTON_SPAWN;
-            }
-            else if(word == "PPLEP" || word == "pplep" || word == "Pplep"){
-              sys->code[clientReaded].connection = NEWTON_PPLEP;
-            }
-            else{
-              sys->code[clientReaded].connection = NEWTON_UNKNOWN_CONNECTION;
-              error = NEWTON_ERROR;
-              checkError(error,("Error reading CONNECTION card for code: "+clientReaded));
-            }
-          }
-          if(word=="N_PROCS"){
-            configFile >> word;
-            stringstream(word) >> sys->code[clientReaded].nProcs;
-          }          
-          if(word=="FROM_CODE_ID"){
-            int iCode;
-            configFile >> word;
-            stringstream(word) >> iCode;
-            // Dummy word VAR
-            configFile >> word;
-            configFile >> word;
-            stringstream(word) >> sys->code[clientReaded].nCalculationsFromCode[iCode];
-          }
-          if(word=="TO_CODE_ID"){
-            int iCode;
-            configFile >> word;
-            stringstream(word) >> iCode;
-            // Dummy word VAR
-            configFile >> word;
-            configFile >> word;
-            stringstream(word) >> sys->code[clientReaded].nCalculations2Code[iCode];
-          }
-          if(word=="GUESS_MAP"){
-            configFile >> sys->code[clientReaded].map[NEWTON_PRE_SEND];
-          }
-          if(word=="CALC_MAP"){
-            configFile >> sys->code[clientReaded].map[NEWTON_POST_RECV];
-          }
-          // Strings
-          if(word=="INPUT_NAME"){
-            configFile >> sys->code[clientReaded].inputModelName;
-          }
-          if(word=="INPUT_EXT"){
-            configFile >> sys->code[clientReaded].inputExt;
-          }
-          if(word=="RESTART_NAME"){
-            configFile >> sys->code[clientReaded].restartName;
-          }
-          if(word=="RESTART_EXT"){
-            configFile >> sys->code[clientReaded].restartExt;
-          }
-          if(word=="RESTART_PATH"){
-            configFile >> sys->code[clientReaded].restartPath;
-          }
-          if(word=="OUTPUT_NAME"){
-            configFile >> sys->code[clientReaded].outputName;
-          }
-          if(word=="OUTPUT_EXT"){
-            configFile >> sys->code[clientReaded].outputExt;
-          }
-          if(word=="OUTPUT_PATH"){
-            configFile >> sys->code[clientReaded].outputPath;
-          }
-          if(word=="BIN_COMMAND"){
-            configFile >> sys->code[clientReaded].binCommand;
-          }
-          if(word=="ARGS"){
-            for(int iArg=0; iArg<sys->code[clientReaded].nArgs; iArg++){
-              configFile >> sys->code[clientReaded].arg[iArg];
-            }
-          }
-          
-          configFile >> word;
-        }
-        clientReaded++;
-            }
-      
-      // Next word
-            configFile >> word;
-        }
-    }
-    else{
-        error = NEWTON_ERROR;
-        checkError(error,"Error opening \"newton.config\"");
-    }
+    } // Finish while(!EOF)
+
+  } 
+  else{
+      error = NEWTON_ERROR;
+      checkError(error,"Error opening \"newton.config\"");
+  }
   configFile.close();
+  
+  //~ // TEST
+  //~ cout<<"Initial conditions:"<<endl;
+  //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    //~ cout<<sys->xName[iUnk]<<": "<<sol->x[iUnk]<<endl;
+  //~ }
+  
 }
 
 /* Parser::isAComment
@@ -1305,8 +1116,7 @@ bool Parser::isAComment(string word)
       word[0]=='#' ||
       word[0]=='@' ||
       word[0]=='%' ||
-      word[0]=='_' ||
-      word[0]=='-'){
+      word[0]=='_' ){
     return true;
   }
   return false;

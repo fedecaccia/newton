@@ -46,30 +46,38 @@ void Mapper::config()
 /*
 Map one vector into another.
 
-input: code ID, vector with data to map, vector in wich mapped values are saved
+input: code, string of the mapper, number of elements of image, image vector, 
+number of elements to map, vector to map, 
+* 
 output: error
 
 */
-int Mapper::map(System* sys, int iCode, int stage)
+int Mapper::map(int iCode, string map, int nXToMap, double* XToMap, int nMapped, double* mapped)
 {
-  if(sys->code[iCode].map[stage] == ""){ // id vacío
-    // Just copy x2Map into xMapped
-    math->copyInVector(sys->code[iCode].xValuesToSend, 0, 
-                       sys->code[iCode].xValuesToMap, 0, 
-                       sys->code[iCode].nGuesses);
+  if(map == ""){
+    if(nXToMap!=nMapped){
+      error = NEWTON_ERROR;
+      cout<<"Number of values to map are differtent to number of values mapped in code: "<<iCode<<" - Mapper::map"<<endl;
+    }
+    else{
+      for(int iX=0; iX<nXToMap; iX++){
+        mapped[iX] = XToMap[iX];
+      }        
+    }
   }
-  else{
-      // Map
-      // IDEA
-      // if(sys->code[iCode].map == function.id para alguna de las funciones de mapeo cargadas
-      // (el usuario al escribir la función, guarda el id en un string)      
-      
-      // usar sys->code[iCode].xvaluesToMap
-      // usar sys->code[iCode].xvaluesToSend
-      // usar sys->code[iCode].yvaluesReceived
-      // usar sys->code[iCode].yvaluesMapped
+
+  else if(map == "th2xs"){
+
   }
   
+  else if(map == "v2q"){
+
+  }
+  
+  else{
+    error = NEWTON_ERROR;
+    cout<<"Mapper: "<<map<<" is not founded for code: "<<iCode<<" - Mapper::map"<<endl;        
+  }
   
   return error;
 }

@@ -28,9 +28,9 @@ Date: 3 June 2017
 #include "Evolution.h"
 #include "Communicator.h"
 #include "Solver.h"
-#include "Mapper.h"
 
 #include "mpi.h"
+#include "petsc.h"
 #include <time.h>
 #include <string>
 
@@ -47,7 +47,6 @@ class Newton
 		Evolution* NewtonEvolution;
 		Communicator* NewtonComm;
 		Solver* NewtonSolver;
-		Mapper* NewtonMap;		
 		
 	private:
 		int error;

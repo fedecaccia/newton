@@ -22,20 +22,23 @@ Date: 4 June 2017
 #include "global.h"
 #include "Client.h"
 #include "System.h"
-#include "Mapper.h"
 #include "Communicator.h"
 #include "MathLib.h"
+
+#include <iomanip>
+#include "petsc.h"
 
 class Solver
 {
 	public:
 		Solver();
     void initialize(System*);
-    void setInitialCondition(int);
-		void iterateUntilConverge(System*, Mapper*, Communicator*);
-    void calculateNewGuess();
-    void calculateResiduals(System*, Mapper*, Communicator*);
+    void setFirstGuess(System*, int);
+		void iterateUntilConverge(System*, Communicator*);
+    void calculateNewGuess(System*, Communicator*);
+    void calculateResiduals(System*, Communicator*);
     
+    double* x;
     double nltol;
     int maxIter;
     int method;
@@ -43,11 +46,14 @@ class Solver
     int sJacCalc;
 		
 	private:
-    int runCode(int, System*, Mapper*);
+    int runCode(int, System*);
     int spawnCode(int, System*);
-    int readOutputFromCode(int, System*, Mapper*);
+    int readOutputFromCode(int, System*);
     int sendDataToCode(int);
     int receiveDataFromCode(int);
+    void jacobianConstruction(System*, Communicator*);
+    void solveLinearSystem(System*);
+    void x2gamma2delta(System*);
   
 		int error;
     double residual;    
@@ -56,10 +62,20 @@ class Solver
     MathLib* math;
     int freeRank;
     
-    double* x;
-    double* xStar;
-    double* y;
+    double* xItPrev;
+    double* xBackUp;
     double* resVector;
+    double* resVectorBackUp;
+    double** J;
+    double** Jk;
+    
+    Vec u, b;
+    Mat A;
+    PC pc;
+    KSP ksp;
+    
+    int codeConnected;
+    
     
     Client* NewtonClient;
 };

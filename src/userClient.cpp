@@ -26,12 +26,12 @@ using namespace::std;
 In this function user can programm all necessary to write an input
 for an specific client code.
 
-input: code ID, amount of values to send, vector with values to send 
+input: code name, amount of values to send, vector with values to send 
 and input file string
 output: error: NEWTON_ERROR or NEWTON_SUCCESS
 
 */
-int Client::prepareUserClientInput(int codeID, int nValues, double* values, string input)
+int Client::prepareUserClientInput(string codeName, int nValues, double* values, string input)
 { 
   // Input file
   ofstream inputFile;
@@ -43,7 +43,7 @@ int Client::prepareUserClientInput(int codeID, int nValues, double* values, stri
     }
 	}
 	else{
-		cout<<"ERROR writing input file for code ID: "<<codeID<<endl;
+		cout<<"Error writing input file for code: "<<codeName<<" - Client::prepareTestClientInput"<<endl;
     error = NEWTON_ERROR;
 	}
   inputFile.close();
@@ -56,12 +56,12 @@ int Client::prepareUserClientInput(int codeID, int nValues, double* values, stri
 In this function user can programm all necessary to read an output
 for an specific client code.
 
-input: code ID, amount of values to read, vector with values to read 
+input: code name, amount of values to read, vector with values to read 
 and output file string
 output: error: NEWTON_ERROR or NEWTON_SUCCESS
 
 */
-int Client::readUserClientOutput(int codeID, int nValues, double* values, string output)
+int Client::readUserClientOutput(string codeName, int nValues, double* values, string output)
 { 
   // Output file
   ifstream outputFile;
@@ -73,7 +73,8 @@ int Client::readUserClientOutput(int codeID, int nValues, double* values, string
     }
 	}
 	else{
-		cout<<"ERROR reading output file from code ID: "<<codeID<<endl;
+		cout<<"Error reading output file from code: "<<codeName<<" - Client::readTestClientOutput"<<endl;
+    error = NEWTON_ERROR;
 	}
   outputFile.close();  
  

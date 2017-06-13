@@ -5,32 +5,36 @@ ________________________________________________________________________
 
 # Numerical methods
 
-METHOD explicit_serial
+METHOD newton
 PHASES linear1 & linear2 &
-ABS_TOL 1e-07 MAX_ITER 10
+ABS_TOL 1e-07 MAX_ITER 2
+X_INI x -1.89 y 2.36 z 3.6 w -0.709
 
 ________________________________________________________________________
 
 # Client code specifications
 
 CLIENT linear1
-CALCS x y z GUESSES w GUESSES_MAPPED 1 MAP asdasd
+CALCS w x y GUESSES z
 INPUT_NAME test0
 INPUT_EXT dat
 OUTPUT_NAME from_input
 OUTPUT_EXT out
 CONNECTION io
 BIN_COMMAND bin/Test
-ARGS arg1 arg2 arg3
+ARGS 0 input_name
+TYPE TEST
 
 CLIENT linear2 
-CALCS w GUESSES x y z
+CALCS z GUESSES w x y
 INPUT_NAME test1
 INPUT_EXT dat
 OUTPUT_NAME from_input
 OUTPUT_EXT out
 CONNECTION io 
 BIN_COMMAND bin/Test
+ARGS 1 input_name
+TYPE TEST
 
 ________________________________________________________________________
 

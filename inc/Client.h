@@ -32,16 +32,16 @@ class Client
 {
 	public:
 		Client();
-    int prepareInput(int, System*);
-    int readOutput(int, System*);
+    int prepareInput(int, std::string, int, double*, std::string);
+    int readOutput(int, std::string, int, double*, std::string);
 		
 	private:
   
-    int prepareTestClientInput(int, int, double*, string);
-    int readTestClientOutput(int, int, double*, string);
+    int prepareTestClientInput(std::string, int, double*, std::string);
+    int readTestClientOutput(std::string, int, double*, std::string);
     
-    int prepareUserClientInput(int, int, double*, string);
-    int readUserClientOutput(int, int, double*, string);
+    int prepareUserClientInput(std::string, int, double*, std::string);
+    int readUserClientOutput(std::string, int, double*, std::string);
     
 		int error;
 };

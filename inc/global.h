@@ -41,10 +41,6 @@ Date: 3 June 2017
 #define NEWTON_SPAWN                2
 #define NEWTON_PPLEP                3
 
-// Stages in residual calculation
-#define NEWTON_PRE_SEND             0
-#define NEWTON_POST_RECV            1
-
 // Mapper in each stage
 #define NEWTON_NO_MAP               0
 #define NEWTON_MAP                  1

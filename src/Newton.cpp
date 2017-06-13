@@ -34,7 +34,6 @@ Newton::Newton()
 	NewtonSystem = new System();
 	NewtonEvolution = new Evolution();
 	NewtonSolver = new Solver();
-	NewtonMap = new Mapper();
 	NewtonComm = new Communicator();
 }
 
@@ -61,16 +60,14 @@ void Newton::initialize()
 	error = MPI_Comm_rank(MPI_COMM_WORLD, &irank);
 	checkError(error, "MPI_Comm_rank error");
   
+  // PETSc init
+  PetscInitialize(PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);
+  
 	// Objects initialization
 
 	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver);
-	NewtonParser->checkConsistency(NewtonSystem);
 	
 	NewtonSystem->construct();
-	
-  NewtonSolver->initialize(NewtonSystem);
-  
-	NewtonMap->config();
 
 	NewtonComm->initialize();	
 }
@@ -89,8 +86,8 @@ void Newton::run()
 	while(NewtonEvolution->status != NEWTON_COMPLETE){
     click = clock();
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
-		NewtonSolver->setInitialCondition(NewtonEvolution->step);
-		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonMap, NewtonComm);
+		NewtonSolver->setFirstGuess(NewtonSystem, NewtonEvolution->step);
+		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm);
 		NewtonEvolution->update(NewtonSystem);
     rootPrints(" Total time step: "
                +dou2str((clock()-click)/ CLOCKS_PER_SEC)+" seconds");
@@ -110,7 +107,8 @@ output: -
 
 */
 void Newton::finish()
-{
+{  
 	NewtonComm->disconnect();
-	MPI_Finalize();
+  PetscFinalize();
+	//MPI_Finalize();
 }

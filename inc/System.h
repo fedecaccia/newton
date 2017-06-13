@@ -21,6 +21,7 @@ Date: 9 June 2017
 #define SYSTEM_H
 
 #include "global.h"
+#include "Mapper.h"
 #include "MathLib.h"
 
 #include <string>
@@ -30,61 +31,23 @@ class System
 {
 	public:
 		System();
-    void allocate1();
-    void allocate2();
+    void allocate1(int);
     void allocate3();
 		void construct();
     int setFilesAndCommands(int);
-    int extractToMap(int, double*);
-    int setMappedOnY(int, double*);
+    void alpha2beta(int);
+    void computeResiduals(double*, double*);
+    void x2gamma(double*);
+    void beta2x(double*);
+    void beta2gamma();
+    void gamma2delta(int);
+    int findCodeInPhase(int, int);
     
-    struct client{
-      int id;
-      int type;
-      int connection;
-      string* map;
-      int nProcs;
-      int nArgs;
-      string* arg;
-      int nGuesses;
-      int nGuessesMapped;      
-      int nCalculationsWMap;      
-      int nCalculations;
-      int* nCalculations2Code;
-      int* nCalculationsFromCode;
-      int firstGuessPossition;      
-      int* calculationPossitions;
-      double* xValuesToMap;
-      double* xValuesToSend;
-      double* yValuesReceived;
-      double* yValuesMapped;
-      string inputModelName;
-      string actualInputName;      
-      string actualInput;
-      string inputExt;
-      string restartName;
-      string actualRestartName;
-      string actualRestart;
-      string restartExt;
-      string restartPath;
-      string outputName;
-      string actualOutputName;
-      string actualOutput;
-      string outputExt;
-      string outputPath;
-      string binCommand;
-      string commandToRun;
-    };
-    
-
-
-
     int nCodes;
     int nPhasesPerIter;
     int* nCodesInPhase;
-    int** codeToConnectInPhase;
-    std::string** codeToConnectInPhase2;
-    client* code;
+    std::string** codeToConnectInPhase;
+    //~ client* code;
     int nUnk;
     int nRes;
     
@@ -95,12 +58,16 @@ class System
     int nGamma;
     string* gammaName;
     int* beta2linkInRes;
+    int* beta2linkInX;
     int* x2linkInRes;
+    int* x2linkInGamma;
     string* xName;
     string* resName;
     int* beta2linkInGamma;
-    struct client2{
+    struct client{
       string name;
+      int id;
+      int type;
       int connection;
       int nProcs;
       int nArgs;
@@ -133,11 +100,12 @@ class System
       string binCommand;
       string commandToRun;      
     };
-    client2* code2;
+    client* code;    
 		
 	private:
-		int error;
+		int error;    
     MathLib* math;
+    Mapper* NewtonMap;
 
 };
 

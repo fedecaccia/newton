@@ -23,7 +23,7 @@ Code ID 0 calculates (w,x,y) values as function of (z_guess) value readed from
 input, solving the coupled equations (1b,2b,3b):
 
  w = (17 -  2*x -  3*y - 4*z_guess)/ 1  (1b)
- x = (18 - 12*w - 14*y - 5*z_guess)/12  (2b)
+ x = (18 - 12*w - 14*y - 5*z_guess)/13  (2b)
  y = (19 - 11*w - 16*x - 6*z_guess)/15  (3b)
 
 Code ID 1 calculates (z) value as function of (w_guess,x_guess,y_guess) values 
@@ -107,9 +107,9 @@ int main(int argc,char **argv)
       // System rhs
       double* b;
       b = new double[3];
-      b[0] = 17 -  4*z;
-      b[1] = 18 -  8*z;
-      b[2] = 19 - 12*z;
+      b[0] = 17 - 4*z;
+      b[1] = 18 - 5*z;
+      b[2] = 19 - 6*z;
       
       // Solve system
       w = mat[0][0] * b[0] + mat[0][1] * b[1] + mat[0][2] * b[2];
@@ -132,7 +132,7 @@ int main(int argc,char **argv)
       y = input[2];
       
       // Solve system
-      z = (20 - 10*w - 9*x - 8*z) / 7.0;
+      z = (20 - 10*w - 9*x - 8*y) / 7.0;
       
       // Send results
       printResults(&z, 1, fileOutput);
@@ -173,6 +173,8 @@ double* loaddata(string file )
       case 1:
         values = new double[3];
         inputFile >> values[0];      
+        inputFile >> values[1];      
+        inputFile >> values[2];      
         break;      
     }
 	}

@@ -21,14 +21,15 @@ Date: 4 June 2017
 
 #include "global.h"
 #include "MathLib.h"
-#include "System.h"
+
+#include <string>
 
 class Mapper
 {
 	public:
 		Mapper();
 		void config();		
-    int map(System*, int, int);
+    int map(int, string, int, double*, int, double*);
 		
 	private:
 		int error;

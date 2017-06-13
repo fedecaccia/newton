@@ -41,19 +41,20 @@ class Parser
 	private:
 		bool isAComment(std:: string);
 		std::string takeNextWord();
-	    bool wordIsCard(std::string, std::string);
-	    bool wordIsForbidden(std::string);
+    bool wordIsCard(std::string, std::string);
+	  bool wordIsForbidden(std::string);
 
-	    void checkImportantCards(System*, Solver*);
-	    void checkClientProperties(System*, int);
+	  void checkImportantCards(System*, Solver*);
+	  void checkClientProperties(System*, int);
 
 		std::string loadClientAndTakeWord(System*);
 		std::string loadCalcsAndTakeWord(System*);
 		std::string loadGuessesAndTakeWord(System*);
 
 		int error;
-	    string delim;
-	    bool unkSaved;
+    string delim;
+	  bool unkSaved;
+    int globalRes;
 		std::string word;
 		std::ifstream configFile;
 		int clientReaded;
