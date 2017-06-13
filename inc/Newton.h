@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
+NEWTON					      |
+                      |
 Implicit coupling 		|	CLASS
-in nonlinear			|	NEWTON
-calculations			|
-						|
+in nonlinear			    |	NEWTON
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 

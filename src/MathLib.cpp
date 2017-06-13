@@ -66,6 +66,19 @@ void MathLib::zeros(double* x1, int N)
   }
 }
 
+// Make identity matrix
+void MathLib::identity(double** A, int n)
+{
+  for(int i=0; i<n; i++){
+    for(int j=0; j<n; j++){
+      A[i][j] = 0;
+      if(i==j) {
+        A[i][j] = 1;
+      }
+    }
+  }
+}
+
 // Vector negativo
 double* MathLib::negateVector(double* x1, int N)
 {
@@ -125,6 +138,19 @@ double* MathLib::scaleVec(double* x1, double a, int N)
     x2[i] = a*x1[i];
   }
   return x2;
+}
+
+// A2 = c*A1
+double** MathLib::scaleMat(double** A1, double c, int N)
+{
+  double** A2 = new double*[N];
+  for (int i=0; i<N; i++){
+    A2[i] = new double[N];
+    for (int j=0; j<N; j++){
+      A2[i][j] = c*A1[i][j];
+    }
+  }
+  return A2;
 }
 
 // C = A + B

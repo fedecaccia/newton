@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
+NEWTON					      |
+                      |
 Implicit coupling 		|	FUNCTIONS
-in nonlinear			|	GLOBAL
-calculations			|
-						|
+in nonlinear			    |	GLOBAL
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 
@@ -24,13 +24,13 @@ using namespace::std;
 
 // Global variables
 // MPI world size
-int world_size;
+int world_size=1;
 // MPI process rank
-int irank;
+int irank=0;
 // MPI_Initialized flag
-int flag;;
+int flag=0;
 // mpierror
-int mpierror;
+int mpierror=0;
 
 /* functionTrying(*f)();
 Try function and catch exception.
@@ -60,13 +60,14 @@ output: -
 */
 void checkError(int error, string errorPhrase)
 {
-	if(MPI_Initialized(&flag)){
+  MPI_Initialized(&flag);
+	if(flag){
 		mpierror = MPI_Allreduce(MPI_IN_PLACE, // const void *sendbuf, 
 								 &error, // void *recvbuf, 
 								 1, // int count,
-                  				 MPI_INTEGER, // MPI_Datatype datatype, 
-                  				 MPI_SUM, // MPI_Op op, 
-                  				 MPI_COMM_WORLD); // MPI_Comm comm);
+                 MPI_INTEGER, // MPI_Datatype datatype, 
+                 MPI_SUM, // MPI_Op op, 
+                 MPI_COMM_WORLD); // MPI_Comm comm);
 	}
 
 	if(error!=NEWTON_SUCCESS || mpierror != MPI_SUCCESS){

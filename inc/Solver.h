@@ -1,15 +1,16 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
+NEWTON					      |
+                      |
 Implicit coupling 		|	CLASS
-in nonlinear			|	SOLVER
-calculations			|
-						|
+in nonlinear			    |	SOLVER
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 
-Solver computes the residual values and solves the nonlinear system with different kind of methods.
+Solver computes the residual values and solves the nonlinear system with 
+different kind of methods.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
@@ -34,8 +35,8 @@ class Solver
 		Solver();
     void initialize(System*);
     void setFirstGuess(System*, int);
-		void iterateUntilConverge(System*, Communicator*);
-    void calculateNewGuess(System*, Communicator*);
+		void iterateUntilConverge(System*, Communicator*, int);
+    void calculateNewGuess(System*, Communicator*, int, int);
     void calculateResiduals(System*, Communicator*);
     
     double* x;
@@ -44,6 +45,10 @@ class Solver
     int method;
     double dxJacCalc;
     int sJacCalc;
+    int iJacCalc;
+    
+    int nEvalInStep;
+    int nEval;
 		
 	private:
     int runCode(int, System*);
@@ -52,6 +57,8 @@ class Solver
     int sendDataToCode(int);
     int receiveDataFromCode(int);
     void jacobianConstruction(System*, Communicator*);
+    void broydenUpdate(System*, int);
+    void updateJacobian(System*, Communicator*, int, int);
     void solveLinearSystem(System*);
     void x2gamma2delta(System*);
   
@@ -62,17 +69,20 @@ class Solver
     MathLib* math;
     int freeRank;
     
+    double* deltaX;
     double* xItPrev;
     double* xBackUp;
     double* resVector;
+    double* resVectorItPrev;
     double* resVectorBackUp;
     double** J;
-    double** Jk;
+    double** JItPrev;
     
     Vec u, b;
     Mat A;
     PC pc;
     KSP ksp;
+    PetscScalar valueToAssembly;
     
     int codeConnected;
     

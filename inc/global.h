@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
+NEWTON					      |
+                      |
 Implicit coupling 		|	HEADER
-in nonlinear			|	GLOBAL
-calculations			|
-						|
+in nonlinear			    |	GLOBAL
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 

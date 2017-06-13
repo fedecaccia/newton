@@ -49,6 +49,7 @@ Date: 7 June 2017
 #include <sstream> 
 #include <fstream> 
 #include <iostream>
+#include <iomanip>
 #include <string>
 
 using namespace::std;
@@ -174,7 +175,7 @@ double* loaddata(string file )
         values = new double[3];
         inputFile >> values[0];      
         inputFile >> values[1];      
-        inputFile >> values[2];      
+        inputFile >> values[2];
         break;      
     }
 	}
@@ -203,7 +204,7 @@ void printResults(double* vec, int n, string file)
   outputFile.open(file.c_str());
 	if (outputFile.is_open()){
 		for(int i=0; i<n; i++){
-      outputFile << vec[i]<<endl;
+      outputFile << setprecision(9)<<vec[i]<<endl;
     }
 	}
 	else{

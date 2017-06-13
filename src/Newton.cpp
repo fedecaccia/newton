@@ -1,15 +1,18 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
-Implicit coupling 		|	CLASS
-in nonlinear			|	NEWTON
-calculations			|
-						|
+NEWTON					      |
+                      |
+Implicit coupling 		|	FUNCTION
+in nonlinear			    |	NEWTON
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 
-Newton manages the three main stages in residual calculation: initializing everything to start calculations, administrates evolution parameters, controls that solution to residual equations converge in each evolution step, and finishes everything safety.
+Newton manages the three main stages in residual calculation: initializing 
+everything to start calculations, administrates evolution parameters, controls 
+that solution to residual equations converge in each evolution step, and ends
+everything safety.
 
 Author: Federico A. Caccia
 Date: 3 June 2017
@@ -63,6 +66,11 @@ void Newton::initialize()
   // PETSc init
   PetscInitialize(PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);
   
+  rootPrints("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    Newton    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    rootPrints("                                    Implicit coupling");
+    rootPrints("                                in nonlinear calculations");
+    rootPrints("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");  
+  
 	// Objects initialization
 
 	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver);
@@ -87,14 +95,14 @@ void Newton::run()
     click = clock();
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
 		NewtonSolver->setFirstGuess(NewtonSystem, NewtonEvolution->step);
-		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm);
+		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm, NewtonEvolution->step);
 		NewtonEvolution->update(NewtonSystem);
     rootPrints(" Total time step: "
                +dou2str((clock()-click)/ CLOCKS_PER_SEC)+" seconds");
 	}
+  rootPrints("Total function evaluations: "+int2str(NewtonSolver->nEval));
+  rootPrints("Total time: "+dou2str((clock()-firstClick)/ CLOCKS_PER_SEC)+" seconds");
   rootPrints("Calculation finished successfully.");
-  rootPrints("Total time: "
-             +dou2str((clock()-firstClick)/ CLOCKS_PER_SEC)+" seconds");
 }
 
 /* Newton::finish
@@ -110,5 +118,6 @@ void Newton::finish()
 {  
 	NewtonComm->disconnect();
   PetscFinalize();
-	//MPI_Finalize();
+	MPI_Finalize();
+  rootPrints("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 }

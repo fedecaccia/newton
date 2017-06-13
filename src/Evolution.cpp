@@ -1,15 +1,16 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
+NEWTON					      |
+                      |
 Implicit coupling 		|	CLASS
-in nonlinear			|	EVOLUTION
-calculations			|
-						|
+in nonlinear			    |	EVOLUTION
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 
-Evolution updates the evolution parameter and other problem dependent variables and configurations.
+Evolution updates the evolution parameter and other problem dependent variables
+and configurations.
 
 Author: Federico A. Caccia
 Date: 4 June 2017

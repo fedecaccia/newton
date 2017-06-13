@@ -30,6 +30,8 @@ class MathLib
     void copyMat(double**, double**, int);
     // Puesta a cero del vector
     void zeros(double*, int);
+    // Make identity matrix
+    void identity(double**, int);
     // Suma de delta en una posición del vector
     void sumDeltaInPosition(double*, int, double, int);
     // A*x
@@ -40,6 +42,8 @@ class MathLib
     double** vecXvec(double*, double*, int);
     // x2 = c*x1
     double* scaleVec(double*, double, int);
+    // A2 = c*A1
+    double** scaleMat(double**, double, int);
     // C = A + B
     double** sumMat(double**, double**, int);        
     // Resolución del sistema lineal mediante descomposición LU

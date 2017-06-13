@@ -1,15 +1,16 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
-Implicit coupling 		|	CLASS
-in nonlinear			|	SOLVER
-calculations			|
-						|
+NEWTON					      |
+                      |
+Implicit coupling 		|	FUNCTION
+in nonlinear			    |	SOLVER
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 
-Solver computes the residual values and solves the nonlinear system with different kind of methods.
+Solver computes the residual values and solves the nonlinear system with 
+different kind of methods.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
@@ -38,10 +39,16 @@ Solver::Solver()
   dxJacCalc = 0.1;
   // Steps between Jacobian calculation by finite difference method
   sJacCalc = 0;    
+  // Iterations between Jacobian calculation by finite difference method
+  iJacCalc = 0;    
   // Math object
   math = new MathLib();
   // client code object
   NewtonClient = new Client();
+  // Total funtion evaluations in step
+  nEvalInStep = 0;
+  // Total function evaluation in problem
+  nEval = 0;
   
   // Initial error value
 	error = NEWTON_SUCCESS;
@@ -61,27 +68,41 @@ void Solver::initialize(System* sys)
   x = new double[sys->nUnk];
   // X previous iteration
   xItPrev = new double[sys->nUnk];
+  // x - sItPrev
+  deltaX = new double[sys->nUnk];
   // X saved to construct Jacobian
   xBackUp = new double[sys->nUnk];
   // Residual vector
   resVector = new double[sys->nUnk];
+  // Residual vector previous iteration
+  resVectorItPrev = new double[sys->nUnk];
   // Residual vector back up
   resVectorBackUp = new double[sys->nUnk];
   // Jacobian matrix
   J = new double*[sys->nUnk];
   // Jacobian matrix previous iteration
-  Jk = new double*[sys->nUnk];  
+  JItPrev = new double*[sys->nUnk];  
   
   // Initialization
   math->zeros(x, sys->nUnk);
   math->zeros(xItPrev, sys->nUnk);
+  math->zeros(deltaX, sys->nUnk);
   math->zeros(resVector, sys->nUnk);
+  math->zeros(resVectorItPrev, sys->nUnk);
   for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
     J[iUnk] = new double[sys->nUnk];
-    Jk[iUnk] = new double[sys->nUnk];
-    math->zeros(J[iUnk], sys->nUnk);
-    math->zeros(Jk[iUnk], sys->nUnk);  
+    JItPrev[iUnk] = new double[sys->nUnk];
   }
+  math->identity(J, sys->nUnk);
+  math->identity(JItPrev, sys->nUnk);
+  
+  //~ for(int i=0; i<sys->nUnk; i++){
+    //~ for(int j=0; j<sys->nUnk; j++){
+      //~ cout<<J[i][j]<<" ";
+    //~ }
+    //~ cout<<endl;
+  //~ }
+  //~ exit(1);
   
   // PETSc elements
   MatCreate(PETSC_COMM_WORLD,&A);
@@ -111,6 +132,7 @@ This function sets the intial guess. In first evolution step it corresponds
 to the initial condition loaded from configuration file, or, in case that
 it couldn't be supported, every guess value is zero. In following steps
 it is calculated interpolating previous values.
+It also set guesss for the Jacobian matrix.
 
 input: System pointer, step value
 output: -
@@ -120,13 +142,18 @@ void Solver::setFirstGuess(System* sys, int step)
 {
   if(step!=0){
     // Interpolate previous values? Do nothing to keep x values    
+    // J?
   }
   else{
     // Initial condition has been loaded by parser    
+    // J CI?
   }
   
   // Put x values in xItPrev
   math->copyInVector(xItPrev, 0, x, 0, sys->nUnk);
+  // Put J values in JItPrev
+  math->copyMat(JItPrev, J, sys->nUnk);
+  
   
   // Put x values in gamma and in delta
   x2gamma2delta(sys);
@@ -176,22 +203,26 @@ input: -
 output: -
 
 */
-void Solver::iterateUntilConverge(System* sys, Communicator* comm)
+void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
 {
+  // New step
+  iter = 0;
+  nEvalInStep = 0;
   calculateResiduals(sys, comm);
   rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
   while(residual > nltol && iter < maxIter){
     
-    calculateNewGuess(sys, comm);
+    calculateNewGuess(sys, comm, step, iter);
     calculateResiduals(sys, comm);
     iter++;
     
     rootPrints(" Non linear iteration: "+int2str(iter)+"\t Residual: "+dou2str(residual));
   }
+  rootPrints(" Total iterations in step: "+int2str(iter)+" - Total funtion evaluations: "+int2str(nEvalInStep));
   if(residual>nltol){
     error = NEWTON_ERROR;
     checkError(error, "Maximum non linear iterations reached - Solver-iterateUntilConverge");      
-  }
+  }  
 }
 
   
@@ -204,28 +235,10 @@ output: -
 
 */
 void Solver::calculateResiduals(System* sys, Communicator* comm)
-{
-  // TEST
-  //~ cout<<"ALPHAS, BETAS, GAMMAS & DELTAS pre calculating residuals"<<endl;
-  //~ for (int iCode=0; iCode<sys->nCodes; iCode++){
-    //~ cout<<"Code: "<<iCode<<endl;
-    //~ cout<<"Alphas:"<<endl;
-    //~ for(int iAlpha = 0; iAlpha<sys->code[iCode].nAlpha; iAlpha++){
-      //~ cout<<sys->code[iCode].alpha[iAlpha]<<endl;
-    //~ }
-    //~ cout<<"Betas:"<<endl;
-    //~ for(int iBeta = 0; iBeta<sys->code[iCode].nBeta; iBeta++){
-      //~ cout<<sys->beta[sys->code[iCode].betaFirstValuePos+iBeta]<<endl;
-    //~ }
-    //~ cout<<"Gammas:"<<endl;
-    //~ for(int iGamma= 0; iGamma<sys->code[iCode].nGamma; iGamma++){
-      //~ cout<<sys->gamma[sys->code[iCode].gammaFirstValuePos+iGamma]<<endl;
-    //~ }
-    //~ cout<<"Deltas:"<<endl;
-    //~ for(int iDelta = 0; iDelta<sys->code[iCode].nDelta; iDelta++){
-      //~ cout<<sys->code[iCode].delta[iDelta]<<endl;
-    //~ }
-  //~ }
+{  
+  // New function evaluation
+  nEval++;
+  nEvalInStep++;
   
   // Zeroing vector that receives calculation values
   for(int iCode=0; iCode<sys->nCodes; iCode++){    
@@ -325,33 +338,16 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       
       sys->alpha2beta(codeConnected);
       
-    }
-    
-  //~ // TEST
-  //~ cout<<"ALPHAS, BETAS, GAMMAS & DELTAS"<<endl;
-  //~ for (int iCode=0; iCode<sys->nCodes; iCode++){
-    //~ cout<<"Code: "<<iCode<<endl;
-    //~ cout<<"Alphas:"<<endl;
-    //~ for(int iAlpha = 0; iAlpha<sys->code[iCode].nAlpha; iAlpha++){
-      //~ cout<<sys->code[iCode].alpha[iAlpha]<<endl;
-    //~ }
-    //~ cout<<"Betas:"<<endl;
-    //~ for(int iBeta = 0; iBeta<sys->code[iCode].nBeta; iBeta++){
-      //~ cout<<sys->beta[sys->code[iCode].betaFirstValuePos+iBeta]<<endl;
-    //~ }
-    //~ cout<<"Gammas:"<<endl;
-    //~ for(int iGamma= 0; iGamma<sys->code[iCode].nGamma; iGamma++){
-      //~ cout<<sys->gamma[sys->code[iCode].gammaFirstValuePos+iGamma]<<endl;
-    //~ }
-    //~ cout<<"Deltas:"<<endl;
-    //~ for(int iDelta = 0; iDelta<sys->code[iCode].nDelta; iDelta++){
-      //~ cout<<sys->code[iCode].delta[iDelta]<<endl;
-    //~ }
-  //~ }
-  //exit(1);
+    }   
+  }  
   
-    
-  }
+  // Save previous value of residual
+  math->copyInVector(resVectorItPrev, 0, resVector, 0, sys->nUnk); 
+  // Compute residuals as (beta - x)
+  sys->computeResiduals(resVector, x);
+  
+  // Calculate norm 2 of the residual vector
+  residual = math->moduleAbs(resVector, sys->nUnk);
   
   //~ // TEST
   //~ cout<<sys->nPhasesPerIter<<endl;
@@ -376,17 +372,11 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
     //~ }
   //~ }
   
-  // Compute residuals as (beta - x)
-  sys->computeResiduals(resVector, x);
-  
   // TEST
-  cout<<"Beta"<<setw(20)<<"x"<<setw(20)<<"res"<<endl;
-  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-    cout<<sys->beta[iUnk]<<setw(20)<<x[iUnk]<<setw(20)<<resVector[iUnk]<<endl;    
-  }
-  
-  // Calculate norm 2 of the residual vector
-  residual = math->moduleAbs(resVector, sys->nUnk);  
+  //~ cout<<"Beta"<<setw(20)<<"x"<<setw(20)<<"res"<<endl;
+  //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    //~ cout<<sys->beta[iUnk]<<setw(20)<<x[iUnk]<<setw(20)<<resVector[iUnk]<<endl;    
+  //~ }
 }
 
 /* Solver calculateNewGuess
@@ -397,7 +387,7 @@ input: -
 output: -
 
 */
-void Solver::calculateNewGuess(System* sys, Communicator* comm)
+void Solver::calculateNewGuess(System* sys, Communicator* comm, int step, int iter)
 {
   switch(method){
     case EXPLICIT_SERIAL:
@@ -416,9 +406,13 @@ void Solver::calculateNewGuess(System* sys, Communicator* comm)
       break;   
       
     case SECANT:
+      updateJacobian(sys, comm, step, iter);
+      solveLinearSystem(sys);
       break;   
       
     case BROYDEN:
+      updateJacobian(sys, comm, step, iter);
+      solveLinearSystem(sys);
       break;   
       
     default:
@@ -429,6 +423,158 @@ void Solver::calculateNewGuess(System* sys, Communicator* comm)
   // Put x values in gamma and delta
   x2gamma2delta(sys);
 }
+
+/* Solver::updateJacobian
+
+
+
+
+
+*/
+void Solver::updateJacobian(System* sys, Communicator* comm, int step, int iter)
+{
+  switch(method){
+    case SECANT:
+      if(step==0 && iter==0){
+        jacobianConstruction(sys, comm);
+      }
+      else if(sJacCalc>0 && iter==0){
+        if(step % sJacCalc==0){
+          jacobianConstruction(sys, comm);
+        }
+      }
+      else if(iJacCalc>0){
+        if(iter>0 && (iter % iJacCalc)==0){
+          jacobianConstruction(sys, comm);
+        }
+      }
+      break;
+    
+    case BROYDEN:
+      if(step==0 && iter==0 && sJacCalc>0){
+        jacobianConstruction(sys, comm);
+      }
+      else if(sJacCalc>0 && iter==0){
+        if(step % sJacCalc==0){
+          jacobianConstruction(sys, comm);
+        }
+      }
+      else if(iJacCalc>0){
+        if(iter>0 && (iter % iJacCalc)==0){
+          jacobianConstruction(sys, comm);
+        }
+      }
+      else{
+        broydenUpdate(sys, iter);
+      }
+      break;
+      
+    default:
+      break;
+  }
+}
+
+/* Solver::broydenUpdate
+
+
+
+
+
+*/
+void Solver::broydenUpdate(System* sys, int iter)
+{  
+  if(iter>0){
+    // J = Jk + (deltaRes - Jk*deltaX) / (deltaXT*deltaX) * deltaXT;
+    math->copyMat(JItPrev, J, sys->nUnk);
+    double* deltaRes = math->differenceInVectors(resVector, resVectorItPrev, sys->nUnk);
+    double* Jdx = math->matXvec(JItPrev, deltaX, sys->nUnk);
+    double* num = math->differenceInVectors(deltaRes, Jdx, sys->nUnk);
+    double div = math->vecDotvec(deltaX, deltaX, sys->nUnk);
+    double* t2a = math->scaleVec(num, 1.0/div, sys->nUnk);
+    double** t2b = math->vecXvec(t2a, deltaX, sys->nUnk);
+    J = math->sumMat(JItPrev, t2b, sys->nUnk);
+    // Saving -J in order to solve deltaX = -J * res
+    // Saving just J
+    // J = math->scaleMat(J, -1, sys->nUnk);
+    
+    // TEST
+    //~ cout<<"x:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ cout<<x[i]<<" ";
+    //~ }
+    //~ cout<<endl;
+    //~ cout<<"xItPrev:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ cout<<xItPrev[i]<<" ";
+    //~ }
+    //~ cout<<endl;
+    //~ cout<<"res:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ cout<<resVector[i]<<" ";
+    //~ }
+    //~ cout<<endl;
+    //~ cout<<"resVectorItPrev:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ cout<<resVectorItPrev[i]<<" ";
+    //~ }
+    //~ cout<<endl;  
+    //~ cout<<"JItPrev:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ for(int j=0; j<sys->nUnk; j++){
+        //~ cout<<JItPrev[i][j]<<" ";
+      //~ }
+      //~ cout<<endl;
+    //~ }
+    //~ cout<<endl;
+    //~ 
+    //~ 
+    //~ cout<<"deltaRes:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ cout<<deltaRes[i]<<" ";
+    //~ }
+    //~ cout<<endl;
+    //~ 
+    //~ cout<<"Jdx:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ cout<<Jdx[i]<<" ";
+    //~ }
+    //~ cout<<endl;
+    //~ 
+    //~ cout<<"num:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ cout<<num[i]<<" ";
+    //~ }
+    //~ cout<<endl;
+    //~ 
+    //~ cout<<"div:"<<div<<endl;
+    //~ 
+    //~ cout<<"t2a:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ cout<<t2a[i]<<" ";
+    //~ }
+    //~ cout<<endl;
+    //~ 
+    //~ cout<<"t2b:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ for(int j=0; j<sys->nUnk; j++){
+        //~ cout<<t2b[i][j]<<" ";
+      //~ }
+      //~ cout<<endl;
+    //~ }
+    //~ cout<<endl;   
+    
+    
+    //~ cout<<"J:"<<endl;
+    //~ for(int i=0; i<sys->nUnk; i++){
+      //~ for(int j=0; j<sys->nUnk; j++){
+        //~ cout<<J[i][j]<<" ";
+      //~ }
+      //~ cout<<endl;
+    //~ }
+    //exit(1); 
+  }
+}
+
 
 /* Solver::jacobianConstruction
 
@@ -445,23 +591,26 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm)
   
   // f(x) was calculated in calculateResiduals() previously
   
-  // Loop for partial derivative calculation
+  // Loop in partial derivative calculation (cols)
   rootPrints("  Calculating Jacobian by finite difference...");
-  for(int i=0; i<sys->nRes; i++){
-    //rootPrints(" Jacobian Row: "+int2str(i+1)); // ORDENAR POR RESIDUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS
-    math->sumDeltaInPosition(x, i, dxJacCalc, sys->nUnk);
+  for(int j=0; j<sys->nUnk; j++){
+    //rootPrints(" Jacobian Row: "+int2str(i+1));
+    math->sumDeltaInPosition(x, j, dxJacCalc, sys->nUnk);
     
     x2gamma2delta(sys);
     calculateResiduals(sys, comm);
-    for(int j=0; j<sys->nUnk; j++){
-      J[i][j] = (resVector[j]-resVectorBackUp[j]) / dxJacCalc;
+    // Loop in residuals (rows)
+    // Saving -J in order to solve deltaX = -J * res
+    // Now just saving J
+    for(int i=0; i<sys->nRes; i++){
+      J[i][j] = (resVector[i]-resVectorBackUp[i]) / dxJacCalc;
     }
 
     // Restore x
     math->copyInVector(x, 0, xBackUp, 0, sys->nUnk);
   }
   
-  if(irank==0){cout<<"  End Jacobian calculation"<<endl;}
+  rootPrints("  End Jacobian calculation");
   
   //~ // TEST
   //~ if(irank==0){
@@ -487,7 +636,7 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm)
 
 */
 void Solver::solveLinearSystem(System* sys)
-{
+{  
   // Save resVector in b
   for (int i=0; i<sys->nUnk; i++) {
     VecSetValues(b,1,&i,&resVector[i],INSERT_VALUES);
@@ -497,13 +646,30 @@ void Solver::solveLinearSystem(System* sys)
   VecAssemblyBegin(b);
   VecAssemblyEnd(b);
   
-  // Save -J in A
+  // Save J in A
   for(int i=0; i<sys->nUnk; i++){
     for(int j=0; j<sys->nUnk; j++){
-      MatSetValue(A,i,j,-J[i][j],INSERT_VALUES);
+      switch (method){
+          case(NEWTON):
+            valueToAssembly = -J[i][j];
+            break;
+            
+          case(SECANT):
+            valueToAssembly = -J[i][j];
+            break;
+            
+          case(BROYDEN):
+            valueToAssembly = -J[i][j];
+            break;
+          
+          default:
+            valueToAssembly = J[i][j];
+            break;      
+      }
+      MatSetValue(A,i,j,valueToAssembly,INSERT_VALUES);
     }
   } 
-  
+    
   MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);  
   // Solve
@@ -511,17 +677,28 @@ void Solver::solveLinearSystem(System* sys)
   KSPGetPC(ksp,&pc);
   PCSetType(pc,PCNONE);
   KSPSolve(ksp,b,u);
+
+  if(irank==NEWTON_ROOT){
+    // Get x solution from u
+    VecGetArray(u,&deltaX);
+  }
   
-  // Get x solution from u
-  //math->zeros(x, sys->nUnk);  
-  VecGetArray(u,&x);
-  x = math->sumVectors(x, xItPrev, sys->nUnk);
-  //~ cout<<"x:"<<endl;
+  // Share solution
+  error =  MPI_Bcast( deltaX,// void *buffer, 
+                          sys->nUnk,// int count, 
+                          MPI_DOUBLE_PRECISION,// MPI_Datatype datatype, 
+                          NEWTON_ROOT,// int root, 
+                          MPI_COMM_WORLD);// MPI_Comm comm )
+  checkError(error, "Error sharing solution between processes");                            
+  
+  // Save previous value of x
+  math->copyInVector(xItPrev, 0, x, 0, sys->nUnk);
+  x = math->sumVectors(deltaX, xItPrev, sys->nUnk);
+  //~ cout<<"delta x  -  x:"<<endl;
   //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-    //~ cout<<x[iUnk]<<endl;
+    //~ cout<<deltaX[iUnk]<<"\t"<<x[iUnk]<<endl;
   //~ }
   //~ exit(1);
-  
   
 }
 
@@ -541,7 +718,8 @@ output: error
 */
 int Solver::runCode(int iCode, System* sys)
 {   
-  // Prepare input
+  //cout<<iCode<<"**************"<<irank<<endl;
+  // Prepare input  
   error = NewtonClient->prepareInput(sys->code[iCode].type, 
                                      sys->code[iCode].name, 
                                      sys->code[iCode].nDelta, 

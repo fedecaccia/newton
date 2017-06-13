@@ -74,6 +74,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="STEPS_JAC_CALC"){
       return true;
     }
+    if(word=="ITER_JAC_CALC"){
+      return true;
+    }
     if(word=="CLIENT"){
       return true;
     }
@@ -139,7 +142,7 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="X_INI"){
       return true;
     }
-    if(word=="TYPE"){
+    if(word=="IO_TYPE"){
       return true;
     }
     if(word=="ID"){
@@ -422,7 +425,7 @@ string Parser::loadClientAndTakeWord(System* sys)
       word = takeNextWord();
     }
     
-    else if(word=="TYPE"){
+    else if(word=="IO_TYPE"){
       word = takeNextWord();
       transform(word.begin(), word.end(), word.begin(), ::tolower);
       if(word == "test"){
@@ -522,7 +525,7 @@ string Parser::loadClientAndTakeWord(System* sys)
       }
       else{
         error = NEWTON_ERROR;
-        checkError(error, "Unknown connection type: "+word+" - Parser::loadClientAndTakeWord");
+        checkError(error, "Unknown connection IO_TYPE: "+word+" - Parser::loadClientAndTakeWord");
       }
       word = takeNextWord();
     }
@@ -642,7 +645,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
   // First input file opening
   
-  configFile.open("newton.configtest");
+  configFile.open("newton.config");
   if (configFile.is_open()){
     while(!configFile.eof()){
       
@@ -660,6 +663,10 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
       else if(word=="N_STEPS"){
         word = takeNextWord();
         stringstream(word) >> evol->nSteps;
+        if(evol->nSteps<1){
+          error = NEWTON_ERROR;
+          checkError(error, "Bad number of steps: \""+word+"\" in N_STEPS - Parser::parseInput");
+        }
         word = takeNextWord();
       }
       
@@ -715,6 +722,12 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
       else if(word=="STEPS_JAC_CALC"){
         word = takeNextWord();
         stringstream(word) >> sol->sJacCalc;
+        word = takeNextWord();
+      }
+      
+      else if(word=="ITER_JAC_CALC"){
+        word = takeNextWord();
+        stringstream(word) >> sol->iJacCalc;
         word = takeNextWord();
       }
 
@@ -793,7 +806,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
   // Second input file opening
   
-  configFile.open("newton.configtest");
+  configFile.open("newton.config");
   if (configFile.is_open()){
     while(!configFile.eof()){
 
@@ -869,37 +882,37 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
   sys->allocate3(); // ********************************************change things
 
   //TEST
-  cout<<"Number of clients: "<<sys->nCodes<<endl;
-  cout<<"Number of unknowns: "<<sys->nUnk<<" - Number of residuals: "<<sys->nRes<<endl;
-  cout<<"Unknowns order: "<<endl;
-  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-    cout<<sys->xName[iUnk]<<endl;
-  }
-  cout<<"Nonlinear method: "<<sol->method<<endl;
-  cout<<"Phases: "<<sys->nPhasesPerIter<<endl;
-  for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
-    cout<<" "<<iPhase<<"- n codes in phase: "<<sys->nCodesInPhase[iPhase]<<endl;
-  }
-  cout<<"Clients: "<<endl;
-  for(int iCode=0; iCode<sys->nCodes; iCode++){
-    cout<<"Code: "<<sys->code[iCode].name<<endl;
-    cout<<" - nAlpha: "<<sys->code[iCode].nAlpha<<endl;
-    cout<<" - nBeta: "<<sys->code[iCode].nBeta<<endl;
-    cout<<" - nGamma: "<<sys->code[iCode].nGamma<<endl;
-    cout<<" - nDelta: "<<sys->code[iCode].nDelta<<endl;
-    cout<<" - alphaMap: "<<sys->code[iCode].alphaMap<<endl;
-    cout<<" - gammaMap: "<<sys->code[iCode].gammaMap<<endl;
-    cout<<" - n Procs: "<<sys->code[iCode].nProcs<<endl;
-    cout<<" - n Args: "<<sys->code[iCode].nArgs<<endl;
-    cout<<" - connection type: "<<sys->code[iCode].connection<<endl;
-    cout<<" - command to run bin: "<<sys->code[iCode].binCommand<<endl;
-    cout<<" - Input model name: "<<sys->code[iCode].inputModelName<<endl;
-    cout<<" - Input extension: "<<sys->code[iCode].inputExt<<endl;
-    cout<<" - Restart name: "<<sys->code[iCode].restartName<<endl;
-    cout<<" - Restart extension: "<<sys->code[iCode].restartExt<<endl;
-    cout<<" - Output model name: "<<sys->code[iCode].outputName<<endl;
-    cout<<" - Output extension: "<<sys->code[iCode].outputExt<<endl;
-  }
+  //~ cout<<"Number of clients: "<<sys->nCodes<<endl;
+  //~ cout<<"Number of unknowns: "<<sys->nUnk<<" - Number of residuals: "<<sys->nRes<<endl;
+  //~ cout<<"Unknowns order: "<<endl;
+  //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    //~ cout<<sys->xName[iUnk]<<endl;
+  //~ }
+  //~ cout<<"Nonlinear method: "<<sol->method<<endl;
+  //~ cout<<"Phases: "<<sys->nPhasesPerIter<<endl;
+  //~ for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+    //~ cout<<" "<<iPhase<<"- n codes in phase: "<<sys->nCodesInPhase[iPhase]<<endl;
+  //~ }
+  //~ cout<<"Clients: "<<endl;
+  //~ for(int iCode=0; iCode<sys->nCodes; iCode++){
+    //~ cout<<"Code: "<<sys->code[iCode].name<<endl;
+    //~ cout<<" - nAlpha: "<<sys->code[iCode].nAlpha<<endl;
+    //~ cout<<" - nBeta: "<<sys->code[iCode].nBeta<<endl;
+    //~ cout<<" - nGamma: "<<sys->code[iCode].nGamma<<endl;
+    //~ cout<<" - nDelta: "<<sys->code[iCode].nDelta<<endl;
+    //~ cout<<" - alphaMap: "<<sys->code[iCode].alphaMap<<endl;
+    //~ cout<<" - gammaMap: "<<sys->code[iCode].gammaMap<<endl;
+    //~ cout<<" - n Procs: "<<sys->code[iCode].nProcs<<endl;
+    //~ cout<<" - n Args: "<<sys->code[iCode].nArgs<<endl;
+    //~ cout<<" - connection type: "<<sys->code[iCode].connection<<endl;
+    //~ cout<<" - command to run bin: "<<sys->code[iCode].binCommand<<endl;
+    //~ cout<<" - Input model name: "<<sys->code[iCode].inputModelName<<endl;
+    //~ cout<<" - Input extension: "<<sys->code[iCode].inputExt<<endl;
+    //~ cout<<" - Restart name: "<<sys->code[iCode].restartName<<endl;
+    //~ cout<<" - Restart extension: "<<sys->code[iCode].restartExt<<endl;
+    //~ cout<<" - Output model name: "<<sys->code[iCode].outputName<<endl;
+    //~ cout<<" - Output extension: "<<sys->code[iCode].outputExt<<endl;
+  //~ }
 
   // Reinitialization
   betaLoaded = 0;
@@ -908,7 +921,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
   // Third input file opening  
 
-  configFile.open("newton.configtest");
+  configFile.open("newton.config");
   if (configFile.is_open()){
     while(!configFile.eof()){
 
@@ -975,7 +988,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
   // Fourth input file opening  
 
-  configFile.open("newton.configtest");
+  configFile.open("newton.config");
   if (configFile.is_open()){
     while(!configFile.eof()){
 
@@ -1013,31 +1026,31 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
 
   // TEST
 
-  cout<<"Codes to connect in each phase in EXPLICIT_SERIAL"<<endl;
-  for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
-    for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
-      cout<<" - "<<sys->codeToConnectInPhase[iPhase][iCode]<<" ";
-    }
-    cout<<endl;
-  }
-
-  cout<<"Global betas: "<<sys->nBeta<<endl;
-  for(int iBeta=0; iBeta<sys->nBeta; iBeta++){
-    cout<<" - "<<sys->betaName[iBeta]<<": "<<sys->beta[iBeta]<<endl;
-  }
-  cout<<"Global gammas: "<<sys->nGamma<<endl;
-  for(int iGamma=0; iGamma<sys->nGamma; iGamma++){
-    cout<<" - "<<sys->gammaName[iGamma]<<": "<<sys->gamma[iGamma]<<endl;
-  }
-
-  cout<<" Arguments"<<endl;
-  for(int iCode=0; iCode<sys->nCodes; iCode++){
-    cout<<" ("<<sys->code[iCode].nArgs<<"): ";
-    for(int iArg=0; iArg<sys->code[iCode].nArgs; iArg++){
-      cout<<sys->code[iCode].arg[iArg]<<" ";
-    }
-    cout<<endl;
-  }
+  //~ cout<<"Codes to connect in each phase in EXPLICIT_SERIAL"<<endl;
+  //~ for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+    //~ for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
+      //~ cout<<" - "<<sys->codeToConnectInPhase[iPhase][iCode]<<" ";
+    //~ }
+    //~ cout<<endl;
+  //~ }
+//~ 
+  //~ cout<<"Global betas: "<<sys->nBeta<<endl;
+  //~ for(int iBeta=0; iBeta<sys->nBeta; iBeta++){
+    //~ cout<<" - "<<sys->betaName[iBeta]<<": "<<sys->beta[iBeta]<<endl;
+  //~ }
+  //~ cout<<"Global gammas: "<<sys->nGamma<<endl;
+  //~ for(int iGamma=0; iGamma<sys->nGamma; iGamma++){
+    //~ cout<<" - "<<sys->gammaName[iGamma]<<": "<<sys->gamma[iGamma]<<endl;
+  //~ }
+//~ 
+  //~ cout<<" Arguments"<<endl;
+  //~ for(int iCode=0; iCode<sys->nCodes; iCode++){
+    //~ cout<<" ("<<sys->code[iCode].nArgs<<"): ";
+    //~ for(int iArg=0; iArg<sys->code[iCode].nArgs; iArg++){
+      //~ cout<<sys->code[iCode].arg[iArg]<<" ";
+    //~ }
+    //~ cout<<endl;
+  //~ }
 
   
   
@@ -1052,7 +1065,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
   
   // Fifth input file opening  
 
-  configFile.open("newton.configtest");
+  configFile.open("newton.config");
   if (configFile.is_open()){
     while(!configFile.eof()){
 

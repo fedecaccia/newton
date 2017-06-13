@@ -39,7 +39,7 @@ output: -
 */
 void Mapper::config()
 {
-  rootPrints("Configurating mapper...");  
+  rootPrints("Checking for mappers...");  
 	checkError(error,"Error configurating mapper.");
 }
 
