@@ -1,6 +1,5 @@
 syntax: glob
 
-src/test
 obj/*.o
 *.vtk
 *.msh
@@ -8,13 +7,15 @@ obj/*.o
 *.pdf
 *.txt
 bin/*
+*/bin/*
 relap.*
 *.CRM
 *.fer
 *.bathe
-*.dat
+*step*.dat
 *.info
 *.i
 *.o
 *.r
 log
+*.out
