@@ -12,7 +12,7 @@ calculations			    |
 Stablish mpi communitaction with clients.
 
 Author: Federico A. Caccia
-Date: 13 June 2017
+Date: 14 June 2017
 
 \*****************************************************************************/
 

@@ -37,6 +37,8 @@ int Client::prepareTestClientInput(string codeName, int nValues, double* values,
   ofstream inputFile;
   
   inputFile.open(input.c_str());
+  inputFile.precision(numeric_limits<double>::digits10 + 1);
+  
 	if (inputFile.is_open()){
 		for(int i=0; i<nValues; i++){
       inputFile << values[i]<<endl;

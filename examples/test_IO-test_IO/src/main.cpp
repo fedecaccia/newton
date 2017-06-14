@@ -49,7 +49,7 @@ Date: 7 June 2017
 #include <sstream> 
 #include <fstream> 
 #include <iostream>
-#include <iomanip>
+#include <limits>
 #include <string>
 
 using namespace::std;
@@ -200,11 +200,12 @@ void printResults(double* vec, int n, string file)
 {
   // Output file
   ofstream outputFile;
+  outputFile.precision(numeric_limits<double>::digits10 + 1);
   
   outputFile.open(file.c_str());
 	if (outputFile.is_open()){
-		for(int i=0; i<n; i++){
-      outputFile << setprecision(9)<<vec[i]<<endl;
+		for(int i=0; i<n; i++){      
+      outputFile <<vec[i]<<endl;
     }
 	}
 	else{

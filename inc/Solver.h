@@ -13,7 +13,7 @@ Solver computes the residual values and solves the nonlinear system with
 different kind of methods.
 
 Author: Federico A. Caccia
-Date: 4 June 2017
+Date: 14 June 2017
 
 \*****************************************************************************/
 

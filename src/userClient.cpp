@@ -35,6 +35,7 @@ int Client::prepareUserClientInput(string codeName, int nValues, double* values,
 { 
   // Input file
   ofstream inputFile;
+  inputFile.precision(numeric_limits<double>::digits10 + 1);
   
   inputFile.open(input.c_str());
 	if (inputFile.is_open()){

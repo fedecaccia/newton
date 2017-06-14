@@ -26,6 +26,7 @@ Date: 7 June 2017
 #include <sstream> 
 #include <fstream> 
 #include <iostream>
+#include <limits>
 #include <string>
 
 class Client
