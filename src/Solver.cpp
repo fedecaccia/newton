@@ -208,9 +208,17 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   // New step
   iter = 0;
   nEvalInStep = 0;
-  calculateResiduals(sys, comm);
+  calculateResiduals(sys, comm); 
   rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
   while(residual > nltol && iter < maxIter){
+    
+    // Send NEWTON_RESTART order to clients connected by MPI
+    order = NEWTON_RESTART;
+    for(int iCode=0; iCode<sys->nCodes; iCode++){
+      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+        comm->sendOrder(iCode, order);
+      }
+    }
     
     calculateNewGuess(sys, comm, step, iter);
     calculateResiduals(sys, comm);
@@ -219,9 +227,20 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
     rootPrints(" Non linear iteration: "+int2str(iter)+"\t Residual: "+dou2str(residual));
   }
   rootPrints(" Total iterations in step: "+int2str(iter)+" - Total funtion evaluations: "+int2str(nEvalInStep));
+  
+  // Bad ending
   if(residual>nltol){
+    //comm->disconnect();
     error = NEWTON_ERROR;
     checkError(error, "Maximum non linear iterations reached - Solver-iterateUntilConverge");      
+  }
+  
+  // Send NEWTON_CONTINUE order to clients connected by MPI
+  order = NEWTON_CONTINUE;
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+    if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+      comm->sendOrder(iCode, order);
+    }
   }  
 }
 
@@ -267,7 +286,7 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       
       if(sys->code[codeConnected].connection==NEWTON_MPI_COMMUNICATION){
         if(irank==0){ // only root works
-          error = sendDataToCode(codeConnected);
+          error = sendDataToCode(codeConnected, sys, comm);
         }
         // All processes check
         checkError(irank, "Error sending data to code - Solver::calculateResiduals");
@@ -317,7 +336,7 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
 
       if(sys->code[codeConnected].connection==NEWTON_MPI_COMMUNICATION){
         if(irank==0){ // only root works
-          error = receiveDataFromCode(codeConnected);
+          error = receiveDataFromCode(codeConnected, sys, comm);
         }
         // All processes check
         checkError(irank, "Error receiving data from code - Solver::calculateResiduals");
@@ -608,6 +627,14 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm)
 
     // Restore x
     math->copyInVector(x, 0, xBackUp, 0, sys->nUnk);
+    
+    // Send NEWTON_RESTART order to clients connected by MPI
+    order = NEWTON_RESTART;
+    for(int iCode=0; iCode<sys->nCodes; iCode++){
+      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+        comm->sendOrder(iCode, order);
+      }
+    }
   }
   
   rootPrints("  End Jacobian calculation");
@@ -694,6 +721,7 @@ void Solver::solveLinearSystem(System* sys)
   // Save previous value of x
   math->copyInVector(xItPrev, 0, x, 0, sys->nUnk);
   x = math->sumVectors(deltaX, xItPrev, sys->nUnk);
+  // TEST
   //~ cout<<"delta x  -  x:"<<endl;
   //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
     //~ cout<<deltaX[iUnk]<<"\t"<<x[iUnk]<<endl;
@@ -745,7 +773,7 @@ int Solver::runCode(int iCode, System* sys)
 
 Spawn n processes of a particular code.
 
-input: -
+input: code number, System pointer
 output: error
 
 */
@@ -797,7 +825,7 @@ int Solver::spawnCode(int iCode, System* sys)
 Load variables from specific ouput file.
 Map them before save in x.
 
-input: code ID, System pointer, Mapper pointer
+input: code number, System pointer, Mapper pointer
 output: error
 
 */
@@ -824,16 +852,15 @@ Send data to a client via MPI functions.
 This data could be a function of guesses values in x,
 like cross sections as a function of termalhydraulic variables.
 
-input: code ID
+input: code number, System pointer, Communicator pointer
 output: error
 
 */
-int Solver::sendDataToCode(int iCode)
+int Solver::sendDataToCode(int iCode, System* sys, Communicator* comm)
 { 
-  // Send data 
+  // Send data
+  error = comm->send(iCode, sys->code[iCode].nDelta, sys->code[iCode].delta);
   
-  
-  error = NEWTON_SUCCESS;  
   return NEWTON_SUCCESS;
 }
 
@@ -842,16 +869,14 @@ int Solver::sendDataToCode(int iCode)
 Receive data from a client via MPI functions.
 Map them before save in x.
 
-input: code ID
+input: code number, System pointer, Communicator pointer
 output: error
 
 */
-int Solver::receiveDataFromCode(int iCode)
+int Solver::receiveDataFromCode(int iCode, System* sys, Communicator* comm)
 { 
-  // Save in appropiate possitions in y
+  // Receive data
+  error = comm->receive(iCode, sys->code[iCode].nAlpha, sys->code[iCode].alpha);
   
-  
-  
-  error = NEWTON_SUCCESS;  
   return error;
 }

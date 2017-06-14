@@ -35,6 +35,12 @@ Date: 3 June 2017
 #define NEWTON_CONNECTED			      0
 #define NEWTON_DISCONNECTED		      1
 
+// MPI communication order
+#define NEWTON_CONTINUE		          0
+#define NEWTON_RESTART      	      1
+#define NEWTON_FINISH       	      2
+#define NEWTON_ABORT        	      3
+
 // Communication way with client   
 #define NEWTON_UNKNOWN_CONNECTION   0
 #define NEWTON_MPI_COMMUNICATION    1

@@ -12,7 +12,7 @@ calculations			    |
 Stablish mpi communitaction with clients.
 
 Author: Federico A. Caccia
-Date: 4 June 2017
+Date: 13 June 2017
 
 \*****************************************************************************/
 
@@ -20,6 +20,7 @@ Date: 4 June 2017
 #define COMMUNICATOR_H
 
 #include "global.h"
+#include "Evolution.h"
 #include "System.h"
 
 #include "mpi.h"
@@ -27,15 +28,22 @@ Date: 4 June 2017
 class Communicator
 {
 	public:
-		Communicator();
-		void initialize(System*);
+		Communicator(System*, Evolution*);
+		void initialize();
 		void disconnect();
+    int firstCommunication(int);
+    int sendOrder(int, int);
+    int send(int, int, double*);
+    int receive(int, int, double*);
 		
 	private:
 		int error;
+    int tag;
 		int isConnectedByMPI;
-    char** Port_Name;
+    string* Port_Name;
     MPI_Comm* Coupling_Comm;
+    System* sys;
+    Evolution* evol;
 
 };
 

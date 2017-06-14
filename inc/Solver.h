@@ -54,8 +54,8 @@ class Solver
     int runCode(int, System*);
     int spawnCode(int, System*);
     int readOutputFromCode(int, System*);
-    int sendDataToCode(int);
-    int receiveDataFromCode(int);
+    int sendDataToCode(int, System*, Communicator*);
+    int receiveDataFromCode(int, System*, Communicator*);
     void jacobianConstruction(System*, Communicator*);
     void broydenUpdate(System*, int);
     void updateJacobian(System*, Communicator*, int, int);
@@ -63,6 +63,7 @@ class Solver
     void x2gamma2delta(System*);
   
 		int error;
+    int order;
     double residual;    
     int iter;
     int iCode;

@@ -103,9 +103,10 @@ output: string
 */
 string int2str (int a)
 {
-    ostringstream temp;
-    temp<<a;
-    return temp.str();
+  char str[10];
+  sprintf(str, "%d", a);
+  string myStr(str);
+  return myStr;  
 }
 
 /* dou2str

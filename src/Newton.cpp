@@ -37,7 +37,7 @@ Newton::Newton()
 	NewtonSystem = new System();
 	NewtonEvolution = new Evolution();
 	NewtonSolver = new Solver();
-	NewtonComm = new Communicator();
+	NewtonComm = new Communicator(NewtonSystem, NewtonEvolution);
 }
 
 /* Newton::initialize
@@ -77,7 +77,7 @@ void Newton::initialize()
 	
 	NewtonSystem->construct();
 
-	NewtonComm->initialize(NewtonSystem);	
+	NewtonComm->initialize();	
 }
 
 /* Newton::run
@@ -115,7 +115,7 @@ output: -
 
 */
 void Newton::finish()
-{  
+{ 
 	NewtonComm->disconnect();
   PetscFinalize();
 	MPI_Finalize();
