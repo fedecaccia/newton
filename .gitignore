@@ -12,10 +12,12 @@ relap.*
 *.CRM
 *.fer
 *.bathe
-*step*.dat
+*step*
 *.info
 *.i
 *.o
 *.r
 log
 *.out
+*.log
+*ompiuri
