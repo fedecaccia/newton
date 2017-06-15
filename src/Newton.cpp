@@ -73,7 +73,7 @@ void Newton::initialize()
   
 	// Objects initialization
 
-	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver);
+	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver, NewtonSolver->NewtonClient);
 	
 	NewtonSystem->construct();
 

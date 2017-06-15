@@ -37,7 +37,7 @@ output: error: NEWTON_ERROR or NEWTON_SUCCESS
 int Client::prepareUserClientInput(string codeName, int nValues, double* values, string input, string inputModel)
 { 
   // Input file
-  ofstream inputFile;
+  inputFile.open(input.c_str());
   inputFile.precision(numeric_limits<double>::digits10 + 1);
   
   inputFile.open(input.c_str());
@@ -70,9 +70,7 @@ output: error: NEWTON_ERROR or NEWTON_SUCCESS
 */
 int Client::readUserClientOutput(string codeName, int nValues, double* values, string output)
 { 
-  // Output file
-  ifstream outputFile;
-  
+  // Output file  
   outputFile.open(output.c_str());
 	if (outputFile.is_open()){
 		for(int i=0; i<nValues; i++){

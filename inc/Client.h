@@ -33,8 +33,49 @@ class Client
 {
 	public:
 		Client();
+    void allocate1();
+    void allocate2();
     int prepareInput(int, std::string, int, double*, std::string, std::string);
     int readOutput(int, std::string, int, double*, std::string);
+    
+    int nFermi;
+    struct fermiStruct{
+      std::string name;
+      int nPhysicalEntities;
+      int nGroups;
+      int nXS;
+      struct physicalEntity{
+        string name;
+        double burnup;
+        double** xs;
+      };
+      physicalEntity* pe;
+    };
+    fermiStruct* fermi;
+    
+    int nRelap;
+    struct relapStruct{
+      std::string name;
+      int nAxialZones;
+      int nRadialPoints;
+      double t0;
+      double tf;
+      double t;
+      double maxDt;
+      string* hs;
+      string* pipe;
+      double* fpow;
+      double voidf;
+      double voidg;
+      double tempf;
+      double tempg;
+      double* tempRef;
+      double* rhomix;
+      double tempFuelC;
+      double tempFuelV;
+      double* tempDoppFuel;
+    };
+    relapStruct* relap;
 		
 	private:
   
@@ -50,7 +91,17 @@ class Client
     int prepareFermiXs2powInput(std::string, int, double*, std::string, std::string);
     int readFermiXs2powOutput(std::string, int, double*, std::string);
     
+    std::string takeNextWord();
+    std::string takeNextLine();
+    
 		int error;
+    string word;
+    string line;
+    ofstream inputFile;
+    ifstream inputModelFile;
+    ifstream outputFile;
+
+    int nValuesExpected;
 };
 
 #endif

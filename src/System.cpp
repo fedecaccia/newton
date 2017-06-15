@@ -332,7 +332,7 @@ int System::setFilesAndCommands(int step)
   
   for(int iCode=0; iCode<nCodes; iCode++){
     // Input file
-    code[iCode].inputModel = code[iCode].inputModelName+code[iCode].inputExt;
+    code[iCode].inputModel = code[iCode].inputModelName+"."+code[iCode].inputExt;
     code[iCode].actualInputName = code[iCode].inputModelName+"_step"+int2str(step);
     code[iCode].actualInput = code[iCode].actualInputName+"."+code[iCode].inputExt;
     // Ouput file
@@ -344,7 +344,7 @@ int System::setFilesAndCommands(int step)
       code[iCode].actualOutput = code[iCode].actualOutputName+"."+code[iCode].outputExt;
     }
     else{
-      code[iCode].actualOutputName = code[iCode].outputName+"_step"+int2str(step);
+      code[iCode].actualOutputName = code[iCode].outputName;
       code[iCode].actualOutput = code[iCode].actualOutputName+"."+code[iCode].outputExt;
     }
     // Restart file
@@ -353,10 +353,10 @@ int System::setFilesAndCommands(int step)
        code[iCode].restartName=="From_input" ||
        code[iCode].restartName==""){
       code[iCode].actualRestartName = code[iCode].actualInputName;
-      code[iCode].actualRestart = code[iCode].actualRestartName+code[iCode].restartExt;
+      code[iCode].actualRestart = code[iCode].actualRestartName+"."+code[iCode].restartExt;
     }
     else{
-      code[iCode].actualRestartName = code[iCode].restartName+"_step"+int2str(step);
+      code[iCode].actualRestartName = code[iCode].restartName;
       code[iCode].actualRestart = code[iCode].actualRestartName+"."+code[iCode].restartExt;
     }
     // Command to run
@@ -369,9 +369,9 @@ int System::setFilesAndCommands(int step)
         code[iCode].commandToRun +=" "+int2str(code[iCode].id);
       }
       // Actual input with extension
-      else if(code[iCode].arg[iArg]=="INPUT" || 
-              code[iCode].arg[iArg]=="input" ||
-              code[iCode].arg[iArg]=="Input"){
+      else if(code[iCode].arg[iArg]=="INPUT" || code[iCode].arg[iArg]=="INPUT_FILE" ||
+              code[iCode].arg[iArg]=="input" || code[iCode].arg[iArg]=="input_file" ||
+              code[iCode].arg[iArg]=="Input" || code[iCode].arg[iArg]=="Input_file" ){
         code[iCode].commandToRun +=" "+code[iCode].actualInput;
       }
       // Actual input without extension

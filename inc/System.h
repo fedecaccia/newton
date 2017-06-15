@@ -25,6 +25,7 @@ Date: 9 June 2017
 #include "MathLib.h"
 
 #include <string>
+#include <algorithm>
 #include <math.h>
 
 class System
@@ -104,7 +105,7 @@ class System
     client* code;    
 		
 	private:
-		int error;    
+		int error;
     MathLib* math;
     Mapper* NewtonMap;
 

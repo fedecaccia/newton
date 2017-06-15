@@ -39,6 +39,7 @@ class Solver
     void calculateNewGuess(System*, Communicator*, int, int);
     void calculateResiduals(System*, Communicator*);
     
+    Client* NewtonClient;    
     double* x;
     double nltol;
     int maxIter;
@@ -86,9 +87,6 @@ class Solver
     PetscScalar valueToAssembly;
     
     int codeConnected;
-    
-    
-    Client* NewtonClient;
 };
 
 #endif

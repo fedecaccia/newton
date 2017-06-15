@@ -1,0 +1,42 @@
+$Mesh 
+    mesh_file   fuel_5.msh
+#    parfile_n   cube_vol.metismesh.npart.4
+#    parfile_e   cube_vol.metismesh.epart.4
+$EndMesh 
+
+$Mode
+  timedep QSTATIC 
+  p0 2.5e6  
+  t0 0.0
+  tf 0.05
+  dt 0.05
+$EndMode
+
+$Xs
+  egn 1
+#            F D   XA  nXF  eXF CHI
+  "fuel_z1"  0 1.5 0.2 0.5 0.4 1.0
+  "fuel_z2"  0 1.5 0.198 0.5 0.4 1.0
+  "fuel_z3"  0 1.5 0.197 0.5 0.4 1.0
+  "fuel_z4"  0 1.5 0.197 0.5 0.4 1.0
+  "fuel_z5"  0 1.5 0.196 0.5 0.4 1.0
+  "fluid_z1" 0 1.5 0.005 0.0  0.0 1.0
+  "fluid_z2" 0 1.5 0.005 0.0  0.0 1.0
+  "fluid_z3" 0 1.5 0.005 0.0  0.0 1.0
+  "fluid_z4" 0 1.5 0.004 0.0  0.0 1.0
+  "fluid_z5" 0 1.5 0.003 0.0  0.0 1.0
+$EndXs
+
+$Boundary
+  "bottom"    1 0
+  "top"       2 0
+  "lateral"   3 0
+$EndBoundary
+
+$Output
+  # Power in physical entities
+  kind 2
+  file "pow_phys.dat"
+  nphy 5
+  "fuel_z1" "fuel_z2" "fuel_z3" "fuel_z4" "fuel_z5"
+$EndOutput

@@ -54,7 +54,7 @@ output: error
 */
 int Mapper::map(int iCode, string map, int nXToMap, double* XToMap, int nMapped, double* mapped)
 {
-  if(map == ""){
+  if(map == "" || map=="none"){
     if(nXToMap!=nMapped){
       error = NEWTON_ERROR;
       cout<<"Number of values to map are differtent to number of values mapped in code: "<<iCode<<" - Mapper::map"<<endl;

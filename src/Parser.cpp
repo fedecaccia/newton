@@ -86,12 +86,12 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="N_STEPS"){
       return true;
     }
-    if(word=="GUESSES"){
-      return true;
-    }
-    if(word=="CALCS"){
-      return true;
-    }
+    //~ if(word=="GUESSES"){
+      //~ return true;
+    //~ }
+    //~ if(word=="CALCS"){
+      //~ return true;
+    //~ }
     if(word=="X_INI"){
       return true;
     }
@@ -146,6 +146,39 @@ bool Parser::wordIsCard(string word, string parent)
       return true;
     }
     if(word=="ID"){
+      return true;
+    }
+    if(word=="N_PHYSICAL_ENTITIES"){
+      return true;
+    }
+    if(word=="N_XS"){
+      return true;
+    }
+    if(word=="N_GROUPS"){
+      return true;
+    }
+    if(word=="PHYSICAL_ENTITIES"){
+      return true;
+    }
+    if(word=="T_0"){
+      return true;
+    }
+    if(word=="T_F"){
+      return true;
+    }
+    if(word=="MAX_DT"){
+      return true;
+    }
+    if(word=="HS_ZONES"){
+      return true;
+    }
+    if(word=="PIPE_ZONES"){
+      return true;
+    }
+    if(word=="N_RADIAL_POINTS"){
+      return true;
+    }
+    if(word=="N_AXIAL_ZONES"){
       return true;
     }
   }
@@ -300,11 +333,12 @@ string Parser::loadCalcsAndTakeWord(System* sys)
     }while(!wordIsForbidden(word));
   
   // Reading other properties of calcs
-  
+
   while(wordIsCard(word, "CALCS")){
     if(word=="MAP"){
       word = takeNextWord();
       if(!wordIsForbidden(word)){
+        transform(word.begin(), word.end(), word.begin(), ::tolower);
         sys->code[clientReaded].alphaMap = word;
       }
       else{
@@ -373,11 +407,12 @@ string Parser::loadGuessesAndTakeWord(System* sys)
     if(word=="MAP"){
       word = takeNextWord();
       if(!wordIsForbidden(word)){
-        sys->code[clientReaded].alphaMap = word;
+        transform(word.begin(), word.end(), word.begin(), ::tolower);
+        sys->code[clientReaded].gammaMap = word;
       }
       else{
         error = NEWTON_ERROR;
-        checkError(error, "\""+word+"\" word is forbidden to use as mapper - Parser::loadCalcsAndTakeWord");
+        checkError(error, "\""+word+"\" word is forbidden to use as mapper - Parser::loadGuessesAndTakeWord");
       }
       word = takeNextWord();
     }
@@ -446,8 +481,7 @@ string Parser::loadClientAndTakeWord(System* sys)
       }
       word = takeNextWord();
     }
-      
-    
+          
     else if(word=="CALCS"){
       word = loadCalcsAndTakeWord(sys);
     }
@@ -506,8 +540,10 @@ string Parser::loadClientAndTakeWord(System* sys)
     
     else if(word=="BIN_COMMAND"){
       word = takeNextWord();
-      sys->code[clientReaded].binCommand = word;
-      word = takeNextWord();
+      while(!wordIsForbidden(word)){
+        sys->code[clientReaded].binCommand += word+" ";
+        word = takeNextWord();
+      }
     }
     
     else if(word=="CONNECTION"){
@@ -549,6 +585,13 @@ string Parser::loadClientAndTakeWord(System* sys)
       stringstream(word) >> sys->code[clientReaded].nProcs;
       word = takeNextWord();
     }
+    
+    else if(wordIsCard(word, "CLIENT")){
+      word = takeNextWord();
+      while(!wordIsForbidden(word)){
+        word = takeNextWord();
+      }
+    }
 
     else{
       word = takeNextWord();
@@ -560,7 +603,7 @@ string Parser::loadClientAndTakeWord(System* sys)
 
   /*if(!wordIsForbidden(word)){
     error = NEWTON_ERROR;
-    checkError(error, "Unknown input word: \""+word+"\" - Parser::parseInput");
+    checkError(error, "Unknown input word: \""+word+"\" - Parser::loadClientAndTakeWord");
   }*/
 
   // Bad position of guesses and calcs properties
@@ -612,22 +655,22 @@ void Parser::checkClientProperties(System* sys, int client)
   }
 
   // Variables
-    if(sys->code[client].nAlpha==0){
-      error = NEWTON_ERROR;
-      checkError(error, "CALCS_PRE_MAP unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
-    }
-    if(sys->code[client].nBeta==0){
-      error = NEWTON_ERROR;
-      checkError(error, "CALCS unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
-    }
-    if(sys->code[client].nGamma==0){
-      error = NEWTON_ERROR;
-      checkError(error, "GUESSES unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
-    }
-    if(sys->code[client].nDelta==0){
-      error = NEWTON_ERROR;
-      checkError(error, "GUESSES_MAPPED unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
-    }
+  if(sys->code[client].nAlpha==0){
+    error = NEWTON_ERROR;
+    checkError(error, "CALCS_PRE_MAP unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
+  }
+  if(sys->code[client].nBeta==0){
+    error = NEWTON_ERROR;
+    checkError(error, "CALCS unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
+  }
+  if(sys->code[client].nGamma==0){
+    error = NEWTON_ERROR;
+    checkError(error, "GUESSES unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
+  }
+  if(sys->code[client].nDelta==0){
+    error = NEWTON_ERROR;
+    checkError(error, "GUESSES_MAPPED unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");
+  }
 
 }
 
@@ -639,7 +682,7 @@ input: System pointer
 output: -
 
 */
-void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
+void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* client)
 {
   rootPrints("Parsing configuration file...");
 
@@ -782,10 +825,10 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
       }*/
 
       // Unknown or empty word
-
       else{
         word = takeNextWord();
       }
+      
     }
   }
   else{
@@ -937,6 +980,8 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
           word = takeNextWord();
         }
         word = takeNextWord();
+        
+        checkConsistencyInPhases(sys);
       }      
       
       // Read variables
@@ -1111,6 +1156,261 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol)
   //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
     //~ cout<<sys->xName[iUnk]<<": "<<sol->x[iUnk]<<endl;
   //~ }
+     
+  // Count amount of each code type
+  
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+    if(sys->code[iCode].type==FERMI_XS2POW){
+      client->nFermi++;
+    }
+    else if(sys->code[iCode].type==RELAP_POW2TH){
+      client->nRelap++;
+    }
+  }
+  // Allocate things in clients
+  client->allocate1();
+  
+  // Initialize counters
+  clientReaded = 0;
+  fermiReaded = 0;
+  relapReaded = 0;
+  
+  // Set client names
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+    if(sys->code[iCode].type==FERMI_XS2POW){
+      client->fermi[fermiReaded].name = sys->code[iCode].name;
+      fermiReaded++;
+    }
+    else if(sys->code[iCode].type==RELAP_POW2TH){
+      client->relap[relapReaded].name = sys->code[iCode].name;
+      relapReaded++;
+    }
+  }
+  
+  // Initialize counters  
+  clientReaded = 0;
+  fermiReaded = 0;
+  relapReaded = 0;
+  
+  // CODE SPECIFIC READINGS
+  
+  // Sixth input file opening  
+
+  configFile.open("newton.config");
+  if (configFile.is_open()){
+    while(!configFile.eof()){
+      //cout<<word<<endl;
+      // Load FERMI amount of things
+      if(word=="CLIENT"){
+        
+        // FERMI_XS2POW
+        if(sys->code[clientReaded].type==FERMI_XS2POW){
+          word = takeNextWord();
+          while((!wordIsCard(word, "INPUT") || (wordIsCard(word, "INPUT") && wordIsCard(word, "CLIENT"))) && !configFile.eof()){
+            if(word=="N_PHYSICAL_ENTITIES"){
+              word = takeNextWord();
+              stringstream(word) >> client->fermi[fermiReaded].nPhysicalEntities;
+            }
+            else if(word=="N_GROUPS"){
+              word = takeNextWord();
+              stringstream(word) >> client->fermi[fermiReaded].nGroups;
+            }
+            else if(word=="N_XS"){
+              word = takeNextWord();
+              stringstream(word) >> client->fermi[fermiReaded].nXS;
+            }           
+            word = takeNextWord();
+          }
+
+          fermiReaded++;
+        }
+        
+        // RELAP_POW2TH
+        else if(sys->code[clientReaded].type==RELAP_POW2TH){
+          word = takeNextWord();
+
+          while((!wordIsCard(word, "INPUT") || (wordIsCard(word, "INPUT") && wordIsCard(word, "CLIENT"))) && !configFile.eof()){
+            
+            if(word=="T_0"){
+              word = takeNextWord();
+              stringstream(word) >> client->relap[relapReaded].t0;
+            }
+            else if(word=="T_F"){
+              word = takeNextWord();
+              stringstream(word) >> client->relap[relapReaded].tf;
+            }
+            else if(word=="MAX_DT"){
+              word = takeNextWord();
+              stringstream(word) >> client->relap[relapReaded].maxDt;
+            }
+            else if(word=="N_AXIAL_ZONES"){
+              word = takeNextWord();
+              stringstream(word) >> client->relap[relapReaded].nAxialZones;
+            }
+            else if(word=="N_RADIAL_POINTS"){
+              word = takeNextWord();
+              stringstream(word) >> client->relap[relapReaded].nRadialPoints;
+            }
+            word = takeNextWord();
+            //cout<<word<<endl;
+          }
+          relapReaded++;
+        }
+        else{
+          word = takeNextWord();
+        }
+        clientReaded++;
+      }
+      // Unknown or empty word
+
+      else{        
+        word = takeNextWord();
+      }
+    
+    } // Finish while(!EOF)
+
+  } 
+  else{
+      error = NEWTON_ERROR;
+      checkError(error,"Error opening \"newton.config\"");
+  }
+  configFile.close();
+  
+  // Allocate things in clients
+  client->allocate2();
+
+  // Initialize counters
+  clientReaded = 0;
+  fermiReaded = 0;
+  relapReaded = 0;
+  
+  // CODE SPECIFIC READINGS
+
+  // Sixth input file opening  
+
+  configFile.open("newton.config");
+  if (configFile.is_open()){
+    while(!configFile.eof()){
+
+      // Load FERMI amount of things
+      if(word=="CLIENT"){
+        
+        if(sys->code[clientReaded].type==FERMI_XS2POW){
+          word = takeNextWord();
+          while((!wordIsCard(word, "INPUT") || (wordIsCard(word, "INPUT") && wordIsCard(word, "CLIENT"))) && !configFile.eof()){
+            
+            if(word=="PHYSICAL_ENTITIES"){
+              for(int ipe=0; ipe<client->fermi[fermiReaded].nPhysicalEntities; ipe++){
+                word = takeNextWord();
+                client->fermi[fermiReaded].pe[ipe].name = word;
+               }
+            }
+            word = takeNextWord();
+            
+          }
+          fermiReaded++;
+        }        
+        else if(sys->code[clientReaded].type==RELAP_POW2TH){
+          word = takeNextWord();
+         while((!wordIsCard(word, "INPUT") || (wordIsCard(word, "INPUT") && wordIsCard(word, "CLIENT"))) && !configFile.eof()){
+
+            if(word=="HS_ZONES"){
+              for(int ihs=0; ihs<client->relap[relapReaded].nAxialZones; ihs++){
+                word = takeNextWord();
+                client->relap[relapReaded].hs[ihs] = word;
+               }
+            }
+            if(word=="PIPE_ZONES"){
+              for(int ip=0; ip<client->relap[relapReaded].nAxialZones; ip++){
+                word = takeNextWord();
+                client->relap[relapReaded].pipe[ip] = word;
+               }
+            }
+            word = takeNextWord();
+            
+          }
+          relapReaded++;
+        }
+        else{
+          word = takeNextWord();     
+        }
+        clientReaded++;
+      }
+      // Unknown or empty word
+
+      else{        
+        word = takeNextWord();
+      }
+    
+    } // Finish while(!EOF)
+
+  } 
+  else{
+      error = NEWTON_ERROR;
+      checkError(error,"Error opening \"newton.config\"");
+  }
+  configFile.close();
+  
+  // Initialize counters  
+  fermiReaded = 0;
+  relapReaded = 0;
+  
+  //~ // TEST
+  //~ for(int iCode=0; iCode<sys->nCodes; iCode++){
+    //~ if(sys->code[iCode].type==FERMI_XS2POW){
+      //~ cout<<client->fermi[fermiReaded].name<<endl;
+      //~ cout<<"n physical entities: "<<client->fermi[fermiReaded].nPhysicalEntities<<endl;
+      //~ cout<<"n energy groups: "<<client->fermi[fermiReaded].nGroups<<endl;
+      //~ cout<<"n XS: "<<client->fermi[fermiReaded].nXS<<endl;
+      //~ for(int ipe=0; ipe<client->fermi[fermiReaded].nPhysicalEntities; ipe++){
+        //~ cout<<" - pe: "<<client->fermi[fermiReaded].pe[ipe].name<<endl;
+      //~ }     
+      //~ fermiReaded++;
+    //~ }
+    //~ else if(sys->code[iCode].type==RELAP_POW2TH){
+      //~ cout<<client->relap[relapReaded].name<<endl;
+      //~ cout<<"t0: "<<client->relap[relapReaded].t0<<endl;
+      //~ cout<<"tf: "<<client->relap[relapReaded].tf<<endl;
+      //~ cout<<"max dt: "<<client->relap[relapReaded].maxDt<<endl;
+      //~ cout<<"n radial points: "<<client->relap[relapReaded].nRadialPoints<<endl;
+      //~ cout<<"n axial zones: "<<client->relap[relapReaded].nAxialZones<<endl;
+      //~ for(int iZone=0; iZone<client->relap[relapReaded].nAxialZones; iZone++){
+        //~ cout<<" - hs: "<<client->relap[relapReaded].hs[iZone]<<" pipe: "<<client->relap[relapReaded].pipe[iZone]<<endl;
+      //~ }
+      //~ relapReaded++;
+    //~ }
+  //~ }
+  //~ exit(1);
+  
+}
+
+/* Parser::checkConsistencyInPhases
+
+Checks if there are not repeated clients between phases.
+
+input: System pointer
+output: -
+
+*/
+void Parser::checkConsistencyInPhases(System* sys)
+{
+  string iClient, jClient;
+  for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+    for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
+      iClient = sys->codeToConnectInPhase[iPhase][iCode];
+      for(int jPhase=0; jPhase<sys->nPhasesPerIter; jPhase++){
+        for(int jCode=0; jCode<sys->nCodesInPhase[jPhase]; jCode++){
+          jClient = sys->codeToConnectInPhase[jPhase][jCode];
+          if(! (iPhase==jPhase && iCode==jCode)){
+            if(iClient==jClient){
+              error = NEWTON_ERROR;
+              checkError(error, "Bad formulation. Check card PHASES - Parser::checkConsistencyInPhases");
+            }
+          }
+        }
+      }
+    }    
+  }
   
 }
 
