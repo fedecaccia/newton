@@ -8,9 +8,227 @@ Parsing configuration file...
 Building system...
 Checking for mappers...
 Checking communication with clients...
-******aa
-[0]PETSC ERROR: ------------------------------------------------------------------------
-[0]PETSC ERROR: Caught signal number 11 SEGV: Segmentation Violation, probably memory access out of range
+Publishing service:Newton-0
+Publishing service:Newton-1
+Connection with code iD: 0 accepted.
+Connection with code iD: 1 accepted.
+Sending orders to code: 0...
+Sended.
+Sending orders to code: 1...
+Sended.
+Solving step: 1
+Sending data to code: 0...
+Sending data to code: 0...
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 1...
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 1...
+ d:0
+ d:0
+Sended.
+ d:0
+Sended.
+Sending data to code: 1...
+ d:0
+ d:0
+ d:0
+Sended.
+Sending data to code: 1...
+ d:0
+ d:0
+ d:0
+Sended.
+ d:0
+ d:0
+ d:0
+Sended.
+Received.
+ a:0
+ a:0
+ a:0
+ d:0
+ d:0
+Sended.
+Receiving data from code: 0...
+Received.
+ a:0
+ a:0
+ a:0
+Received.
+ a:0
+ a:0
+ a:0
+Received.
+ a:-5.72729
+ a:-5.27272
+ a:11.0909
+Receiving data from code: 1...
+Received.
+ a:2.85714
+Received.
+ a:0
+Received.
+ a:0
+Received.
+ a:0
+ First guess: 			 Residual: 13.8483
+Sending orders to code: 0...
+Sended.
+Sending orders to code: 1...
+Sended.
+  Calculating Jacobian by finite difference...
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 0...
+ d:0
+Sending data to code: 1...
+ d:0.1
+Sending data to code: 1...
+ d:0.1
+ d:0
+Sended.
+Sending data to code: 1...
+Sending data to code: 1...
+ d:0.1
+ d:0
+ d:0
+ d:0
+ d:0
+Sended.
+ d:0
+Sended.
+ d:0.1
+ d:0
+ d:0
+Sended.
+Sended.
+Received.
+ a:0
+ a:0
+ a:0
+Received.
+ a:0
+ a:0
+ a:0
+Received.
+ a:0
+ a:0
+ a:0
+Receiving data from code: 0...
+Received.
+ a:-5.72729
+ a:-5.27272
+ a:11.0909
+Receiving data from code: 1...
+Received.
+ a:0
+Received.
+ a:0
+Received.
+ a:0
+Received.
+ a:2.71429
+Sending orders to code: 0...
+Sended.
+Sending orders to code: 1...
+Sended.
+Sending data to code: 0...
+ d:0
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 1...
+ d:0
+ d:0.1
+Sended.
+Sending data to code: 1...
+ d:0
+ d:0.1
+Sending data to code: 1...
+ d:0
+ d:0.1
+ d:0
+Sended.
+ d:0
+Sended.
+Sending data to code: 1...
+ d:0
+ d:0.1
+ d:0
+ d:0
+Sended.
+Received.
+ a:0
+Sended.
+Receiving data from code: 0...
+Received.
+ a:0
+ a:0
+ a:0
+Received.
+ a:0
+ a:0
+ a:0
+ a:0
+ a:0
+Received.
+ a:-5.72729
+ a:-5.27272
+ a:11.0909
+Received.
+ a:0
+Received.
+ a:0
+Received.
+ a:0
+Receiving data from code: 1...
+Received.
+ a:2.72857
+Sending orders to code: 0...
+Sended.
+Sending orders to code: 1...
+Sended.
+Sending data to code: 0...
+ d:0
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 0...
+ d:0
+Sended.
+Sending data to code: 1...
+ d:0
+ d:0
+ d:0.1
+Sended.
+Sending data to code: 1...
+ d:0
+ d:0
+ d:0.1
+Sended.
+Sended.
+Sen[[0]PETSC ERROR: ------------------------------------------------------------------------
+[0]PETSC ERROR: Caught signal number 15 Terminate: Some process (or the batch system) has told this process to end
 [0]PETSC ERROR: Try option -start_in_debugger or -on_error_attach_debugger
 [0]PETSC ERROR: or see http://www.mcs.anl.gov/petsc/documentation/faq.html#valgrind
 [0]PETSC ERROR: or try http://valgrind.org on GNU/linux and Apple Mac OS X to find memory corruption errors
@@ -20,6 +238,44 @@ Checking communication with clients...
 [0]PETSC ERROR: Signal received
 [0]PETSC ERROR: See http://www.mcs.anl.gov/petsc/documentation/faq.html for trouble shooting.
 [0]PETSC ERROR: Petsc Release Version 3.6.1, Jul, 22, 2015 
-[0]PETSC ERROR: Unknown Name on a d8-opt named mecom22 by cacciaf Tue Jun 13 20:34:49 2017
+[0]PETSC ERROR: Unknown Name on a d8-opt named mecom22 by cacciaf Wed Jun 14 21:06:23 2017
 [0]PETSC ERROR: Configure options --prefix=/usr/local/petsc-201508-d8-opt --with-petsc-arch=d8-opt --with-make-np=4 --with-debugging=0 --with-pastix=1 --download-pastix=yes --with-ptscotch=1 --download-ptscotch=yes --with-metis=1 --download-metis=yes --with-parmetis=1 --download-parmetis=yes --with-hypre=1 --download-hypre=yes --with-scalapack=1 --download-scalapack=yes --with-spai=1 --download-spai=yes --with-superlu=1 --download-superlu=yes --with-mumps=1 --download-mumps=yes --with-ml=1 --download-ml=yes --with-superlu_dist=1 --download-superlu_dist=yes --doCleanup=0
 [0]PETSC ERROR: #1 User provided function() line 0 in  unknown file
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD 
+with errorcode 59.
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code.. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+--------------------------------------------------------------------------
+mpiexec detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[13785,1],0]
+  Exit code:    59
+--------------------------------------------------------------------------
+Received.
+ a:0
+Received.
+ a:0
+ Non linear iteration: 2	 Residual: 5.97873e-16
+ Total iterations in step: 2 - Total funtion evaluations: 7
+ Total time step: 0.099787 seconds
+Total function evaluations: 7
+Total time: 0.0998 seconds
+Calculation finished successfully.
+Sending orders to code: 0...
+Sended.
+Sending orders to code: 1...
+Sended.
+Communication with code id: 0 closed
+Communication with code id: 1 closed
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+

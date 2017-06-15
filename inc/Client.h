@@ -33,16 +33,22 @@ class Client
 {
 	public:
 		Client();
-    int prepareInput(int, std::string, int, double*, std::string);
+    int prepareInput(int, std::string, int, double*, std::string, std::string);
     int readOutput(int, std::string, int, double*, std::string);
 		
 	private:
   
-    int prepareTestClientInput(std::string, int, double*, std::string);
+    int prepareTestClientInput(std::string, int, double*, std::string, std::string);
     int readTestClientOutput(std::string, int, double*, std::string);
     
-    int prepareUserClientInput(std::string, int, double*, std::string);
+    int prepareUserClientInput(std::string, int, double*, std::string, std::string);
     int readUserClientOutput(std::string, int, double*, std::string);
+    
+    int prepareRelapPow2thInput(std::string, int, double*, std::string, std::string);
+    int readRelapPow2thOutput(std::string, int, double*, std::string);
+    
+    int prepareFermiXs2powInput(std::string, int, double*, std::string, std::string);
+    int readFermiXs2powOutput(std::string, int, double*, std::string);
     
 		int error;
 };

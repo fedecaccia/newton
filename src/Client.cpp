@@ -40,16 +40,24 @@ array of values to send, string of the input to write in the actual step
 output: error
 
 */
-int Client::prepareInput(int type, string name, int nDelta, double* delta, string actualInput)
+int Client::prepareInput(int type, string name, int nDelta, double* delta, string actualInput, string inputModel)
 { 
   switch (type){
     
     case TEST:
-      error = prepareTestClientInput(name, nDelta, delta, actualInput);
+      error = prepareTestClientInput(name, nDelta, delta, actualInput, inputModel);
       break;
     
     case USER_CODE:
-      error = prepareUserClientInput(name, nDelta, delta, actualInput);
+      error = prepareUserClientInput(name, nDelta, delta, actualInput, inputModel);
+      break;
+      
+    case RELAP_POW2TH:
+      error = prepareRelapPow2thInput(name, nDelta, delta, actualInput, inputModel);
+      break;
+      
+    case FERMI_XS2POW:
+      error = prepareFermiXs2powInput(name, nDelta, delta, actualInput, inputModel);
       break;
       
     default:
@@ -81,6 +89,14 @@ int Client::readOutput(int type, string name, int nAlpha, double* alpha, string 
     
     case USER_CODE:
       error = readUserClientOutput(name, nAlpha , alpha, actualOutput);
+      break;
+    
+    case RELAP_POW2TH:
+      error = readRelapPow2thOutput(name, nAlpha , alpha, actualOutput);
+      break;
+    
+    case FERMI_XS2POW:
+      error = readFermiXs2powOutput(name, nAlpha , alpha, actualOutput);
       break;
       
     default:

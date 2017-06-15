@@ -13,7 +13,7 @@ In this class user can programm specific routines to read output and write
 inputs for a particular client code.
 
 Author: Federico A. Caccia
-Date: 7 June 2017
+Date: 14 June 2017
 
 \*****************************************************************************/
 
@@ -21,7 +21,7 @@ Date: 7 June 2017
 
 using namespace::std;
 
-/* Client::prepareUserClientInput
+/* Client::prepareRelapPow2thInput
  
 In this function user can programm all necessary to write an input
 for an specific client code.
@@ -34,13 +34,14 @@ and inputs file string (to write, and to read as model)
 output: error: NEWTON_ERROR or NEWTON_SUCCESS
 
 */
-int Client::prepareUserClientInput(string codeName, int nValues, double* values, string input, string inputModel)
+int Client::prepareRelapPow2thInput(string codeName, int nValues, double* values, string input, string inputModel)
 { 
   // Input file
   ofstream inputFile;
-  inputFile.precision(numeric_limits<double>::digits10 + 1);
   
   inputFile.open(input.c_str());
+  inputFile.precision(numeric_limits<double>::digits10 + 1);
+  
 	if (inputFile.is_open()){
 		for(int i=0; i<nValues; i++){
       inputFile << values[i]<<endl;
@@ -55,7 +56,7 @@ int Client::prepareUserClientInput(string codeName, int nValues, double* values,
  return error; 
 }
 
-/* Client::readUserClientOutput
+/* Client::readRelapPow2thOutput
  
 In this function user can programm all necessary to read an output
 for an specific client code.
@@ -68,7 +69,7 @@ and output file string
 output: error: NEWTON_ERROR or NEWTON_SUCCESS
 
 */
-int Client::readUserClientOutput(string codeName, int nValues, double* values, string output)
+int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, string output)
 { 
   // Output file
   ifstream outputFile;

@@ -212,14 +212,10 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
   while(residual > nltol && iter < maxIter){
     
-    // Send NEWTON_RESTART order to clients connected by MPI
-    order = NEWTON_RESTART;
-    for(int iCode=0; iCode<sys->nCodes; iCode++){
-      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
-        comm->sendOrder(iCode, order);
-      }
-    }
-    
+    // Send NEWTON_RESTART order to clients connected
+    order = NEWTON_RESTART;    
+    comm->sendOrder(order);
+        
     calculateNewGuess(sys, comm, step, iter);
     calculateResiduals(sys, comm);
     iter++;
@@ -230,18 +226,9 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   
   // Bad ending
   if(residual>nltol){
-    //comm->disconnect();
     error = NEWTON_ERROR;
     checkError(error, "Maximum non linear iterations reached - Solver-iterateUntilConverge");      
   }
-  
-  // Send NEWTON_CONTINUE order to clients connected by MPI
-  order = NEWTON_CONTINUE;
-  for(int iCode=0; iCode<sys->nCodes; iCode++){
-    if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
-      comm->sendOrder(iCode, order);
-    }
-  }  
 }
 
   
@@ -284,12 +271,10 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
     for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){      
       codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
       
-      if(sys->code[codeConnected].connection==NEWTON_MPI_COMMUNICATION){
-        if(irank==0){ // only root works
-          error = sendDataToCode(codeConnected, sys, comm);
-        }
+      if(sys->code[codeConnected].connection!=NEWTON_SPAWN){
+        error = sendDataToCode(codeConnected, sys, comm);
         // All processes check
-        checkError(irank, "Error sending data to code - Solver::calculateResiduals");
+        checkError(error, "Error sending data to code - Solver::calculateResiduals");
       }
     }
     // Run codes by script in this phase
@@ -334,12 +319,10 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
     for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
       codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
 
-      if(sys->code[codeConnected].connection==NEWTON_MPI_COMMUNICATION){
-        if(irank==0){ // only root works
-          error = receiveDataFromCode(codeConnected, sys, comm);
-        }
+      if(sys->code[codeConnected].connection!=NEWTON_SPAWN){
+        error = receiveDataFromCode(codeConnected, sys, comm);
         // All processes check
-        checkError(irank, "Error receiving data from code - Solver::calculateResiduals");
+        checkError(error, "Error receiving data from code - Solver::calculateResiduals");
       }
     }
     
@@ -630,11 +613,7 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm)
     
     // Send NEWTON_RESTART order to clients connected by MPI
     order = NEWTON_RESTART;
-    for(int iCode=0; iCode<sys->nCodes; iCode++){
-      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
-        comm->sendOrder(iCode, order);
-      }
-    }
+    comm->sendOrder(order);
   }
   
   rootPrints("  End Jacobian calculation");
@@ -752,7 +731,8 @@ int Solver::runCode(int iCode, System* sys)
                                      sys->code[iCode].name, 
                                      sys->code[iCode].nDelta, 
                                      sys->code[iCode].delta, 
-                                     sys->code[iCode].actualInput);
+                                     sys->code[iCode].actualInput,
+                                     sys->code[iCode].inputModel);
   if(error!=NEWTON_SUCCESS){
     cout<<"Error preparing input to code: "<<sys->code[iCode].name<<" - Solver::runCode"<<endl;
     return error;

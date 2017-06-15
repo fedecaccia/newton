@@ -287,7 +287,7 @@ void mpi_send(double* output, int n)
   tag = 0;
   cout<<"Sending values..."<<endl;
   error = MPI_Send (output, n, MPI_DOUBLE_PRECISION, 0, tag, Coupling_Comm);
-  cout<<"Value sendeds."<<endl;
+  cout<<"Values sent."<<endl;
 }
 
 void mpi_finish()

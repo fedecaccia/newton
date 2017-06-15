@@ -25,13 +25,16 @@ using namespace::std;
  
 In this function user can programm all necessary to write an input
 for an specific client code.
+Values in prepare(...)input are in the same order than the corresponding
+mapper has saved them. If there are not mapper, values are in the same order 
+that has been set in GUESSES in "newton.config".
 
 input: code name, amount of values to send, vector with values to send 
-and input file string
+and inputs file string (to write, and to read as model)
 output: error: NEWTON_ERROR or NEWTON_SUCCESS
 
 */
-int Client::prepareTestClientInput(string codeName, int nValues, double* values, string input)
+int Client::prepareTestClientInput(string codeName, int nValues, double* values, string input, string inputModel)
 { 
   // Input file
   ofstream inputFile;
@@ -57,6 +60,9 @@ int Client::prepareTestClientInput(string codeName, int nValues, double* values,
  
 In this function user can programm all necessary to read an output
 for an specific client code.
+Values in read(...)output has to be saved in the same order than the 
+corresponding mapper uses them. If there are not mapper, values has to be saved
+in the same order that has been set in CALCS in "newton.config".
 
 input: code name, amount of values to read, vector with values to read 
 and output file string

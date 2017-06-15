@@ -31,8 +31,8 @@ class Communicator
 		Communicator(System*, Evolution*);
 		void initialize();
 		void disconnect();
-    int firstCommunication(int);
-    int sendOrder(int, int);
+    int firstCommunication();
+    int sendOrder(int);
     int send(int, int, double*);
     int receive(int, int, double*);
 		

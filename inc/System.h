@@ -84,6 +84,7 @@ class System
       string gammaMap;
       
       string inputModelName;
+      string inputModel;
       string actualInputName;      
       string actualInput;
       string inputExt;

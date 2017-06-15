@@ -97,8 +97,10 @@ void Newton::run()
 		NewtonSolver->setFirstGuess(NewtonSystem, NewtonEvolution->step);
 		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm, NewtonEvolution->step);
 		NewtonEvolution->update(NewtonSystem);
-    rootPrints(" Total time step: "
-               +dou2str((clock()-click)/ CLOCKS_PER_SEC)+" seconds");
+    if(NewtonEvolution->status != NEWTON_COMPLETE){
+      NewtonComm->sendOrder(NEWTON_CONTINUE);
+    }
+    rootPrints(" Total time step: "+dou2str((clock()-click)/ CLOCKS_PER_SEC)+" seconds");
 	}
   rootPrints("Total function evaluations: "+int2str(NewtonSolver->nEval));
   rootPrints("Total time: "+dou2str((clock()-firstClick)/ CLOCKS_PER_SEC)+" seconds");

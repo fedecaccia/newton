@@ -79,6 +79,7 @@ void System::allocate1(int method)
       code[iCode].gammaMap = "";
       
       code[iCode].inputModelName = "";
+      code[iCode].inputModel = "";
       code[iCode].actualInputName = "";      
       code[iCode].actualInput = "";
       code[iCode].inputExt = "";
@@ -331,6 +332,7 @@ int System::setFilesAndCommands(int step)
   
   for(int iCode=0; iCode<nCodes; iCode++){
     // Input file
+    code[iCode].inputModel = code[iCode].inputModelName+code[iCode].inputExt;
     code[iCode].actualInputName = code[iCode].inputModelName+"_step"+int2str(step);
     code[iCode].actualInput = code[iCode].actualInputName+"."+code[iCode].inputExt;
     // Ouput file

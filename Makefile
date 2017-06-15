@@ -15,6 +15,8 @@ OBJELEM = $(OBJ_DIR)/Client.o						\
 		  $(OBJ_DIR)/System.o 							\
 		  $(OBJ_DIR)/Solver.o							  \
 		  $(OBJ_DIR)/testClient.o						\
+		  $(OBJ_DIR)/relapPow2th.o					\
+		  $(OBJ_DIR)/fermiXs2pow.o					\
 		  $(OBJ_DIR)/userClient.o
 EXE=$(BIN_DIR)/Newton
 MPICC=mpic++
