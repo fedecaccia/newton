@@ -208,6 +208,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="STAGE"){
       return true;
     }
+    if(word=="CLIENT"){
+      return true;
+    }
     if(word=="CALCS_PRE_MAP"){
       return true;
     }
@@ -1426,10 +1429,57 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   
   
   
+  // MAPPER SPECIFIC READINGS
+
+  // Seventh input file opening  
+
+  configFile.open("newton.config");
+  if (configFile.is_open()){
+    while(!configFile.eof()){
+
+      // Count things in mapper
+      if(word=="MAPPER"){
+        
+      }
+
+      else{        
+        word = takeNextWord();
+      }
+    
+    } // Finish while(!EOF)
+
+  } 
+  else{
+      error = NEWTON_ERROR;
+      checkError(error,"Error opening \"newton.config\"");
+  }
+  configFile.close();
   
   
   
-  
+  // Eighth input file opening  
+
+  configFile.open("newton.config");
+  if (configFile.is_open()){
+    while(!configFile.eof()){
+
+      // Count things in mapper
+      if(word=="MAPPER"){
+        
+      }
+
+      else{        
+        word = takeNextWord();
+      }
+    
+    } // Finish while(!EOF)
+
+  } 
+  else{
+      error = NEWTON_ERROR;
+      checkError(error,"Error opening \"newton.config\"");
+  }
+  configFile.close();
   
   
   
