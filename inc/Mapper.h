@@ -35,13 +35,14 @@ class Mapper
 		
 	private:
     Client* client;
-    int th2xs(int, double*, int, double*, int, int, int);
+    int th2xs(int, double*, int, double*, Client::fermiStruct*);
     int pow2fpow(int, double*, int, double*);
 		int error;
     MathLib* math;
     int nPhysicalEntities;
     int nXS;
     int nGroups;
+    double* burnup;
 };
 
 #endif

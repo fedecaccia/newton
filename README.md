@@ -38,6 +38,19 @@ make
 ```
 This test solves the same system of coupled equations but now communicating with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now Newton doesn't has to know nothing about file names and paths: communication is between codes while the are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.s
 
+## Main features
+
+* Explicit and implicit methods implemented to solve nonlinear residuals.
+PETSc functions implemented to solve linear systems in methods that build jacobian matrix of the system.
+
+* Efficient error handling.
+
+* Ready-to-use functions to read outputs & write inputs of clients that connect by I/O.
+
+* Ready-to-use mappers of variables received and sended to clients.
+
+* Sets of specific variables that need to be storage and updated along the evolution of systems.
+
 ## Running `Newton` on multiple processors
 
 `Newton` is designed to run in one or multiple processes.
@@ -57,8 +70,6 @@ Newton includes the possibility of using mapings between variables to adecuate t
 * Communication with [Fermi](https://github.com/GG1991/fermi) & RELAP by I/O both connected with different threads of `Newton` (now serial).
 
 * Implement efficient mappers to get cross-sections as function of termal-hydraulic and burnup variables.
-
-* Implement sets of specific variables that need to be storage and updated along the evolution of systems.
 
 * Implement communication using PPLEP.
 

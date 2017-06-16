@@ -229,6 +229,13 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
     error = NEWTON_ERROR;
     checkError(error, "Maximum non linear iterations reached - Solver-iterateUntilConverge");      
   }
+
+  //~ // TEST
+  //~ rootPrints("Step solution:");
+  //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    //~ rootPrints(dou2str(x[iUnk]));
+  //~ }
+  
 }
 
   
@@ -388,7 +395,7 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       //~ cout<<sys->code[iCode].delta[iDelta]<<endl;
     //~ }
   //~ }
-  
+  //~ 
   // TEST
   //~ cout<<"Beta"<<setw(20)<<"x"<<setw(20)<<"res"<<endl;
   //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
@@ -783,6 +790,21 @@ int Solver::spawnCode(int iCode, System* sys)
     const char** argv = new const char*[sys->code[iCode].nArgs+1];
     for(int iArg=0; iArg<sys->code[iCode].nArgs; iArg++){
       argv[iArg] = (sys->code[iCode].arg[iArg]).c_str();
+      if(sys->code[iCode].arg[iArg]=="code_id"){
+        argv[iArg] = (int2str(sys->code[iCode].id)).c_str();
+      }
+      else if(sys->code[iCode].arg[iArg]=="input" || sys->code[iCode].arg[iArg]=="input_file"){
+        argv[iArg] = (sys->code[iCode].actualInput).c_str();
+      }
+      else if(sys->code[iCode].arg[iArg]=="input_name"){
+        argv[iArg] = (sys->code[iCode].actualInputName).c_str();
+      }
+      else if(sys->code[iCode].arg[iArg]=="output"){
+        argv[iArg] = (sys->code[iCode].actualOutput).c_str();
+      }
+      else if(sys->code[iCode].arg[iArg]=="output_name"){
+        argv[iArg] = (sys->code[iCode].actualOutputName).c_str();
+      }
     }
     argv[sys->code[iCode].nArgs] = NULL;
     cout<<"Spawning..."<<endl;

@@ -44,9 +44,10 @@ input: -
 output: -
 
 */
-void Evolution::update(System* sys)
+void Evolution::update(System* sys, Client* client)
 {
 	step++;
+  client->updateVars(deltaStep);
 	if(step==nSteps){
 		status = NEWTON_COMPLETE;
 	}

@@ -363,39 +363,39 @@ int System::setFilesAndCommands(int step)
     code[iCode].commandToRun = code[iCode].binCommand;
     for(int iArg=0; iArg<code[iCode].nArgs; iArg++){
       // Code ID
-      if(code[iCode].arg[iArg]=="CODE_ID" || 
-         code[iCode].arg[iArg]=="code_id" ||
-         code[iCode].arg[iArg]=="Code_id"){        
+      if(code[iCode].arg[iArg]=="code_id" || 
+         code[iCode].arg[iArg]=="CODE_ID" ||
+         code[iCode].arg[iArg]=="Code_id"){
+        transform(code[iCode].arg[iArg].begin(), code[iCode].arg[iArg].end(), code[iCode].arg[iArg].begin(), ::tolower);
         code[iCode].commandToRun +=" "+int2str(code[iCode].id);
-        code[iCode].arg[iArg]=int2str(code[iCode].id);
       }
       // Actual input with extension
-      else if(code[iCode].arg[iArg]=="INPUT" || code[iCode].arg[iArg]=="INPUT_FILE" ||
-              code[iCode].arg[iArg]=="input" || code[iCode].arg[iArg]=="input_file" ||
-              code[iCode].arg[iArg]=="Input" || code[iCode].arg[iArg]=="Input_file" ){        
+      else if(code[iCode].arg[iArg]=="input" || code[iCode].arg[iArg]=="input_file" ||
+              code[iCode].arg[iArg]=="INPUT" || code[iCode].arg[iArg]=="INPUT_FILE" ||
+              code[iCode].arg[iArg]=="Input" || code[iCode].arg[iArg]=="Input_file" ){
+        transform(code[iCode].arg[iArg].begin(), code[iCode].arg[iArg].end(), code[iCode].arg[iArg].begin(), ::tolower);
         code[iCode].commandToRun +=" "+code[iCode].actualInput;
-        code[iCode].arg[iArg]=code[iCode].actualInput;
       }
       // Actual input without extension
-      else if(code[iCode].arg[iArg]=="INPUT_NAME" || 
-              code[iCode].arg[iArg]=="input_name" ||
-              code[iCode].arg[iArg]=="Input_name"){        
+      else if(code[iCode].arg[iArg]=="input_name" || 
+              code[iCode].arg[iArg]=="INPUT_NAME" ||
+              code[iCode].arg[iArg]=="Input_name"){
+        transform(code[iCode].arg[iArg].begin(), code[iCode].arg[iArg].end(), code[iCode].arg[iArg].begin(), ::tolower);
         code[iCode].commandToRun +=" "+code[iCode].actualInputName;
-        code[iCode].arg[iArg]=code[iCode].actualInputName;
       }
       // Actual output with extension
-      else if(code[iCode].arg[iArg]=="OUTPUT" || 
-              code[iCode].arg[iArg]=="ouput" ||
-              code[iCode].arg[iArg]=="Ouput"){        
+      else if(code[iCode].arg[iArg]=="output" || 
+              code[iCode].arg[iArg]=="OUTPUT" ||
+              code[iCode].arg[iArg]=="Output"){
+        transform(code[iCode].arg[iArg].begin(), code[iCode].arg[iArg].end(), code[iCode].arg[iArg].begin(), ::tolower);
         code[iCode].commandToRun +=" "+code[iCode].actualOutput;
-        code[iCode].arg[iArg]=code[iCode].actualOutput;
       }
       // Actual output without extension
-      else if(code[iCode].arg[iArg]=="OUTPUT_NAME" || 
-              code[iCode].arg[iArg]=="output_name" ||
-              code[iCode].arg[iArg]=="Output_name"){        
+      else if(code[iCode].arg[iArg]=="output_name" || 
+              code[iCode].arg[iArg]=="OUTPUT_NAME" ||
+              code[iCode].arg[iArg]=="Output_name"){
+        transform(code[iCode].arg[iArg].begin(), code[iCode].arg[iArg].end(), code[iCode].arg[iArg].begin(), ::tolower);
         code[iCode].commandToRun +=" "+code[iCode].actualOutputName;
-        code[iCode].arg[iArg]=code[iCode].actualOutputName;
       }
       // Else, just use the string readed as argument
       else{

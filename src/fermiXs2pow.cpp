@@ -54,7 +54,9 @@ int Client::prepareFermiXs2powInput(string codeName, int nValues, double* values
   nValuesExpected = fermi[iF].nXS*fermi[iF].nGroups*fermi[iF].nPhysicalEntities;
   if(nValues!=nValuesExpected){
     error=NEWTON_ERROR;
-    cout<<"The amount of values received: "+int2str(nValues)<<" is different from expected: "<<int2str(nValuesExpected)<<" - Client::prepareFermiXs2powInput";
+    cout<<"The amount of values received: "
+    <<int2str(nValues)<<" is different from expected: "
+    <<int2str(nValuesExpected)<<" - Client::prepareFermiXs2powInput"<<endl;
     return error;
   }
   
@@ -66,6 +68,13 @@ int Client::prepareFermiXs2powInput(string codeName, int nValues, double* values
         fermi[iF].pe[ipe].xs[ixs][ig] = values[ivalue];
         ivalue++;
       }
+    }
+  }
+  
+  // Save Energy multipled by fission rate in each physical entity - THIS DEPENDS ON XS FISSION POSITION
+  for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
+    for(int ig=0; ig<fermi[iF].nGroups; ig++){
+      fermi[iF].pe[ipe].EFissionRate[ig] = fermi[iF].pe[ipe].xs[2][ig]*fermi[iF].pe[ipe].xs[3][ig];
     }
   }
     
@@ -167,7 +176,13 @@ int Client::readFermiXs2powOutput(string codeName, int nValues, double* values, 
 		cout<<"Error reading output file from code: "<<codeName<<" - Client::readFermiXs2powOutput"<<endl;
     error = NEWTON_ERROR;
 	}
-  outputFile.close();  
+  outputFile.close(); 
+  
+  // TEST
+  cout<<"power"<<endl;
+  for(int i=0; i<nValues; i++){
+    cout<<values[i]<<endl;
+  }
  
- return error; 
+  return error; 
 }

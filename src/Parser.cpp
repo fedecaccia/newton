@@ -1205,7 +1205,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   relapReaded = 0;
   
   // CODE SPECIFIC READINGS
-  
+
   // Sixth input file opening  
 
   configFile.open("newton.config");

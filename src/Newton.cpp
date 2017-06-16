@@ -97,7 +97,7 @@ void Newton::run()
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
 		NewtonSolver->setFirstGuess(NewtonSystem, NewtonEvolution->step);
 		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm, NewtonEvolution->step);
-		NewtonEvolution->update(NewtonSystem);
+		NewtonEvolution->update(NewtonSystem, NewtonSolver->NewtonClient);
     if(NewtonEvolution->status != NEWTON_COMPLETE){
       NewtonComm->sendOrder(NEWTON_CONTINUE);
     }

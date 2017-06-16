@@ -80,7 +80,7 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
   }
 
   else if(map == "th2xs"){
-    // Look in fermi structures of Client aditional data to send to the mapper
+    // Look which is the number of Fermi clients of Client
     int iFermi=-1;
     for(int iF=0; iF<client->nFermi; iF++){
       if(client->fermi[iF].name==codeName){
@@ -93,14 +93,8 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
       cout<<"Code "<<codeName<<" has not fermi structures data to map with "<<map<<" - Mapper::map"<<endl;
       return error;
     }
-    nPhysicalEntities=client->fermi[iFermi].nPhysicalEntities;
-    nXS=client->fermi[iFermi].nXS;
-    nGroups=client->fermi[iFermi].nGroups;
-    //~ // TEST
-    //~ cout<<nPhysicalEntities<<" "<<nXS<<" "<<nGroups<<endl;
-    //~ exit(1);    
     
-    error = th2xs(nxToMap, xToMap, nMapped, mapped, nPhysicalEntities, nXS, nGroups);
+    error = th2xs(nxToMap, xToMap, nMapped, mapped, &(client->fermi[iFermi]));
   }
   
   else if(map == "pow2fpow"){

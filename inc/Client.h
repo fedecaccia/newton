@@ -34,6 +34,7 @@ class Client
 		Client();
     void allocate1();
     void allocate2();
+    void updateVars(double);
     int prepareInput(int, std::string, int, double*, std::string, std::string);
     int readOutput(int, std::string, int, double*, std::string);
     
@@ -47,6 +48,7 @@ class Client
         std::string name;
         double burnup;
         double** xs;
+        double* EFissionRate;
       };
       physicalEntity* pe;
     };

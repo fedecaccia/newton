@@ -21,13 +21,14 @@ Date: 4 June 2017
 #define EVOLUTION_H
 
 #include "global.h"
+#include "Client.h"
 #include "System.h"
 
 class Evolution
 {
 	public:
 		Evolution();
-		void update(System*);
+		void update(System*, Client*);
 
 		int status;
 		int step;

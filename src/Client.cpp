@@ -62,10 +62,18 @@ void Client::allocate2()
   for(int iF=0; iF<nFermi; iF++){
     fermi[iF].pe = new fermiStruct::physicalEntity[fermi[iF].nPhysicalEntities];
     for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
+      fermi[iF].pe[ipe].EFissionRate = new double[fermi[iF].nGroups];
       fermi[iF].pe[ipe].xs = new double*[fermi[iF].nXS];
       for(int iXS=0; iXS<fermi[iF].nXS; iXS++){
         fermi->pe[ipe].xs[iXS] = new double[fermi[iF].nGroups];
       }
+    }
+  }
+  
+  // Burnup initialize
+  for(int iF=0; iF<nFermi; iF++){
+    for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
+      fermi[iF].pe[ipe].burnup = 0;
     }
   }
   
@@ -208,4 +216,29 @@ string Client::takeNextLine()
   }
   
   return line;
+}
+
+
+/* Client::updateVars
+
+
+
+*/
+void Client::updateVars(double time)
+{
+  // Fermi updates
+  for(int iF=0; iF<nFermi; iF++){
+    for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
+      for(int ig=0; ig<fermi[iF].nGroups; ig++){
+        fermi[iF].pe[ipe].burnup += fermi[iF].pe[ipe].EFissionRate[ig]*24*60*60*time;
+      }
+    }
+  }
+  // TEST
+  cout<<"BURNUP values: "<<endl;
+  for(int iF=0; iF<nFermi; iF++){
+    for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
+      cout<<fermi[iF].pe[ipe].name<<" "<<fermi[iF].pe[ipe].burnup <<endl;
+    }
+  }
 }

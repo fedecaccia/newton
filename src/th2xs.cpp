@@ -26,24 +26,25 @@ using namespace::std;
 Map vector of thermal-hydraulic values into another of cross sections.
 
 input: code, number of elements to map, vector to map, 
-number of elements of image, image vector, & number of:
-zones, physical entities, XS, energy groups
+number of elements of image, image vector, & pointer to the current fermi 
+struct
 output: error
 
 */
-int Mapper::th2xs(int nXToMap, double* xToMap, int nMapped, double* mapped, int nPhysicalEntities, int nXS, int nGroups)
+int Mapper::th2xs(int nXToMap, double* xToMap, int nMapped, double* mapped, Client::fermiStruct* fermi)
 {
   // Check consistency
 
   // Organizing data
-  static double* tRef = new double [nPhysicalEntities];
-  static double* tFuel = new double [nPhysicalEntities];
-  static double* nRef = new double [nPhysicalEntities];
-  static double*** xs = new double** [nPhysicalEntities];
-  for(int ipe=0; ipe<nPhysicalEntities; ipe++){
-    xs[ipe] = new double*[nXS];
-    for(int ixs=0; ixs<nXS; ixs++){
-      xs[ipe][ixs] = new double[nGroups];
+  static double* tRef = new double [fermi->nPhysicalEntities];
+  static double* tFuel = new double [fermi->nPhysicalEntities];
+  static double* nRef = new double [fermi->nPhysicalEntities];
+  static double* burnup = new double [fermi->nPhysicalEntities];
+  static double*** xs = new double** [fermi->nPhysicalEntities];
+  for(int ipe=0; ipe<fermi->nPhysicalEntities; ipe++){
+    xs[ipe] = new double*[fermi->nXS];
+    for(int ixs=0; ixs<fermi->nXS; ixs++){
+      xs[ipe][ixs] = new double[fermi->nGroups];
     }
   }
   
@@ -53,11 +54,12 @@ int Mapper::th2xs(int nXToMap, double* xToMap, int nMapped, double* mapped, int 
    * ...*/
   
   int ivalue=0;
-  for (int ipe=0; ipe<nPhysicalEntities; ipe++){
+  for (int ipe=0; ipe<fermi->nPhysicalEntities; ipe++){
     tRef[ipe] = xToMap[ivalue];
     tFuel[ipe] = xToMap[ivalue+1];
     nRef[ipe] = xToMap[ivalue+2];
     ivalue+=3;
+    burnup[ipe] = fermi->pe[ipe].burnup;
   }  
 
   // TEST
@@ -82,26 +84,26 @@ int Mapper::th2xs(int nXToMap, double* xToMap, int nMapped, double* mapped, int 
   "fluid_z5" 0 1.5 0.003 0.0  0.0 1.0 */
   
   // Fuel
-  // XS_D          XS_abs                           XS_eXF           chi
-  xs[0][0][0]=1.5; xs[0][1][0]=0.200-nRef[0]/50000; xs[0][2][0]=0.5; xs[0][3][0]=0.4;
-  xs[1][0][0]=1.5; xs[1][1][0]=0.198-nRef[1]/50000; xs[1][2][0]=0.5; xs[1][3][0]=0.4;
-  xs[2][0][0]=1.5; xs[2][1][0]=0.197-nRef[2]/50000; xs[2][2][0]=0.5; xs[2][3][0]=0.4;
-  xs[3][0][0]=1.5; xs[3][1][0]=0.197-nRef[3]/50000; xs[3][2][0]=0.5; xs[3][3][0]=0.4;
-  xs[4][0][0]=1.5; xs[4][1][0]=0.196-nRef[4]/50000; xs[4][2][0]=0.5; xs[4][3][0]=0.4;
+  // XS_D          XS_abs                                               XS_eXF           chi
+  xs[0][0][0]=1.5; xs[0][1][0]=0.200-nRef[0]/50000-burnup[0]/864000000; xs[0][2][0]=0.5; xs[0][3][0]=0.4;
+  xs[1][0][0]=1.5; xs[1][1][0]=0.198-nRef[1]/50000-burnup[0]/864000000; xs[1][2][0]=0.5; xs[1][3][0]=0.4;
+  xs[2][0][0]=1.5; xs[2][1][0]=0.197-nRef[2]/50000-burnup[0]/864000000; xs[2][2][0]=0.5; xs[2][3][0]=0.4;
+  xs[3][0][0]=1.5; xs[3][1][0]=0.197-nRef[3]/50000-burnup[0]/864000000; xs[3][2][0]=0.5; xs[3][3][0]=0.4;
+  xs[4][0][0]=1.5; xs[4][1][0]=0.196-nRef[4]/50000-burnup[0]/864000000; xs[4][2][0]=0.5; xs[4][3][0]=0.4;
 
   // Refrigerant
-  xs[5][0][0]=1.5; xs[5][1][0]=0.005;               xs[5][2][0]=0; xs[5][3][0]=0;
-  xs[6][0][0]=1.5; xs[6][1][0]=0.005;               xs[6][2][0]=0; xs[6][3][0]=0;
-  xs[7][0][0]=1.5; xs[7][1][0]=0.005;               xs[7][2][0]=0; xs[7][3][0]=0;
-  xs[8][0][0]=1.5; xs[8][1][0]=0.004;               xs[8][2][0]=0; xs[8][3][0]=0;
-  xs[9][0][0]=1.5; xs[9][1][0]=0.003;               xs[9][2][0]=0; xs[9][3][0]=0;
+  xs[5][0][0]=1.5; xs[5][1][0]=0.005;                                   xs[5][2][0]=0;  xs[5][3][0]=0;
+  xs[6][0][0]=1.5; xs[6][1][0]=0.005;                                   xs[6][2][0]=0;  xs[6][3][0]=0;
+  xs[7][0][0]=1.5; xs[7][1][0]=0.005;                                   xs[7][2][0]=0;  xs[7][3][0]=0;
+  xs[8][0][0]=1.5; xs[8][1][0]=0.004;                                   xs[8][2][0]=0;  xs[8][3][0]=0;
+  xs[9][0][0]=1.5; xs[9][1][0]=0.003;                                   xs[9][2][0]=0;  xs[9][3][0]=0;
 
   /* Map values in the order that are going to be send to the client.
    * We are setting deltas to the client here. */
    ivalue=0;
-    for(int ipe=0; ipe<nPhysicalEntities; ipe++){
-      for(int ixs=0; ixs<nXS; ixs++){
-        for(int ig=0; ig<nGroups; ig++){
+    for(int ipe=0; ipe<fermi->nPhysicalEntities; ipe++){
+      for(int ixs=0; ixs<fermi->nXS; ixs++){
+        for(int ig=0; ig<fermi->nGroups; ig++){
           mapped[ivalue] = xs[ipe][ixs][ig];
           ivalue++;
         }
