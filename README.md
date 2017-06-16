@@ -100,9 +100,9 @@ to get developer's manual.
 "Iterative strong coupling of dimensionally heterogeneous models".
 International journal for numerical methods in engineering, 2010, vol 81, pags 1558–1580.
 
-[2] Caccia, F. and Dari. E. “[Acoplamiento multiescala en cálculos fluidodinámicos](https://goo.gl/mZ3A7o)” (“Multiscale
+[2] [Caccia, F. and Dari. E. “Acoplamiento multiescala en cálculos fluidodinámicos" (“Multiscale
 coupling in fluid dynamics calculations”). XXll Congress on Numerical Methods and its
-Applications, 7-11 November 2016, Córdoba, Argentina.
+Applications, 7-11 November 2016, Córdoba, Argentina.](https://goo.gl/mZ3A7o)
 
 ## Author
 
