@@ -223,6 +223,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="N_BURNUP"){
       return true;
     }
+    if(word=="PHYSICAL_ENTITIES"){
+      return true;
+    }
     if(word=="ENERGY_PER_FISSION"){
       return true;
     }
