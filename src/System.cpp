@@ -311,9 +311,53 @@ void System::construct(Mapper* mapper)
   // Initialize file names and command args in I/O case
   error = setFilesAndCommands(0);
   
-  // Load mappers
+  // Mapper object
   NewtonMap=mapper;
-  NewtonMap->config();
+  
+  // List of maps
+  nMap = 0;
+  listOfMaps = new string[nCodes*2];
+  string auxMap;
+  bool mapSaved;
+  for(int iCode=0; iCode<nCodes; iCode++){
+    auxMap = code[iCode].alphaMap;
+    mapSaved = false;
+    if(auxMap!="" && auxMap !="none"){
+      for(int iMap=0; iMap<nMap; iMap++){
+        if(auxMap==listOfMaps[iMap]){
+          mapSaved = true;
+          break;
+        }
+      }
+      if(!mapSaved){
+        listOfMaps[nMap]=auxMap;
+        nMap++;
+      }
+    }
+    auxMap = code[iCode].gammaMap;
+    mapSaved = false;
+    if(auxMap!="" && auxMap !="none"){
+      for(int iMap=0; iMap<nMap; iMap++){
+        if(auxMap==listOfMaps[iMap]){
+          mapSaved = true;
+          break;
+        }
+      }
+      if(!mapSaved){
+        listOfMaps[nMap]=auxMap;
+        nMap++;
+      }
+    }
+  }
+  //~ // TEST
+  //~ for(int iMap=0; iMap<nMap; iMap++){
+    //~ cout<<listOfMaps[iMap]<<endl;
+  //~ }
+  
+  // Configurate mappers
+  for(int iMap=0; iMap<nMap; iMap++){
+    NewtonMap->config(listOfMaps[iMap]);
+  }  
   
 	checkError(error,"Error setting system structure.");
 }

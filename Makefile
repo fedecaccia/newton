@@ -7,6 +7,7 @@ OBJELEM = $(OBJ_DIR)/Client.o						\
 		  $(OBJ_DIR)/Communicator.o	        \
 		  $(OBJ_DIR)/Evolution.o	         	\
 		  $(OBJ_DIR)/global.o		  					\
+		  $(OBJ_DIR)/loadXSfromCRM.o				\
 		  $(OBJ_DIR)/main.o 		  					\
 		  $(OBJ_DIR)/Mapper.o 							\
 		  $(OBJ_DIR)/MathLib.o 							\

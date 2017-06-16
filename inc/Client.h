@@ -46,6 +46,7 @@ class Client
       int nXS;
       struct physicalEntity{
         std::string name;
+        int material;
         double burnup;
         double** xs;
         double* EFissionRate;

@@ -179,10 +179,10 @@ int Client::readFermiXs2powOutput(string codeName, int nValues, double* values, 
   outputFile.close(); 
   
   // TEST
-  cout<<"power"<<endl;
-  for(int i=0; i<nValues; i++){
-    cout<<values[i]<<endl;
-  }
+  //~ cout<<"power"<<endl;
+  //~ for(int i=0; i<nValues; i++){
+    //~ cout<<values[i]<<endl;
+  //~ }
  
   return error; 
 }

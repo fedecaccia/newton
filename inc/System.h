@@ -107,6 +107,8 @@ class System
 		
 	private:
 		int error;
+    int nMap;
+    std::string* listOfMaps;    
     MathLib* math;
     Mapper* NewtonMap;
 

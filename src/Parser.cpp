@@ -86,6 +86,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="N_STEPS"){
       return true;
     }
+    if(word=="MAPPER"){
+      return true;
+    }
     //~ if(word=="GUESSES"){
       //~ return true;
     //~ }
@@ -198,6 +201,29 @@ bool Parser::wordIsCard(string word, string parent)
       return true;
     }
     if(word=="CALCS_PRE_MAP"){
+      return true;
+    }
+  } 
+  else if(parent=="MAPPER"){
+    if(word=="STAGE"){
+      return true;
+    }
+    if(word=="CALCS_PRE_MAP"){
+      return true;
+    }
+    if(word=="GUESSES_MAPPED"){
+      return true;
+    }
+    if(word=="MAP_DATA"){
+      return true;
+    }
+    if(word=="MATERIAL"){
+      return true;
+    }
+    if(word=="N_BURNUP"){
+      return true;
+    }
+    if(word=="ENERGY_PER_FISSION"){
       return true;
     }
   } 
@@ -1363,11 +1389,12 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   }
   configFile.close();
   
-  // Initialize counters  
-  fermiReaded = 0;
-  relapReaded = 0;
+
   
   //~ // TEST
+  // Initialize counters  
+  //~ fermiReaded = 0;
+  //~ relapReaded = 0;
   //~ for(int iCode=0; iCode<sys->nCodes; iCode++){
     //~ if(sys->code[iCode].type==FERMI_XS2POW){
       //~ cout<<client->fermi[fermiReaded].name<<endl;
@@ -1393,6 +1420,19 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
     //~ }
   //~ }
   //~ exit(1);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
 }
 

@@ -40,16 +40,17 @@ input: -
 output: -
 
 */
-void Mapper::config()
+void Mapper::config(string map)
 {
+  // Load data from external files?
   rootPrints("Checking for mappers...");
   
-  // Load data from external files?
-  
-  
-  
-  
-  
+  if(map=="th2xs"){
+    //loadXSfromCRM();
+  }
+  else if(map=="" || map=="none"){
+    
+  } 
   
 	checkError(error,"Error configurating mapper.");
 }

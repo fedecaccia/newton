@@ -75,6 +75,8 @@ Newton includes the possibility of using mapings between variables to adecuate t
 
 * Complete documentation.
 
+* More tests.
+
 * Performance evaluation.
 
 ## References

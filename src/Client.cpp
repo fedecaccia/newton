@@ -55,6 +55,7 @@ Allocates necessary things in physical entitities.
 
 input: -
 output: -
+
 */
 void Client::allocate2()
 {
@@ -70,10 +71,11 @@ void Client::allocate2()
     }
   }
   
-  // Burnup initialize
+  // Initialization
   for(int iF=0; iF<nFermi; iF++){
     for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
       fermi[iF].pe[ipe].burnup = 0;
+      fermi[iF].pe[ipe].material = -1; // Secure initialization
     }
   }
   
