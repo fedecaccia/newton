@@ -59,8 +59,8 @@ Wether it is better one or other choice depends on the way that `Newton` connect
 ```bash
 mpirun -np N -machinefile mf bin/Newton # N threads, mf file with node names
 ```
-To see an example of this look at ```bash examples/test_IO-test_IO/run2procs.sh```.
-Communication with client codes via MPI option requieres an script to run the problem. See ```bash examples/test_MPI-test_MPI/run.sh```.
+To see an example of this look at ```examples/test_IO-test_IO/run2procs.sh```.
+Communication with client codes via MPI option requieres an script to run the problem. See ```examples/test_MPI-test_MPI/run.sh```.
 
 ## Mappers
 
@@ -68,7 +68,7 @@ Newton includes the possibility of using mapings between variables to adecuate t
 
 ## Documentation
 
-Compile tex files in /doc to pdf (some packages from ```bash texlive``` are needed). Type:
+Compile tex files in /doc to pdf (some packages from ```texlive``` are needed). Type:
 ```bash
 cd doc/
 pdflatex newton-u-m.tex
@@ -100,7 +100,7 @@ to get developer's manual.
 "Iterative strong coupling of dimensionally heterogeneous models".
 International journal for numerical methods in engineering, 2010, vol 81, pags 1558–1580.
 
-[2] Caccia, F. and Dari. E. “Acoplamiento multiescala en cálculos fluidodinámicos” (“Multiscale
+[2] Caccia, F. and Dari. E. “[Acoplamiento multiescala en cálculos fluidodinámicos](https://goo.gl/mZ3A7o)” (“Multiscale
 coupling in fluid dynamics calculations”). XXll Congress on Numerical Methods and its
 Applications, 7-11 November 2016, Córdoba, Argentina.
 
