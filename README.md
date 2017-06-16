@@ -54,7 +54,7 @@ Newton includes the possibility of using mapings between variables to adecuate t
 
 ## The future
 
-* Communication with [https://github.com/GG1991/fermi]: Fermi & RELAP by I/O both connected with different threads of `Newton` (now serial).
+* Communication with [Fermi](https://github.com/GG1991/fermi) & RELAP by I/O both connected with different threads of `Newton` (now serial).
 
 * Implement communication using PPLEP.
 
