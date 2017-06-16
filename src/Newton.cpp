@@ -34,9 +34,10 @@ Newton::Newton()
 
 	// Objects initialization
 	NewtonParser = new Parser();
-	NewtonSystem = new System();
+	NewtonSystem = new System();  
 	NewtonEvolution = new Evolution();
 	NewtonSolver = new Solver();
+  NewtonMap = new Mapper(NewtonSolver->NewtonClient);
 	NewtonComm = new Communicator(NewtonSystem, NewtonEvolution);
 }
 
@@ -75,7 +76,7 @@ void Newton::initialize()
 
 	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver, NewtonSolver->NewtonClient);
 	
-	NewtonSystem->construct();
+	NewtonSystem->construct(NewtonMap);
 
 	NewtonComm->initialize();	
 }

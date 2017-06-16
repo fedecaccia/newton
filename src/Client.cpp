@@ -180,7 +180,7 @@ string Client::takeNextWord()
   }
   else{
     error=NEWTON_ERROR;
-    checkError(error, "Neither model input nor output files are open - Client::takeNextWord");
+    cout<<"Neither model input nor output files are open - Client::takeNextWord"<<endl;
   }
   
   return word;
@@ -204,7 +204,7 @@ string Client::takeNextLine()
   }
   else{
     error=NEWTON_ERROR;
-    checkError(error, "Neither model input nor output files are open - Client::takeNextLine");
+    cout<<"Neither model input nor output files are open - Client::takeNextLine"<<endl;
   }
   
   return line;

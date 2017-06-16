@@ -3,10 +3,6 @@
 
 #include <stdlib.h> // abs
 #include <iostream> // endl, cout
-using namespace std;
-using std::cout;
-using std::endl;
-
 #include <math.h>
 
 class MathLib

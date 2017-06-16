@@ -54,7 +54,7 @@ class Parser
 		std::string loadGuessesAndTakeWord(System*);
 
 		int error;
-    string delim;
+    std::string delim;
 	  bool unkSaved;
     int globalRes;
 		std::string word;

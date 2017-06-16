@@ -1,15 +1,16 @@
 /*****************************************************************************\
 
-NEWTON					|
-						|
+NEWTON					      |
+                      |
 Implicit coupling 		|	CLASS
-in nonlinear			|	MAPPER
-calculations			|
-						|
+in nonlinear			    |	MAPPER
+calculations			    |
+                      |
 
 -------------------------------------------------------------------------------
 
-Mapper manages the preprocessing and / or postprocessing of the variables received and / or sended to the clients.
+Mapper manages the preprocessing and / or postprocessing of the variables 
+received and / or sended to the clients.
 
 Author: Federico A. Caccia
 Date: 4 June 2017
@@ -22,8 +23,10 @@ using namespace::std;
 
 /* Mapper constructor
 */
-Mapper::Mapper()
+Mapper::Mapper(Client* clientPtr)
 {
+  // Client Object
+  client = clientPtr;
   // Math object
   math = new MathLib();
   // Initial error value
@@ -39,35 +42,69 @@ output: -
 */
 void Mapper::config()
 {
-  rootPrints("Checking for mappers...");  
+  rootPrints("Checking for mappers...");
+  
+  // Load data from external files?
+  
+  
+  
+  
+  
+  
 	checkError(error,"Error configurating mapper.");
 }
 
-/*
+/* Mapper::map
+
 Map one vector into another.
 
-input: code, string of the mapper, number of elements of image, image vector, 
-number of elements to map, vector to map, 
+input: code, string of the mapper, number of elements to map, vector to map, 
+number of elements of image, image vector.
+
 * 
 output: error
 
 */
-int Mapper::map(int iCode, string map, int nXToMap, double* XToMap, int nMapped, double* mapped)
+int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xToMap, int nMapped, double* mapped)
 {
   if(map == "" || map=="none"){
-    if(nXToMap!=nMapped){
+    if(nxToMap!=nMapped){
       error = NEWTON_ERROR;
       cout<<"Number of values to map are differtent to number of values mapped in code: "<<iCode<<" - Mapper::map"<<endl;
     }
     else{
-      for(int iX=0; iX<nXToMap; iX++){
-        mapped[iX] = XToMap[iX];
+      for(int iX=0; iX<nxToMap; iX++){
+        mapped[iX] = xToMap[iX];
       }        
     }
   }
 
   else if(map == "th2xs"){
-
+    // Look in fermi structures of Client aditional data to send to the mapper
+    int iFermi=-1;
+    for(int iF=0; iF<client->nFermi; iF++){
+      if(client->fermi[iF].name==codeName){
+        iFermi=iF;
+        break;
+      }
+    }
+    if(iFermi==-1){
+      error=NEWTON_ERROR;
+      cout<<"Code "<<codeName<<" has not fermi structures data to map with "<<map<<" - Mapper::map"<<endl;
+      return error;
+    }
+    nPhysicalEntities=client->fermi[iFermi].nPhysicalEntities;
+    nXS=client->fermi[iFermi].nXS;
+    nGroups=client->fermi[iFermi].nGroups;
+    //~ // TEST
+    //~ cout<<nPhysicalEntities<<" "<<nXS<<" "<<nGroups<<endl;
+    //~ exit(1);    
+    
+    error = th2xs(nxToMap, xToMap, nMapped, mapped, nPhysicalEntities, nXS, nGroups);
+  }
+  
+  else if(map == "pow2fpow"){
+    error = pow2fpow(nxToMap, xToMap, nMapped, mapped);
   }
   
   else if(map == "v2q"){

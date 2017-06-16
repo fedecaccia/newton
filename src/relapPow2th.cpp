@@ -46,16 +46,16 @@ int Client::prepareRelapPow2thInput(string codeName, int nValues, double* values
   }
   if(iR==-1){
     error=NEWTON_ERROR;
-    checkError(error, "Bad Relap index name - Client::prepareRelapPow2thInput");
+    cout<<"Bad Relap index name - Client::prepareRelapPow2thInput"<<endl;
+    return error;
   }
   
   // Check amount of values received
   nValuesExpected = relap[iR].nAxialZones;
   if(nValues!=nValuesExpected){
     error=NEWTON_ERROR;
-    checkError(error, "The amount of values received: "+int2str(nValues)
-                     +" is different from expected: "+int2str(nValuesExpected)
-                     +" - Client::prepareRelapPow2thInput");
+    cout<<"The amount of values received: "<<int2str(nValues)<<" is different from expected: "<<int2str(nValuesExpected)<<" - Client::prepareRelapPow2thInput";
+    return error;
   }
   
   // Save values received as XS values in physical entities structures  
@@ -149,7 +149,8 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
   }
   if(iR==-1){
     error=NEWTON_ERROR;
-    checkError(error, "Bad Relap index name - Client::prepareRelapPow2thInput");
+    cout<<"Bad Relap index name - Client::prepareRelapPow2thInput"<<endl;
+    return error;
   }
   
   // Output file

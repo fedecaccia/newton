@@ -39,8 +39,6 @@ System::System()
   nPhasesPerIter = 0;
   // Math object
   math = new MathLib();
-  // Mapper object
-  NewtonMap = new Mapper();
   // Initial error value
 	error = NEWTON_SUCCESS;
 }
@@ -217,7 +215,7 @@ input: -
 output: -
 
 */
-void System::construct()
+void System::construct(Mapper* mapper)
 {
   
   rootPrints("Building system...");
@@ -313,6 +311,7 @@ void System::construct()
   error = setFilesAndCommands(0);
   
   // Load mappers
+  NewtonMap=mapper;
   NewtonMap->config();
   
 	checkError(error,"Error setting system structure.");
@@ -404,7 +403,7 @@ int System::setFilesAndCommands(int step)
 
 void System::alpha2beta(int iCode)
 {
-  error= NewtonMap->map(iCode, code[iCode].alphaMap, code[iCode].nAlpha, code[iCode].alpha, code[iCode].nBeta, &(beta[code[iCode].betaFirstValuePos]));
+  error= NewtonMap->map(iCode, code[iCode].name, code[iCode].alphaMap, code[iCode].nAlpha, code[iCode].alpha, code[iCode].nBeta, &(beta[code[iCode].betaFirstValuePos]));
   checkError(error, "Error building beta - System::alpha2beta");
 }
 
@@ -444,7 +443,7 @@ void System::beta2gamma()
 
 void System::gamma2delta(int iCode)
 {
-  error= NewtonMap->map(iCode, code[iCode].gammaMap, code[iCode].nGamma, &(gamma[code[iCode].gammaFirstValuePos]), code[iCode].nDelta, code[iCode].delta);
+  error= NewtonMap->map(iCode, code[iCode].name, code[iCode].gammaMap, code[iCode].nGamma, &(gamma[code[iCode].gammaFirstValuePos]), code[iCode].nDelta, code[iCode].delta);
   checkError(error, "Error building delta from gamma - System::gamma2delta");
 }
 

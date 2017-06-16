@@ -36,7 +36,7 @@ $EndBoundary
 $Output
   # Power in physical entities
   kind 2
-  file "pow_phys.dat"
+  file pow_phys.dat
   nphy 5
   "fuel_z1" "fuel_z2" "fuel_z3" "fuel_z4" "fuel_z5"
 $EndOutput

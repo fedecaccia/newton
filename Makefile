@@ -12,9 +12,11 @@ OBJELEM = $(OBJ_DIR)/Client.o						\
 		  $(OBJ_DIR)/MathLib.o 							\
 		  $(OBJ_DIR)/Newton.o 							\
 		  $(OBJ_DIR)/Parser.o 							\
+		  $(OBJ_DIR)/pow2fpow.o							\
 		  $(OBJ_DIR)/System.o 							\
 		  $(OBJ_DIR)/Solver.o							  \
 		  $(OBJ_DIR)/testClient.o						\
+		  $(OBJ_DIR)/th2xs.o								\
 		  $(OBJ_DIR)/relapPow2th.o					\
 		  $(OBJ_DIR)/fermiXs2pow.o					\
 		  $(OBJ_DIR)/userClient.o

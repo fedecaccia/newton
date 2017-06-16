@@ -46,16 +46,16 @@ int Client::prepareFermiXs2powInput(string codeName, int nValues, double* values
   }
   if(iF==-1){
     error=NEWTON_ERROR;
-    checkError(error, "Bad Fermi index name - Client::prepareFermiXs2powInput");
+    cout<<"Bad Fermi index name - Client::prepareFermiXs2powInput"<<endl;
+    return error;
   }
   
   // Check amount of values received
   nValuesExpected = fermi[iF].nXS*fermi[iF].nGroups*fermi[iF].nPhysicalEntities;
   if(nValues!=nValuesExpected){
     error=NEWTON_ERROR;
-    checkError(error, "The amount of values received: "+int2str(nValues)
-                     +" is different from expected: "+int2str(nValuesExpected)
-                     +" - Client::prepareFermiXs2powInput");
+    cout<<"The amount of values received: "+int2str(nValues)<<" is different from expected: "<<int2str(nValuesExpected)<<" - Client::prepareFermiXs2powInput";
+    return error;
   }
   
   // Save values received as XS values in physical entities structures  
@@ -90,16 +90,16 @@ int Client::prepareFermiXs2powInput(string codeName, int nValues, double* values
         else{
           // Print XS
           inputFile <<"$Xs"<<endl;
-          inputFile <<"egn"<<fermi[iF].nGroups<<endl;
+          inputFile <<"egn "<<fermi[iF].nGroups<<endl;
           
           for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
-            inputFile<<fermi[iF].pe[ipe].name<<" ";
+            inputFile<<fermi[iF].pe[ipe].name<<" 0 ";
             for(int ixs=0; ixs<fermi[iF].nXS; ixs++){
               for(int ig=0; ig<fermi[iF].nGroups; ig++){
                 inputFile<<fermi[iF].pe[ipe].xs[ixs][ig]<<" ";
               }
             }
-            cout<<endl;
+            inputFile<<" 1.0"<<endl;
           }
           
           inputFile <<"$EndXs"<<endl;
@@ -151,7 +151,8 @@ int Client::readFermiXs2powOutput(string codeName, int nValues, double* values, 
   }
   if(iF==-1){
     error=NEWTON_ERROR;
-    checkError(error, "Bad Fermi index name - Client::prepareFermiXs2powInput");
+    cout<<"Bad Fermi index name - Client::prepareFermiXs2powInput"<<endl;
+    return error;
   }
   
   // Output file

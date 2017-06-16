@@ -42,9 +42,16 @@ int Client::prepareUserClientInput(string codeName, int nValues, double* values,
   
   inputFile.open(input.c_str());
 	if (inputFile.is_open()){
-		for(int i=0; i<nValues; i++){
-      inputFile << values[i]<<endl;
-    }
+    //~ if(inputModelFile.is_open()){
+      for(int i=0; i<nValues; i++){
+        inputFile << values[i]<<endl;
+      }
+    //~ }
+    //~ else{
+      //~ cout<<"Error reading input model file: \""<<inputModel<<"\" for code: "<<codeName<<" - Client::prepareUserClientInput"<<endl;
+      //~ error = NEWTON_ERROR;
+    //~ }
+    //~ inputModelFile.close();  
 	}
 	else{
 		cout<<"Error writing input file for code: "<<codeName<<" - Client::prepareTestClientInput"<<endl;

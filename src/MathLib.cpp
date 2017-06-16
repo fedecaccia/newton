@@ -3,6 +3,10 @@
 
 #include "MathLib.h"
 
+using namespace std;
+using std::cout;
+using std::endl;
+
 MathLib::MathLib()
 {  
 

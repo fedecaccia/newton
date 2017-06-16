@@ -40,7 +40,7 @@ class Communicator
 		int error;
     int tag;
 		int isConnectedByMPI;
-    string* Port_Name;
+    std::string* Port_Name;
     MPI_Comm* Coupling_Comm;
     System* sys;
     Evolution* evol;

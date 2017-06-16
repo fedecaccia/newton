@@ -21,7 +21,6 @@ Date: 7 June 2017
 #define CLIENT_H
 
 #include "global.h"
-#include "System.h"
 
 #include <sstream> 
 #include <fstream> 
@@ -45,7 +44,7 @@ class Client
       int nGroups;
       int nXS;
       struct physicalEntity{
-        string name;
+        std::string name;
         double burnup;
         double** xs;
       };
@@ -62,8 +61,8 @@ class Client
       double tf;
       double t;
       double maxDt;
-      string* hs;
-      string* pipe;
+      std::string* hs;
+      std::string* pipe;
       double* fpow;
       double voidf;
       double voidg;
@@ -95,11 +94,11 @@ class Client
     std::string takeNextLine();
     
 		int error;
-    string word;
-    string line;
-    ofstream inputFile;
-    ifstream inputModelFile;
-    ifstream outputFile;
+    std::string word;
+    std::string line;
+    std::ofstream inputFile;
+    std::ifstream inputModelFile;
+    std::ifstream outputFile;
 
     int nValuesExpected;
 };

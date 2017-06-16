@@ -24,6 +24,7 @@ Date: 3 June 2017
 
 #include "global.h"
 #include "Parser.h"
+#include "Mapper.h"
 #include "System.h"
 #include "Evolution.h"
 #include "Communicator.h"
@@ -47,6 +48,7 @@ class Newton
 		Evolution* NewtonEvolution;
 		Communicator* NewtonComm;
 		Solver* NewtonSolver;
+    Mapper* NewtonMap;
 		
 	private:
 		int error;
