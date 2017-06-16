@@ -8,6 +8,7 @@ obj/*.o
 *.txt
 bin/*
 examples/*/bin/*
+examples/*/obj/*
 *.bathe
 *step*
 *.info
@@ -19,3 +20,6 @@ examples/*/bin/*
 *.sip
 *.bat
 *.dat"
+*.toc
+*.aux
+*.out

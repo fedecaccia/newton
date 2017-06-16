@@ -53,126 +53,126 @@ Maximum amount of nonlinear iteations allowed to reach the convergence of the so
 
 
 
-
-
-
-\subsection{Energy groups information}
-
-\begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{$energy_groups}
-
-    \textcolor{OliveGreen}{numenergy}  1
-    \textcolor{OliveGreen}{numprecur}  2
-    
-\textcolor{Red}{$end_energy_groups}
-\end{Verbatim}
-
-\subsection{Calculation mode}
-
-\begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{$calculation_mode}
-
-   \textcolor{OliveGreen}{static} ONLY_ONE 
-\textcolor{Gray}{#    static PARAMETRIC {"0",XSA1={0.01,0.01,0.02}}, {"1",XSA1={0.01,0.01,0.02}} }
-\textcolor{Gray}{#    transient tf=10.0 dt=0.5 }
-
-\textcolor{Red}{$end_mode}
-\end{Verbatim}
-
-\subsection{Nuclear data information}
-
-\begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{$nuclear_data}
-
-   \textcolor{OliveGreen}{xsfile}          xs.fermi
-   
-\textcolor{Red}{$end_nuclear_data}
-\end{Verbatim}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Nuclear data}
-
-\subsection{Macroscopic cross sections}
-
-
-\begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{$cross_sections}
-
-     <material name> <0|1> <D> <XSa> <XSs> <nXSf> <eXSf> <chi>
-     
-\textcolor{Red}{$end_cross_sections}
-\end{Verbatim}
-
-\noindent
-Where \verb <D> are the diffusion coefficients given as:
-
-\begin{alltt}
-<D> = < \(D_{1}\) \(D_{2} \dots D_{g}\) > 
-\end{alltt}
-
-\noindent
-Where \verb <XSa> is the absortion cross sections given as:
-
-\begin{alltt}
-<XSa> = < \(\sigma_{1}^{a}\) \(\nu\sigma_{2}^{a} \dots \nu\sigma_{g}^{a}\) > 
-\end{alltt}
-
-\noindent
-Where \verb <XSs> are the scattering cross sections given as:
-
-\begin{alltt}
-<XSs> = < \(\sigma_{2\rightarrow1}\) \(\sigma_{3\rightarrow1}  \dots \sigma_{{g\text{-}1}\rightarrow{g}}\) > 
-\end{alltt}
-
-\noindent
-Where \verb <nXSf> are the number of neutrons emitted per fission time the fission cross sections given as:
-
-\begin{alltt}
-<nXSf> = <  \(\nu\sigma_{1}^{f}\) \(\nu\sigma_{2}^{f} \dots \nu\sigma_{g}^{f}\) > 
-\end{alltt}
-
-\noindent
-Where \verb <eXSf> are the energy per fission times the fission cross sections given as:
-
-\begin{alltt}
-<eXSf> = <  \(e\sigma_{1}^{f}\) \(e\sigma_{2}^{f} \dots e\sigma_{g}^{f}\) > 
-\end{alltt}
-
-\noindent
-Where \verb <chi> is the fission spectrum given as:
-
-\begin{alltt}
-<chi> = < \( \chi_{1} \) \(\chi_{2}\dots\chi_{g}\) > 
-\end{alltt}
-
-\subsection{Fission precursors' constants}
-
-\begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{$precursor_constants}
-
-   <beta> <lambda> <chi>
-   
-\textcolor{Red}{$end_cross_sections}
-\end{Verbatim}
-
-\noindent
-Where \verb <beta>  are the fission precursors yields given as:
-
-\begin{alltt}
-<beta> = < \(\beta_{1}\) \(\beta_{2} \dots \beta_{G}\) > 
-\end{alltt}
-
-\noindent
-Where \verb <lambda>  are the precursors' decay constants given as:
-
-\begin{alltt}
-<beta> = < \(\lambda_{1}\) \(\lambda_{2} \dots \lambda_{G}\) > 
-\end{alltt}
-
-\noindent
-Where \verb <chi>  are the precursors' neutron energy spectrum given as:
-
-\begin{alltt}
-<chi> = < \(\chi_{11} \chi_{21} \dots \chi_{G1} \chi_{12} \dots \chi_{Gg}\) > 
-\end{alltt}
+%~ 
+%~ 
+%~ 
+%~ \subsection{Energy groups information}
+%~ 
+%~ \begin{Verbatim}[frame=single,commandchars=\\\{\}]
+%~ \textcolor{Red}{$energy_groups}
+%~ 
+    %~ \textcolor{OliveGreen}{numenergy}  1
+    %~ \textcolor{OliveGreen}{numprecur}  2
+    %~ 
+%~ \textcolor{Red}{$end_energy_groups}
+%~ \end{Verbatim}
+%~ 
+%~ \subsection{Calculation mode}
+%~ 
+%~ \begin{Verbatim}[frame=single,commandchars=\\\{\}]
+%~ \textcolor{Red}{$calculation_mode}
+%~ 
+   %~ \textcolor{OliveGreen}{static} ONLY_ONE 
+%~ \textcolor{Gray}{#    static PARAMETRIC {"0",XSA1={0.01,0.01,0.02}}, {"1",XSA1={0.01,0.01,0.02}} }
+%~ \textcolor{Gray}{#    transient tf=10.0 dt=0.5 }
+%~ 
+%~ \textcolor{Red}{$end_mode}
+%~ \end{Verbatim}
+%~ 
+%~ \subsection{Nuclear data information}
+%~ 
+%~ \begin{Verbatim}[frame=single,commandchars=\\\{\}]
+%~ \textcolor{Red}{$nuclear_data}
+%~ 
+   %~ \textcolor{OliveGreen}{xsfile}          xs.fermi
+   %~ 
+%~ \textcolor{Red}{$end_nuclear_data}
+%~ \end{Verbatim}
+%~ 
+%~ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%~ 
+%~ \section{Nuclear data}
+%~ 
+%~ \subsection{Macroscopic cross sections}
+%~ 
+%~ 
+%~ \begin{Verbatim}[frame=single,commandchars=\\\{\}]
+%~ \textcolor{Red}{$cross_sections}
+%~ 
+     %~ <material name> <0|1> <D> <XSa> <XSs> <nXSf> <eXSf> <chi>
+     %~ 
+%~ \textcolor{Red}{$end_cross_sections}
+%~ \end{Verbatim}
+%~ 
+%~ \noindent
+%~ Where \verb <D> are the diffusion coefficients given as:
+%~ 
+%~ \begin{alltt}
+%~ <D> = < \(D_{1}\) \(D_{2} \dots D_{g}\) > 
+%~ \end{alltt}
+%~ 
+%~ \noindent
+%~ Where \verb <XSa> is the absortion cross sections given as:
+%~ 
+%~ \begin{alltt}
+%~ <XSa> = < \(\sigma_{1}^{a}\) \(\nu\sigma_{2}^{a} \dots \nu\sigma_{g}^{a}\) > 
+%~ \end{alltt}
+%~ 
+%~ \noindent
+%~ Where \verb <XSs> are the scattering cross sections given as:
+%~ 
+%~ \begin{alltt}
+%~ <XSs> = < \(\sigma_{2\rightarrow1}\) \(\sigma_{3\rightarrow1}  \dots \sigma_{{g\text{-}1}\rightarrow{g}}\) > 
+%~ \end{alltt}
+%~ 
+%~ \noindent
+%~ Where \verb <nXSf> are the number of neutrons emitted per fission time the fission cross sections given as:
+%~ 
+%~ \begin{alltt}
+%~ <nXSf> = <  \(\nu\sigma_{1}^{f}\) \(\nu\sigma_{2}^{f} \dots \nu\sigma_{g}^{f}\) > 
+%~ \end{alltt}
+%~ 
+%~ \noindent
+%~ Where \verb <eXSf> are the energy per fission times the fission cross sections given as:
+%~ 
+%~ \begin{alltt}
+%~ <eXSf> = <  \(e\sigma_{1}^{f}\) \(e\sigma_{2}^{f} \dots e\sigma_{g}^{f}\) > 
+%~ \end{alltt}
+%~ 
+%~ \noindent
+%~ Where \verb <chi> is the fission spectrum given as:
+%~ 
+%~ \begin{alltt}
+%~ <chi> = < \( \chi_{1} \) \(\chi_{2}\dots\chi_{g}\) > 
+%~ \end{alltt}
+%~ 
+%~ \subsection{Fission precursors' constants}
+%~ 
+%~ \begin{Verbatim}[frame=single,commandchars=\\\{\}]
+%~ \textcolor{Red}{$precursor_constants}
+%~ 
+   %~ <beta> <lambda> <chi>
+   %~ 
+%~ \textcolor{Red}{$end_cross_sections}
+%~ \end{Verbatim}
+%~ 
+%~ \noindent
+%~ Where \verb <beta>  are the fission precursors yields given as:
+%~ 
+%~ \begin{alltt}
+%~ <beta> = < \(\beta_{1}\) \(\beta_{2} \dots \beta_{G}\) > 
+%~ \end{alltt}
+%~ 
+%~ \noindent
+%~ Where \verb <lambda>  are the precursors' decay constants given as:
+%~ 
+%~ \begin{alltt}
+%~ <beta> = < \(\lambda_{1}\) \(\lambda_{2} \dots \lambda_{G}\) > 
+%~ \end{alltt}
+%~ 
+%~ \noindent
+%~ Where \verb <chi>  are the precursors' neutron energy spectrum given as:
+%~ 
+%~ \begin{alltt}
+%~ <chi> = < \(\chi_{11} \chi_{21} \dots \chi_{G1} \chi_{12} \dots \chi_{Gg}\) > 
+%~ \end{alltt}
