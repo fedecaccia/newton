@@ -63,7 +63,22 @@ To see an example of this look at ```bash examples/test_IO-test_IO/run2procs.sh`
 Communication with client codes via MPI option requieres an script to run the problem. See ```bash examples/test_MPI-test_MPI/run.sh```.
 
 ## Mappers
+
 Newton includes the possibility of using mapings between variables to adecuate them to the unknowns that are used to solve the residuals. For example, in neutronic-temal-hydraulic calculations it is common to treat as unknown temperatures and densities, and cross sections are calculated based on the values of the previous variables. Different mappers could be used for different client codes to adecuate as well guesses as calculated variables. Its implementation requieres minimal programming in ready-to-use functions of class `Mapper`.
+
+## Documentation
+
+Compile tex files in /doc to pdf. Type:
+```bash
+cd doc/
+pdflatex newton-u-m.tex
+```
+to get user's manual and:
+```bash
+cd doc/
+pdflatex newton-d-m.tex
+```
+to get developer's manual.
 
 ## The future
 
