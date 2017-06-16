@@ -41,7 +41,7 @@ This test solves the same system of coupled equations but now communicating with
 ## Main features
 
 * Explicit and implicit methods implemented to solve nonlinear residuals.
-PETSc functions implemented to solve linear systems in methods that build jacobian matrix of the system.
+Newton uses PETSc functions to solve linear systems in methods that build jacobian matrix of the system.
 
 * Efficient error handling.
 
