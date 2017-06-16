@@ -115,7 +115,7 @@ int Client::prepareFermiXs2powInput(string codeName, int nValues, double* values
         
           // Look for EndXs and continue copying
           while ( line!="$EndXs"){
-            line = takeNextLine();            
+            line = takeNextLine();
           }
         }
       }
