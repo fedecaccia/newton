@@ -6,20 +6,55 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Input file}
+\section{General cards}
 
-\subsection{Mesh information}
+\subsection{card METHOD}
+
+Sets the nonlinear method used to solve the residual of the equations. Available values are: 
 
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{$mesh}
-
-    \textcolor{OliveGreen}{mesh_file}    cube-multi-materials.msh
-    \textcolor{OliveGreen}{dimension}    3s
-    \textcolor{OliveGreen}{parfile_e}    cube-multi-materials.epart
-    \textcolor{OliveGreen}{parfile_n}    cube-multi-materials.npart
-
-\textcolor{Red}{$end_mesh} 
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{explicit_serial} 
 \end{Verbatim}
+This method is the common dirichlet-to-newmann explicit method. Codes run by phases inside each iteration. Initial guesses are sended to clients in phase run. \bf{Newton} waits for their solutions and after that, updates unknowns and send necessary values to client codes in phase 2, and so on.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{explicit_parallel} 
+\end{Verbatim}
+This method is similar to the $explicit_serial$, but in this case, guesses are sended to all client codes at the same time. Once all client has ended their calculations, Newton updates the unknown solution with these values and send them again to the clients codes as new guesses.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{newton} 
+\end{Verbatim}
+Newton method. It builds the Jacobian matrix in each iteration, so it requires at least $N+1$ function evaluations in each iteration (with $N$ amount off coupled client codes).
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{secant} 
+\end{Verbatim}
+This method builds the Jacobian matrix only at the beggining of the iterations. It is possible to update the matrix until a determined amount of iterations or steps in evolution problems using ITER_JAC_CALC and STEPS_JAC_CALC cards.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{broyden}
+\end{Verbatim}
+Broyden method is a quasi-newton method with superlinear convergence order. It is possible to initialize the Jacobian matrix with a guess by J_INI card or with calculation of the Jacobian matrix by finite difference (Otherwise Newton starts using the identity matrix). Also, it is possible to recalculate the matrix until a determined amount of iterations or steps in evolution problems using ITER_JAC_CALC and STEPS_JAC_CALC cards.
+
+\subsection{card PHASES}
+This card is only necessary using explicit_serial method. Client code names should be provided in the same order that it is desirable to run. Phases are separated using "&". To end the enumeration, use "&" too. For example, in a problem in wich $client1$ and $client2$ should run in phase 1, $client3$, $client4$ and $client5$ should run in phase 2 and $client6$ should run in phase 3:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{PHASES}  \textcolor{OliveGreen}{client1 client2 & client3 client4 client55 & client6 &}
+\end{Verbatim}
+
+\subsection{card ABS_TOL}
+Absolute nonlinear tolerance in nonlinear iteations to reach the convergence of the solution. Newton ends with error when norm 2 of the residual falls below ABS_TOL.
+
+\subsection{card MAX_ITER}
+Maximum amount of nonlinear iteations allowed to reach the convergence of the solution. Newton ends with error when nonlinear iterations grows above MAX_ITER.
+
+
+
+
+
+
+
 
 \subsection{Energy groups information}
 
