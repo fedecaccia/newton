@@ -63,6 +63,7 @@ void System::allocate1(int method)
   for(int  iCode=0; iCode<nCodes; iCode++){
       code[iCode].name = "";
       code[iCode].connection = NEWTON_UNKNOWN_CONNECTION;
+      code[iCode].spawnType = "";
       code[iCode].nProcs = 1;
       code[iCode].nArgs = 0;
       code[iCode].nAlpha = 0;
@@ -364,32 +365,37 @@ int System::setFilesAndCommands(int step)
       // Code ID
       if(code[iCode].arg[iArg]=="CODE_ID" || 
          code[iCode].arg[iArg]=="code_id" ||
-         code[iCode].arg[iArg]=="Code_id"){
+         code[iCode].arg[iArg]=="Code_id"){        
         code[iCode].commandToRun +=" "+int2str(code[iCode].id);
+        code[iCode].arg[iArg]=int2str(code[iCode].id);
       }
       // Actual input with extension
       else if(code[iCode].arg[iArg]=="INPUT" || code[iCode].arg[iArg]=="INPUT_FILE" ||
               code[iCode].arg[iArg]=="input" || code[iCode].arg[iArg]=="input_file" ||
-              code[iCode].arg[iArg]=="Input" || code[iCode].arg[iArg]=="Input_file" ){
+              code[iCode].arg[iArg]=="Input" || code[iCode].arg[iArg]=="Input_file" ){        
         code[iCode].commandToRun +=" "+code[iCode].actualInput;
+        code[iCode].arg[iArg]=code[iCode].actualInput;
       }
       // Actual input without extension
       else if(code[iCode].arg[iArg]=="INPUT_NAME" || 
               code[iCode].arg[iArg]=="input_name" ||
-              code[iCode].arg[iArg]=="Input_name"){
+              code[iCode].arg[iArg]=="Input_name"){        
         code[iCode].commandToRun +=" "+code[iCode].actualInputName;
+        code[iCode].arg[iArg]=code[iCode].actualInputName;
       }
       // Actual output with extension
       else if(code[iCode].arg[iArg]=="OUTPUT" || 
               code[iCode].arg[iArg]=="ouput" ||
-              code[iCode].arg[iArg]=="Ouput"){
+              code[iCode].arg[iArg]=="Ouput"){        
         code[iCode].commandToRun +=" "+code[iCode].actualOutput;
+        code[iCode].arg[iArg]=code[iCode].actualOutput;
       }
       // Actual output without extension
       else if(code[iCode].arg[iArg]=="OUTPUT_NAME" || 
               code[iCode].arg[iArg]=="output_name" ||
-              code[iCode].arg[iArg]=="Output_name"){
+              code[iCode].arg[iArg]=="Output_name"){        
         code[iCode].commandToRun +=" "+code[iCode].actualOutputName;
+        code[iCode].arg[iArg]=code[iCode].actualOutputName;
       }
       // Else, just use the string readed as argument
       else{

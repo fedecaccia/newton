@@ -70,6 +70,8 @@ class Solver
     int iCode;
     MathLib* math;
     int freeRank;
+    int codeConnected;
+    MPI_Comm mpi_comm_spawn;
     
     double* deltaX;
     double* xItPrev;
@@ -85,8 +87,6 @@ class Solver
     PC pc;
     KSP ksp;
     PetscScalar valueToAssembly;
-    
-    int codeConnected;
 };
 
 #endif

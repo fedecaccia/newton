@@ -139,6 +139,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="CONNECTION"){
       return true;
     }
+    if(word=="SPAWN_TYPE"){
+      return true;
+    }
     if(word=="X_INI"){
       return true;
     }
@@ -478,6 +481,15 @@ string Parser::loadClientAndTakeWord(System* sys)
       else{
         error = NEWTON_ERROR;
         cout<<"Client code tye:\""<< word<<"\"not founded - Parser::loadClientAndTakeWord"<<endl;
+      }
+      word = takeNextWord();
+    }
+    
+    else if(word=="SPAWN_TYPE"){
+      word = takeNextWord();
+      transform(word.begin(), word.end(), word.begin(), ::tolower);
+      if(word=="mpi"){
+        sys->code[clientReaded].spawnType = word;
       }
       word = takeNextWord();
     }

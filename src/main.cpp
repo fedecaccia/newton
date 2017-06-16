@@ -21,7 +21,7 @@ Date: 13 June 2017
 #include "Newton.h"
 
 int main(int argc,char **argv)
-{   
+{ 
   Newton* Coupling = new Newton();
 
   try{
@@ -30,7 +30,7 @@ int main(int argc,char **argv)
   catch(int e){
     (*Coupling).finish();
     return 0;
-  }  
+  }
 
   try{
     (*Coupling).run();

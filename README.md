@@ -16,8 +16,8 @@ It has been demostrated in several works([1], [2]) that implicit approaches impr
 ### Compiling `Newton`
 
 ```bash
-. ev # Set MPI and PETSc environment variables:
 sh createLinksAndFolders.sh
+# After setting MPI and PETSc environment variables
 make
 ```
 ### Running tests
@@ -54,11 +54,13 @@ Newton includes the possibility of using mapings between variables to adecuate t
 
 ## The future
 
+* Communication with Fermi & RELAP by I/O both connected with differents threads of `Newton` (now serial)
+
 * Implement communication using PPLEP.
 
 * Performance evaluation
 
-* Documentation
+* Complete documentation
 
 ## References
 

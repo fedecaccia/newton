@@ -70,6 +70,7 @@ class System
       int id;
       int type;
       int connection;
+      std::string spawnType;
       int nProcs;
       int nArgs;
       std::string* arg;

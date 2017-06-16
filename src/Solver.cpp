@@ -208,7 +208,7 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   // New step
   iter = 0;
   nEvalInStep = 0;
-  calculateResiduals(sys, comm); 
+  calculateResiduals(sys, comm);
   rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
   while(residual > nltol && iter < maxIter){
     
@@ -281,21 +281,27 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
     freeRank = 0;
     for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
       codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
-      
       if(sys->code[codeConnected].connection==NEWTON_SPAWN){
         if(irank==freeRank){
-          error = runCode(codeConnected, sys);
+          error += runCode(codeConnected, sys);
         }
         freeRank++;
         // When all processes run particular codes, 
         // check errors and give them more work
+        
         if(freeRank==world_size){
           checkError(error, "Error running code - Solver::calculateResiduals");
           freeRank = 0;
         }
       }
     }
-    // Other communication types  in this phase?
+    // Check errors
+    checkError(error, "Error running code - Solver::calculateResiduals");
+    
+    
+    // Other communication types?
+    
+    
     
     // Read output from codes that run by script in this phase
     freeRank = 0;
@@ -304,7 +310,7 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       
       if(sys->code[codeConnected].connection==NEWTON_SPAWN){
         if(irank==freeRank){
-          error = readOutputFromCode(codeConnected, sys);
+          error += readOutputFromCode(codeConnected, sys);
         }
         freeRank++;
         // When all processes run particular codes, 
@@ -315,6 +321,9 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
         }
       }
     }
+    // Check errors
+    checkError(error, "Error reading output from code - Solver::calculateResiduals");
+    
     // Receive variables from all clients  in this phase that connect by MPI
     for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
       codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
@@ -325,6 +334,12 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
         checkError(error, "Error receiving data from code - Solver::calculateResiduals");
       }
     }
+    
+    
+    // Other communication types?
+    
+    
+    
     
 
     for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
@@ -725,8 +740,8 @@ output: error
 */
 int Solver::runCode(int iCode, System* sys)
 {   
-  //cout<<iCode<<"**************"<<irank<<endl;
-  // Prepare input  
+  // Prepare input
+  
   error = NewtonClient->prepareInput(sys->code[iCode].type, 
                                      sys->code[iCode].name, 
                                      sys->code[iCode].nDelta, 
@@ -759,20 +774,42 @@ output: error
 */
 int Solver::spawnCode(int iCode, System* sys)
 {
-  if(sys->code[iCode].nProcs==1){
+  if(sys->code[iCode].spawnType=="mpi" || sys->code[iCode].nProcs>1){
+    // MPI_Spawn
+    error = NEWTON_ERROR;
+    cout<<"MPI_Spawn is not implemented yet"<<endl;
+    return error;
+    
+    const char** argv = new const char*[sys->code[iCode].nArgs+1];
+    for(int iArg=0; iArg<sys->code[iCode].nArgs; iArg++){
+      argv[iArg] = (sys->code[iCode].arg[iArg]).c_str();
+    }
+    argv[sys->code[iCode].nArgs] = NULL;
+    cout<<"Spawning..."<<endl;
+    error = MPI_Comm_spawn( (sys->code[iCode].binCommand).c_str(), // const char *command
+                            (char**)argv, //MPI_ARGV_NULL,// char *argv[] 
+                            sys->code[iCode].nProcs,// int maxprocs 
+                            MPI_INFO_NULL,// MPI_Info info
+                            0,// int root (of the group)
+                            MPI_COMM_SELF,// MPI_Comm comm
+                            &mpi_comm_spawn,// MPI_Comm *intercomm
+                            MPI_ERRCODES_IGNORE);// int array_of_errcodes[]    
+   
+    cout<<"Finish spawing"<<endl;
+    // Wait for client (in client there should be a Barrier too)
+    error += MPI_Barrier(mpi_comm_spawn);
+  }
+  
+  else if(sys->code[iCode].nProcs==1){
     // system
     error = system((sys->code[iCode].commandToRun).c_str());
-    
-  }
-  else if(sys->code[iCode].nProcs>1){
-    // MPI_Spawn
-  
   }
   else{
     cout<<"Wrong number of processes to spawn in code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
     error = NEWTON_ERROR;
     return error;
-  }  
+  }
+  
   if(error!=NEWTON_SUCCESS){
     cout<<"Error trying to spawn process from code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
     return error;
