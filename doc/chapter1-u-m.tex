@@ -1,0 +1,178 @@
+\chapter{Input cards}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{mygreen}{rgb}{0.3, 0.9, 0.1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{General cards}
+
+\subsection{card METHOD}
+
+Sets the nonlinear method used to solve the residual of the equations. Available values are: 
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{explicit_serial} 
+\end{Verbatim}
+This method is the common dirichlet-to-newmann explicit method. Codes run by phases inside each iteration. Initial guesses are sended to clients in phase run. \bf{Newton} waits for their solutions and after that, updates unknowns and send necessary values to client codes in phase 2, and so on.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{explicit_parallel} 
+\end{Verbatim}
+This method is similar to the $explicit_serial$, but in this case, guesses are sended to all client codes at the same time. Once all client has ended their calculations, Newton updates the unknown solution with these values and send them again to the clients codes as new guesses.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{newton} 
+\end{Verbatim}
+Newton method. It builds the Jacobian matrix in each iteration, so it requires at least $N+1$ function evaluations in each iteration (with $N$ amount off coupled client codes).
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{secant} 
+\end{Verbatim}
+This method builds the Jacobian matrix only at the beggining of the iterations. It is possible to update the matrix until a determined amount of iterations or steps in evolution problems using ITER_JAC_CALC and STEPS_JAC_CALC cards.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{broyden}
+\end{Verbatim}
+Broyden method is a quasi-newton method with superlinear convergence order. It is possible to initialize the Jacobian matrix with a guess by J_INI card or with calculation of the Jacobian matrix by finite difference (Otherwise Newton starts using the identity matrix). Also, it is possible to recalculate the matrix until a determined amount of iterations or steps in evolution problems using ITER_JAC_CALC and STEPS_JAC_CALC cards.
+
+\subsection{card PHASES}
+This card is only necessary using explicit_serial method. Client code names should be provided in the same order that it is desirable to run. Phases are separated using "&". To end the enumeration, use "&" too. For example, in a problem in wich $client1$ and $client2$ should run in phase 1, $client3$, $client4$ and $client5$ should run in phase 2 and $client6$ should run in phase 3:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{PHASES}  \textcolor{OliveGreen}{client1 client2 & client3 client4 client55 & client6 &}
+\end{Verbatim}
+
+\subsection{card ABS_TOL}
+Absolute nonlinear tolerance in nonlinear iteations to reach the convergence of the solution. Newton ends with error when norm 2 of the residual falls below ABS_TOL.
+
+\subsection{card MAX_ITER}
+Maximum amount of nonlinear iteations allowed to reach the convergence of the solution. Newton ends with error when nonlinear iterations grows above MAX_ITER.
+
+
+
+
+
+
+
+
+\subsection{Energy groups information}
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{$energy_groups}
+
+    \textcolor{OliveGreen}{numenergy}  1
+    \textcolor{OliveGreen}{numprecur}  2
+    
+\textcolor{Red}{$end_energy_groups}
+\end{Verbatim}
+
+\subsection{Calculation mode}
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{$calculation_mode}
+
+   \textcolor{OliveGreen}{static} ONLY_ONE 
+\textcolor{Gray}{#    static PARAMETRIC {"0",XSA1={0.01,0.01,0.02}}, {"1",XSA1={0.01,0.01,0.02}} }
+\textcolor{Gray}{#    transient tf=10.0 dt=0.5 }
+
+\textcolor{Red}{$end_mode}
+\end{Verbatim}
+
+\subsection{Nuclear data information}
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{$nuclear_data}
+
+   \textcolor{OliveGreen}{xsfile}          xs.fermi
+   
+\textcolor{Red}{$end_nuclear_data}
+\end{Verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Nuclear data}
+
+\subsection{Macroscopic cross sections}
+
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{$cross_sections}
+
+     <material name> <0|1> <D> <XSa> <XSs> <nXSf> <eXSf> <chi>
+     
+\textcolor{Red}{$end_cross_sections}
+\end{Verbatim}
+
+\noindent
+Where \verb <D> are the diffusion coefficients given as:
+
+\begin{alltt}
+<D> = < \(D_{1}\) \(D_{2} \dots D_{g}\) > 
+\end{alltt}
+
+\noindent
+Where \verb <XSa> is the absortion cross sections given as:
+
+\begin{alltt}
+<XSa> = < \(\sigma_{1}^{a}\) \(\nu\sigma_{2}^{a} \dots \nu\sigma_{g}^{a}\) > 
+\end{alltt}
+
+\noindent
+Where \verb <XSs> are the scattering cross sections given as:
+
+\begin{alltt}
+<XSs> = < \(\sigma_{2\rightarrow1}\) \(\sigma_{3\rightarrow1}  \dots \sigma_{{g\text{-}1}\rightarrow{g}}\) > 
+\end{alltt}
+
+\noindent
+Where \verb <nXSf> are the number of neutrons emitted per fission time the fission cross sections given as:
+
+\begin{alltt}
+<nXSf> = <  \(\nu\sigma_{1}^{f}\) \(\nu\sigma_{2}^{f} \dots \nu\sigma_{g}^{f}\) > 
+\end{alltt}
+
+\noindent
+Where \verb <eXSf> are the energy per fission times the fission cross sections given as:
+
+\begin{alltt}
+<eXSf> = <  \(e\sigma_{1}^{f}\) \(e\sigma_{2}^{f} \dots e\sigma_{g}^{f}\) > 
+\end{alltt}
+
+\noindent
+Where \verb <chi> is the fission spectrum given as:
+
+\begin{alltt}
+<chi> = < \( \chi_{1} \) \(\chi_{2}\dots\chi_{g}\) > 
+\end{alltt}
+
+\subsection{Fission precursors' constants}
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{$precursor_constants}
+
+   <beta> <lambda> <chi>
+   
+\textcolor{Red}{$end_cross_sections}
+\end{Verbatim}
+
+\noindent
+Where \verb <beta>  are the fission precursors yields given as:
+
+\begin{alltt}
+<beta> = < \(\beta_{1}\) \(\beta_{2} \dots \beta_{G}\) > 
+\end{alltt}
+
+\noindent
+Where \verb <lambda>  are the precursors' decay constants given as:
+
+\begin{alltt}
+<beta> = < \(\lambda_{1}\) \(\lambda_{2} \dots \lambda_{G}\) > 
+\end{alltt}
+
+\noindent
+Where \verb <chi>  are the precursors' neutron energy spectrum given as:
+
+\begin{alltt}
+<chi> = < \(\chi_{11} \chi_{21} \dots \chi_{G1} \chi_{12} \dots \chi_{Gg}\) > 
+\end{alltt}
