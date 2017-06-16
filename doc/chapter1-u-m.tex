@@ -20,7 +20,7 @@ This method is the common dirichlet-to-newmann explicit method. Codes run by pha
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
 \textcolor{Red}{METHOD}  \textcolor{OliveGreen}{explicit_parallel} 
 \end{Verbatim}
-This method is similar to the $explicit_serial$, but in this case, guesses are sended to all client codes at the same time. Once all client has ended their calculations, Newton updates the unknown solution with these values and send them again to the clients codes as new guesses.
+This method is similar to the $explicit$_$serial$, but in this case, guesses are sended to all client codes at the same time. Once all client has ended their calculations, Newton updates the unknown solution with these values and send them again to the clients codes as new guesses.
 
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
 \textcolor{Red}{METHOD}  \textcolor{OliveGreen}{newton} 
@@ -38,16 +38,22 @@ This method builds the Jacobian matrix only at the beggining of the iterations. 
 Broyden method is a quasi-newton method with superlinear convergence order. It is possible to initialize the Jacobian matrix with a guess by J_INI card or with calculation of the Jacobian matrix by finite difference (Otherwise Newton starts using the identity matrix). Also, it is possible to recalculate the matrix until a determined amount of iterations or steps in evolution problems using ITER_JAC_CALC and STEPS_JAC_CALC cards.
 
 \subsection{card PHASES}
-This card is only necessary using explicit_serial method. Client code names should be provided in the same order that it is desirable to run. Phases are separated using "&". To end the enumeration, use "&" too. For example, in a problem in wich $client1$ and $client2$ should run in phase 1, $client3$, $client4$ and $client5$ should run in phase 2 and $client6$ should run in phase 3:
+This card is only necessary using explicit_serial method. Client code names should be provided in the same order that it is desirable to run. Phases are separated using "\&". To end the enumeration, use "\&" too. For example, in a problem in wich $client1$ and $client2$ should run in phase 1, $client3$, $client4$ and $client5$ should run in phase 2 and $client6$ should run in phase 3:
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{PHASES}  \textcolor{OliveGreen}{client1 client2 & client3 client4 client55 & client6 &}
+\textcolor{Red}{PHASES}  \textcolor{OliveGreen}{client1 client2 & client3 client4 client5 & client6 &}
 \end{Verbatim}
 
 \subsection{card ABS_TOL}
 Absolute nonlinear tolerance in nonlinear iteations to reach the convergence of the solution. Newton ends with error when norm 2 of the residual falls below ABS_TOL.
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{ABS_TOL}  \textcolor{OliveGreen}{1e-14}
+\end{Verbatim}
 
 \subsection{card MAX_ITER}
 Maximum amount of nonlinear iteations allowed to reach the convergence of the solution. Newton ends with error when nonlinear iterations grows above MAX_ITER.
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{MAX_ITER}  \textcolor{OliveGreen}{100}
+\end{Verbatim}
 
 
 
