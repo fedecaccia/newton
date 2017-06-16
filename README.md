@@ -56,11 +56,15 @@ Newton includes the possibility of using mapings between variables to adecuate t
 
 * Communication with [Fermi](https://github.com/GG1991/fermi) & RELAP by I/O both connected with different threads of `Newton` (now serial).
 
+* Implement efficient mappers to get cross-sections as function of termal-hydraulic and burnup variables.
+
+* Implement sets of specific variables that need to be storage and updated along the evolution of systems.
+
 * Implement communication using PPLEP.
 
-* Performance evaluation.
-
 * Complete documentation.
+
+* Performance evaluation.
 
 ## References
 
