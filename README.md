@@ -68,7 +68,7 @@ Newton includes the possibility of using mapings between variables to adecuate t
 
 ## Documentation
 
-Compile tex files in /doc to pdf. Type:
+Compile tex files in /doc to pdf (some packages from ```bash texlive``` are needed). Type:
 ```bash
 cd doc/
 pdflatex newton-u-m.tex
