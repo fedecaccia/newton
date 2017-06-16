@@ -40,4 +40,4 @@ ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 #~ $(MPICC) -c -o $@ $< -I${DEP_DIR}
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
-include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
+include $(PETSC_DIR)/lib/petsc/conf/rules

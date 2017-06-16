@@ -6,7 +6,8 @@ obj/*.o
 *.png
 *.pdf
 *.txt
-*bin/*
+bin/*
+examples/*/bin/*
 *.bathe
 *step*
 *.info
