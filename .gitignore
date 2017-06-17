@@ -23,3 +23,7 @@ examples/*/obj/*
 *.toc
 *.aux
 *.out
+kspinfo*
+struct*
+pow_phys*
+
