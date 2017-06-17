@@ -89,12 +89,6 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="MAPPER"){
       return true;
     }
-    //~ if(word=="GUESSES"){
-      //~ return true;
-    //~ }
-    //~ if(word=="CALCS"){
-      //~ return true;
-    //~ }
     if(word=="X_INI"){
       return true;
     }
