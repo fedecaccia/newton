@@ -22,6 +22,7 @@ Date: 3 June 2017
 #include <mpi.h>
 #include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string>
 
 // Errors

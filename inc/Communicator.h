@@ -24,6 +24,7 @@ Date: 14 June 2017
 #include "System.h"
 
 #include "mpi.h"
+#include <string.h>
 
 class Communicator
 {
