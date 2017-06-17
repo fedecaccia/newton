@@ -21,19 +21,26 @@ OBJELEM = $(OBJ_DIR)/Client.o						\
 		  $(OBJ_DIR)/relapPow2th.o					\
 		  $(OBJ_DIR)/fermiXs2pow.o					\
 		  $(OBJ_DIR)/userClient.o
+TEST_OBJELEM = $(OBJ_DIR)/mainTest.o		  
 EXE=$(BIN_DIR)/Newton
+TEST_EXE=$(BIN_DIR)/Test
 MPICC=mpic++
 
 #~ all: $(BIN_DIR) $(OBJ_DIR) $(OBJELEM)
 #~ 	$(MPICC) $(OBJELEM) -o $(EXE)
 
-all: $(BIN_DIR) $(OBJ_DIR) $(OBJELEM)
+all: newton test
+
+newton: $(BIN_DIR) $(OBJ_DIR) $(OBJELEM)
 	$(FC) $(OBJELEM) \
 	$(FFLAGS) -o $(EXE) \
 	$(PETSC_FORTRAN_LIB) $(PETSC_LIB) ${SLEPC_SYS_LIB} -lz
 
+test: $(BIN_DIR) $(OBJ_DIR) $(TEST_OBJELEM)
+	$(MPICC) $(TEST_OBJELEM) -o $(TEST_EXE)
+
 clean_:
-	$(RM) $(OBJELEM) $(OBJELEM2) $(EXE)
+	$(RM) $(OBJELEM) $(TEST_OBJELEM) $(EXE) $(TEST_EXE)
 
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	${PETSC_COMPILE} -c ${CFLAGS} -o $@ $< -I${DEP_DIR}
