@@ -1,0 +1,6 @@
+install:
+	get MPI_DIR, PETS_DIR & stop with message if they are empty
+	create folder and links
+	hostname and create mf files
+	make all
+weak coupling (only one link)

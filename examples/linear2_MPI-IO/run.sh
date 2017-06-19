@@ -12,6 +12,6 @@ SLURM_NPROCS=1
 mpiexec --prefix ${MPI_DIR} \
 -ompi-server file:ompiuri \
 -machinefile ${HOSTFILE} -n ${SLURM_NPROCS} \
-../test_MPI-test_MPI/bin/Test 1 < /dev/null >& 1-test1.log &
+../../bin/Test 0 1 mpi_port 1 < /dev/null >& 1-test1.log &
 sleep 1
 killall ompi-server
