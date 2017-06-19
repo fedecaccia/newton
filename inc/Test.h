@@ -24,8 +24,8 @@ Date: 17 June 2017
 #define TEST_ERROR			 			1
 
 #define TEST_2_LINEAR 				0
-#define TEST_2_NONLINEAR 			1
-#define TEST_3_LINEAR 				2
+#define TEST_3_LINEAR 				1
+#define TEST_2_NONLINEAR 			2
 
 #define CONTINUE  0
 #define RESTART   1
@@ -66,6 +66,23 @@ class linear2
 		
 };
 
+class linear3
+{
+	public:
+		linear3();
+		void solve();
+
+	private:
+    double* input;
+    double* output;
+    double w,x,y,z;
+    double** mat;
+    double* b;
+    std::string file;
+    std::string fileInput;
+    std::string fileOutput;
+};
+
 class nonlinear2
 {
 	public:
@@ -80,23 +97,6 @@ class nonlinear2
     std::string fileOutput;
 
 };
-
-class linear3
-{
-	public:
-		linear3();
-		void solve();
-
-	private:
-    double* input;
-    double* output;
-    double** mat;
-    double* b;
-    std::string file;
-    std::string fileInput;
-    std::string fileOutput;
-};
-
 
 
 
