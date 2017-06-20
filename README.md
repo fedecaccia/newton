@@ -17,26 +17,24 @@ It has been demostrated in several works([1], [2]) that implicit approaches impr
 
 ```bash
 sh createLinksAndFolders.sh
-# After setting MPI and PETSc environment variables
+# After setting MPI_DIR and PETSC_DIR environmental variables
 make
 ```
 ### Running tests
 Several tests has been included as examples to demonstrate the capabilities of the code. Type in console:
 ```bash
-cd examples/test_IO-test_IO/
-make
+cd examples/linear2_IO/
 ./run.sh
 ```
 This example solves a system of four coupled equations with four unknowns (`w`, `x`, `y`, `z`). Client `code 0` solves `x`, `y`, `z` as funcion of `w` and client `code 1` solves `w` as funtion of `x`, `y`, `z`. Both clients are spawned by `Newton` as many times as necessary until the converged solution is reached. 
 The parameters of the problem, as well as parameters needed by the numerical methods implemented in `Newton` and all that `Newton` has to know to spawn the clients is set in the configuration file `examples/test_IO-test_IO/newton.config`. Change value `explicit_serial` in METHOD card to `secant` and run again the test. Then look what happends.
 
-Now move on to another test. Make sure you have set environmental variables and then type:
+Now move on to another test. Type:
 ```bash
-cd ../test_MPI-test_MPI/
-make
+cd ../linear2_MPI/
 ./run.sh
 ```
-This test solves the same system of coupled equations but now communicating with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now Newton doesn't has to know nothing about file names and paths: communication is between codes while the are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.s
+This test solves the same system of coupled equations but now connecting with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now Newton doesn't has to know nothing about file names and paths: communication is between codes while the are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.
 
 ## Main features
 
@@ -59,8 +57,8 @@ Wether it is better one or other choice depends on the way that `Newton` connect
 ```bash
 mpirun -np N -machinefile mf bin/Newton # N threads, mf file with node names
 ```
-To see an example of this look at ```examples/test_IO-test_IO/run2procs.sh```.
-Communication with client codes via MPI option requieres an script to run the problem. See ```examples/test_MPI-test_MPI/run.sh```.
+To see an example of this look at ```examples/nonlinear3_IO/run3procs.sh```.
+Communication with client codes via MPI option requieres an script to run the problem. (Look at any example inside ```_MPI``` folder).
 
 ## Mappers
 

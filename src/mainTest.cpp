@@ -20,7 +20,7 @@ args:
                               ("mpi_comm": string of communicator) ?
 
 Author: Federico A. Caccia
-Date: 17 June 2017
+Date: 19 June 2017
 
 \*****************************************************************************/
 
@@ -42,7 +42,7 @@ MPI_Comm Coupling_Comm;
 using namespace::std;
 
 int main(int argc,char **argv)
-{    
+{ 
   // Checking number of arguments
   if(argc!=5){
     cout<<"ERROR. Running test code with bad number of arguments."<<endl;
@@ -93,6 +93,18 @@ int main(int argc,char **argv)
       system3 = new linear3();
       try{
         system3->solve();
+      }
+      catch(int e){
+        cout<<"ERROR running test."<<endl;
+        return 0;
+      }
+      break;
+
+    case TEST_3_NONLINEAR:
+      nonlinear3* system4;
+      system4 = new nonlinear3();
+      try{
+        system4->solve();
       }
       catch(int e){
         cout<<"ERROR running test."<<endl;
@@ -307,7 +319,7 @@ readed from input, solving the coupled equations (1b,2b):
 Code number 1 calculates (y) value as function of (w_guess, x_guess, z_guess) 
 values readed from input, solving (3b):
 
-  y = (19 - 11*w_guess - 16*x_guess - 6*z_guess)/15  (3b)
+ y = (19 - 11*w_guess - 16*x_guess - 6*z_guess)/15  (3b)
 
 Code number 1 calculates (z) value as function of (w_guess, x_guess, y_guess) 
 values readed from input, solving (4b):
@@ -333,10 +345,10 @@ linear3::linear3()
       for(int i=0; i<2; i++){
         mat[i] = new double[2];
       }
-      mat[0][0] = -0.43478;
-      mat[0][1] = 0.086957;
-      mat[1][0] = 0.521739;
-      mat[1][1] = -0.43478;
+      mat[0][0] = -1.181818;
+      mat[0][1] = 0.181818;
+      mat[1][0] = 1.090909;
+      mat[1][1] = -0.090909;
       b = new double[2];
       break;
       
@@ -508,15 +520,348 @@ void linear3::solve()
   }
 }
 
+
+/*-----------------------------------------------------------------------------
+
+System to solve:
+
+ l*x^2 + m*y = a  (1a)
+ l*x + m*y^2 = b  (2a)
+   
+Code number 0 calculates x value as function of y_guess value readed from 
+input, solving the coupled equations (1b):
+
+ x = sqrt((a-m*y_guess)/l)  (1b)
+   
+Code number 1 calculates y value as function of x_guess  value readed from 
+input, solving (2b):
+
+ y = sqrt((b-l*x_guess)/m)  (2b)
+
+Analytical solutions, with l=1, m=1, a=3, b=5:
+ x = 1
+ y = 2
+
+-----------------------------------------------------------------------------*/
+
 nonlinear2::nonlinear2()
 {
+  // Initialization
+  l = 1;
+  m = 1;
+  a = 3;
+  b = 5;
+  input = new double[1];
+  output = new double[1];
 
+  if(comm=="io"){
+    file = commArg;
+    fileInput = file+".dat";
+    fileOutput = file+".out";  
+  }
+  else if(comm=="mpi_port"){
+    stringstream(commArg) >> codeID;
+    // Connection
+    mpi_connection();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){    
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_finish();
+      throw TEST_ERROR;
+    }    
+  }
 }
 
 void nonlinear2::solve()
 {
+  do{
+    switch(codeClient){
+      case 0:
+        // Load guess
+        if(comm=="io"){                
+          input = loaddata(fileInput, 1);
+          y = input[0];
+        }
+        else if(comm=="mpi_port"){
+          mpi_receive(input, 1);
+          y = input[0];          
+        }
+        else if(comm=="mpi_comm"){
+          
+        }
+        
+        // Calculate solution
+        x = sqrt((a-m*y)/l);
 
+        // Set solution
+        output[0] = x;
+
+        // Send results
+        if(comm=="io"){                
+          printResults(output, 1, fileOutput);
+        }
+        else if(comm=="mpi_port"){
+          mpi_send(output, 1);
+          order = mpi_receive_order();         
+        }
+        else if(comm=="mpi_comm"){         
+          
+        }
+        
+        break;
+        
+      case 1:
+        // Load guess
+        if(comm=="io"){                
+          input = loaddata(fileInput, 1);
+          x = input[0];
+        }
+        else if(comm=="mpi_port"){
+          mpi_receive(input, 1);
+          x = input[0];          
+        }
+        else if(comm=="mpi_comm"){
+          
+        }
+
+        // Calculate solution
+        y = sqrt((b-l*x)/m);
+
+        // Set solution
+        output[0] = y;
+
+        // Send results
+        if(comm=="io"){                
+          printResults(output, 1, fileOutput);
+        }
+        else if(comm=="mpi_port"){
+          mpi_send(output, 1);
+          order = mpi_receive_order();         
+        }
+        else if(comm=="mpi_comm"){         
+          
+        }
+
+        break;
+        
+      default:
+        cout<<"ERROR. Bad client number received in arg 2."<<endl;
+        throw TEST_ERROR;
+    }
+  }while(order==RESTART);
+  
+  if(order==ABORT){
+    mpi_finish();
+    cout<<"Finishing program by ABORT order"<<endl;
+    throw TEST_ERROR;
+  }
+  
+  // Finish connections
+  if(comm=="mpi_port"){
+    mpi_finish();
+  }
 }
+
+
+/*-----------------------------------------------------------------------------
+
+System to solve:
+
+ l*x + sin(m*y) + cos(n*z) = a          (1a)
+ m*y + (l*x)^2 = b                      (2a)
+ n*z + l*x*m*y = c                      (3a)
+   
+Code number 0 calculates x value as function of (y_guess, z_guess) value 
+readed from input, solving the coupled equations (1b):
+
+ x = (a - sin(m*y) - cos(n*z)) / l      (1b)
+   
+Code number 1 calculates y value as function of (x_guess)  value readed from 
+input, solving (2b):
+
+ y = (b - (l*x)^2) /m                   (2b)
+
+Code number 2 calculates z value as function of (x_guess, _guess)  value 
+readed from input, solving (3b):
+
+ z = cbrt((c - l*x*m*y)/n)              (3b)
+
+One of the solutions, with l=1, m=1, n=1, a = 0.91930, b=3, c=29:
+ x = 1
+ y = 2
+ z = 3
+
+-----------------------------------------------------------------------------*/
+
+nonlinear3::nonlinear3()
+{
+  // Initialization
+  l = 1;
+  m = 1;
+  n = 1;
+  a = 0.91930;
+  b = 3;
+  c = 29;
+  input = new double[2];
+  output = new double[1];
+
+  if(comm=="io"){
+    file = commArg;
+    fileInput = file+".dat";
+    fileOutput = file+".out";  
+  }
+  else if(comm=="mpi_port"){
+    stringstream(commArg) >> codeID;
+    // Connection
+    mpi_connection();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){    
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_finish();
+      throw TEST_ERROR;
+    }    
+  }
+}
+
+void nonlinear3::solve()
+{
+  do{
+    switch(codeClient){
+      
+      case 0:
+
+        // Load guess
+        if(comm=="io"){                
+          input = loaddata(fileInput, 2);
+          y = input[0];
+          z = input[1];
+        }
+        else if(comm=="mpi_port"){
+          mpi_receive(input, 2);
+          y = input[0];
+          z = input[1];         
+        }
+        else if(comm=="mpi_comm"){
+          
+        }
+        
+        // Calculate solution
+        x = (a - sin(m*y) - cos(n*z)) / l;
+
+        // Set solution
+        output[0] = x;
+
+        // Send results
+        if(comm=="io"){                
+          printResults(output, 1, fileOutput);
+        }
+        else if(comm=="mpi_port"){
+          mpi_send(output, 1);
+          order = mpi_receive_order();         
+        }
+        else if(comm=="mpi_comm"){         
+          
+        }
+        
+        break;
+        
+      case 1:
+
+        // Load guess
+        if(comm=="io"){                
+          input = loaddata(fileInput, 1);
+          x = input[0];
+        }
+        else if(comm=="mpi_port"){
+          mpi_receive(input, 1);
+          x = input[0];          
+        }
+        else if(comm=="mpi_comm"){
+          
+        }
+
+        // Calculate solution
+        y = (b - pow(l*x,2)) / m;
+
+        // Set solution
+        output[0] = y;
+
+        // Send results
+        if(comm=="io"){                
+          printResults(output, 1, fileOutput);
+        }
+        else if(comm=="mpi_port"){
+          mpi_send(output, 1);
+          order = mpi_receive_order();         
+        }
+        else if(comm=="mpi_comm"){         
+          
+        }
+
+        break;
+
+      case 2:
+
+        // Load guess
+        if(comm=="io"){                
+          input = loaddata(fileInput, 2);
+          x = input[0];
+          y = input[1];
+        }
+        else if(comm=="mpi_port"){
+          mpi_receive(input, 2);
+          x = input[0];
+          y = input[1];
+        }
+        else if(comm=="mpi_comm"){
+          
+        }
+
+        // Calculate solution
+        z = cbrt(c-l*x*m*y) / n;
+
+        // Set solution
+        output[0] = z;
+
+        // Send results
+        if(comm=="io"){                
+          printResults(output, 1, fileOutput);
+        }
+        else if(comm=="mpi_port"){
+          mpi_send(output, 1);
+          order = mpi_receive_order();         
+        }
+        else if(comm=="mpi_comm"){         
+          
+        }
+
+        break;
+        
+      default:
+
+        cout<<"ERROR. Bad client number received in arg 2."<<endl;
+        throw TEST_ERROR;
+    }
+  }while(order==RESTART);
+  
+  if(order==ABORT){
+    mpi_finish();
+    cout<<"Finishing program by ABORT order"<<endl;
+    throw TEST_ERROR;
+  }
+  
+  // Finish connections
+  if(comm=="mpi_port"){
+    mpi_finish();
+  }
+}
+
 
 /* loaddata
 Load variables from input file.
@@ -572,8 +917,10 @@ void printResults(double* vec, int n, string file)
 }
 
 /* mpi_connection
+Starts connection by mpi
 
-
+input: -
+output: -
 
 */
 

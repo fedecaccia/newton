@@ -26,11 +26,12 @@ Date: 17 June 2017
 #define TEST_2_LINEAR 				0
 #define TEST_3_LINEAR 				1
 #define TEST_2_NONLINEAR 			2
+#define TEST_3_NONLINEAR      3
 
-#define CONTINUE  0
-#define RESTART   1
-#define FINISH    2
-#define ABORT     3
+#define CONTINUE              0
+#define RESTART               1
+#define FINISH                2
+#define ABORT                 3
 
 #include <sstream> 
 #include <fstream> 
@@ -38,6 +39,7 @@ Date: 17 June 2017
 #include <limits>
 #include <string>
 #include <mpi.h>
+#include <math.h>
 
 std::string int2str (int);
 double* loaddata(std::string, int);
@@ -95,6 +97,25 @@ class nonlinear2
     std::string file;
     std::string fileInput;
     std::string fileOutput;
+
+    double a, b, l, m, x, y;
+
+};
+
+class nonlinear3
+{
+  public:
+    nonlinear3();
+    void solve();
+
+  private:
+    double* input;
+    double* output;    
+    std::string file;
+    std::string fileInput;
+    std::string fileOutput;
+
+    double a, b, c, l, m, n, x, y, z;
 
 };
 

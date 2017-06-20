@@ -374,33 +374,33 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
   residual = math->moduleAbs(resVector, sys->nUnk);
   
   //~ // TEST
-  //~ cout<<sys->nPhasesPerIter<<endl;
-  //~ cout<<"ALPHAS, BETAS, GAMMAS & DELTAS post calculating residuals"<<endl;
-  //~ for (int iCode=0; iCode<sys->nCodes; iCode++){
-    //~ cout<<"Code: "<<iCode<<endl;
-    //~ cout<<"Alphas:"<<endl;
-    //~ for(int iAlpha = 0; iAlpha<sys->code[iCode].nAlpha; iAlpha++){
-      //~ cout<<sys->code[iCode].alpha[iAlpha]<<endl;
-    //~ }
-    //~ cout<<"Betas:"<<endl;
-    //~ for(int iBeta = 0; iBeta<sys->code[iCode].nBeta; iBeta++){
-      //~ cout<<sys->beta[sys->code[iCode].betaFirstValuePos+iBeta]<<endl;
-    //~ }
-    //~ cout<<"Gammas:"<<endl;
-    //~ for(int iGamma= 0; iGamma<sys->code[iCode].nGamma; iGamma++){
-      //~ cout<<sys->gamma[sys->code[iCode].gammaFirstValuePos+iGamma]<<endl;
-    //~ }
-    //~ cout<<"Deltas:"<<endl;
-    //~ for(int iDelta = 0; iDelta<sys->code[iCode].nDelta; iDelta++){
-      //~ cout<<sys->code[iCode].delta[iDelta]<<endl;
-    //~ }
-  //~ }
+ /*  cout<<sys->nPhasesPerIter<<endl;
+   cout<<"ALPHAS, BETAS, GAMMAS & DELTAS post calculating residuals"<<endl;
+   for (int iCode=0; iCode<sys->nCodes; iCode++){
+     cout<<"Code: "<<iCode<<endl;
+     cout<<"Alphas:"<<endl;
+     for(int iAlpha = 0; iAlpha<sys->code[iCode].nAlpha; iAlpha++){
+      cout<<sys->code[iCode].alpha[iAlpha]<<endl;
+     }
+     cout<<"Betas:"<<endl;
+     for(int iBeta = 0; iBeta<sys->code[iCode].nBeta; iBeta++){
+       cout<<sys->beta[sys->code[iCode].betaFirstValuePos+iBeta]<<endl;
+     }
+    cout<<"Gammas:"<<endl;
+     for(int iGamma= 0; iGamma<sys->code[iCode].nGamma; iGamma++){
+       cout<<sys->gamma[sys->code[iCode].gammaFirstValuePos+iGamma]<<endl;
+     }
+     cout<<"Deltas:"<<endl;
+    for(int iDelta = 0; iDelta<sys->code[iCode].nDelta; iDelta++){
+       cout<<sys->code[iCode].delta[iDelta]<<endl;
+     }
+  }*/
   //~ 
-  // TEST
-  //~ cout<<"Beta"<<setw(20)<<"x"<<setw(20)<<"res"<<endl;
-  //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-    //~ cout<<sys->beta[iUnk]<<setw(20)<<x[iUnk]<<setw(20)<<resVector[iUnk]<<endl;    
-  //~ }
+  //TEST
+  /*cout<<"Beta"<<setw(20)<<"x"<<setw(20)<<"res"<<endl;
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    cout<<sys->beta[iUnk]<<setw(20)<<x[iUnk]<<setw(20)<<resVector[iUnk]<<endl; 
+  }*/
 }
 
 /* Solver calculateNewGuess
