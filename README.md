@@ -17,7 +17,7 @@ It has been demostrated in several works([1], [2]) that implicit approaches impr
 
 ```bash
 sh createLinksAndFolders.sh
-# After setting MPI_DIR and PETSC_DIR environmental variables
+# After setting MPI_DIR and PETSC_DIR environmental variables:
 make
 ```
 ### Running tests
