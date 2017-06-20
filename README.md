@@ -11,7 +11,7 @@ and others.
 `Newton` solves residual coupling equations explicitly or implicitly.
 It has been demostrated in several works([1], [2]) that implicit approaches improve convergence of the iterations.
 
-## Quick start
+## Quickstart
 
 ### Compiling `Newton`
 
