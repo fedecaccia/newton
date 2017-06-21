@@ -36,6 +36,17 @@ cd ../linear2_MPI/
 ```
 This test solves the same system of coupled equations but now connecting with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now Newton doesn't has to know nothing about file names and paths: communication is between codes while the are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.
 
+## Running `Newton` on multiple processors
+
+`Newton` is designed to run in one or multiple processes.
+Wether it is better one or other choice depends on the way that `Newton` connects with clients. Problems involving more than one spawn of codes are adressed more eficiently running `Newton` on multiple threads:
+
+```bash
+mpirun -np N -machinefile mf bin/Newton # N threads, mf file with node names
+```
+To see an example of this look at ```examples/nonlinear3_IO/run3procs.sh```.
+Communication with client codes via MPI option requieres an script to run the problem. (Look at any example inside ```_MPI``` folder).
+
 ## Main features
 
 * Explicit and implicit methods implemented to solve nonlinear residuals.
@@ -48,17 +59,6 @@ Newton uses PETSc functions to solve linear systems in methods that build jacobi
 * Ready-to-use mappers of variables received and sended to clients.
 
 * Sets of specific variables that need to be storage and updated along the evolution of systems.
-
-## Running `Newton` on multiple processors
-
-`Newton` is designed to run in one or multiple processes.
-Wether it is better one or other choice depends on the way that `Newton` connects with clients. Problems involving more than one spawn of codes are adressed more eficiently running `Newton` on multiple threads:
-
-```bash
-mpirun -np N -machinefile mf bin/Newton # N threads, mf file with node names
-```
-To see an example of this look at ```examples/nonlinear3_IO/run3procs.sh```.
-Communication with client codes via MPI option requieres an script to run the problem. (Look at any example inside ```_MPI``` folder).
 
 ## Mappers
 
