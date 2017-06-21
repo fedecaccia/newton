@@ -77,6 +77,7 @@ class Mapper
     Client* client;
     int testMap(int, double*, int, double*);
     int th2xs(int, double*, int, double*, Client::fermiStruct*);
+    double calculateDeltaXS(int, int, int, int, int, double);
     int pow2fpow(int, double*, int, double*);
     void loadXSfromCRM();
     std::string takeNextWord();
@@ -96,6 +97,8 @@ class Mapper
     double*** xs;
     double*** xsDown;
     double*** xsUp;*/
+    double deltaXSi, deltaDepi, deltaDepVali, deltaXS, deltaInDependency, depRef;
+    
 };
 
 #endif

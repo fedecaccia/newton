@@ -189,6 +189,10 @@ void Mapper::loadXSfromCRM()
           for(int iBurnupPoint=0; iBurnupPoint<mat[materialReaded].nBurnupPoints; iBurnupPoint++){
             // Reference point for burnup
             word = takeNextWord();
+            if(word[0]=='*'){
+              error = NEWTON_ERROR;
+              checkError(error, "Error. Too much burnup points set - Mapper::loadXSfromCRM");
+            }
             stringstream(word) >> mat[materialReaded].burnup[iBurnupPoint];
             for(int ixs=0; ixs<nXSTypes; ixs++){
               for(int ig=0; ig<nGroups; ig++){
@@ -226,6 +230,16 @@ void Mapper::loadXSfromCRM()
   }
   crm.close();
 
+
+  // Converting D t XS transport
+  for(int iMat=0; iMat<nMat; iMat++){
+    for(int iBurnup=0; iBurnup<mat[iMat].nBurnupPoints; iBurnup++){
+      for(int ig=0; ig<nGroups; ig++){
+        // XS_t = 1 / (3*D)
+        mat[iMat].xsRef[iBurnup][0][ig] = 1/(3*mat[iMat].xsRef[iBurnup][0][ig]); // Verify that 0 is the index of Difussion coefficient
+      }      
+    }
+  }
 
   // TEST
 /*  for(int iMat=0; iMat<nMat; iMat++){

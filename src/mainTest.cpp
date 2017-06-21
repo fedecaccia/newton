@@ -431,8 +431,9 @@ void linear3::solve()
           z = input[1];
         }
         else if(comm=="mpi_port"){
-          mpi_receive(input, 1);
-          z = input[0];          
+          mpi_receive(input, 2);
+          y = input[0];          
+          z = input[1];
         }
         else if(comm=="mpi_comm"){
           
@@ -451,7 +452,7 @@ void linear3::solve()
           printResults(output, 2, fileOutput);
         }
         else if(comm=="mpi_port"){
-          mpi_send(output, 3);
+          mpi_send(output, 2);
           order = mpi_receive_order();         
         }
         else if(comm=="mpi_comm"){         

@@ -105,7 +105,7 @@ output: error
 
 */
 int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xToMap, int nMapped, double* mapped)
-{
+{ 
   if(map == "" || map=="none"){
     if(nxToMap!=nMapped){
       error = NEWTON_ERROR;

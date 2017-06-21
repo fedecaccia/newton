@@ -58,7 +58,7 @@ Solver::Solver()
   // Steps between Jacobian calculation by finite difference method
   sJacCalc = 0;    
   // Iterations between Jacobian calculation by finite difference method
-  iJacCalc = 0;    
+  iJacCalc = 0;
   // Math object
   math = new MathLib();
   // client code object
@@ -166,32 +166,33 @@ void Solver::setFirstGuess(System* sys, int step)
     // Initial condition has been loaded by parser    
     // J CI?
   }
-  
+
   // Put x values in xItPrev
   math->copyInVector(xItPrev, 0, x, 0, sys->nUnk);
   // Put J values in JItPrev
   math->copyMat(JItPrev, J, sys->nUnk);
-  
-  
+   
   // Put x values in gamma and in delta
   x2gamma2delta(sys);
     
   // TEST
-  //~ cout<<"x: "<<endl;
-  //~ for(int iX=0; iX<sys->nUnk; iX++){
-    //~ cout<<"x("<<iX<<") = "<<x[iX]<<endl;    
-  //~ }
-  //~ cout<<"Gammas: "<<endl;
-  //~ for(int iGamma=0; iGamma<sys->nGamma; iGamma++){
-    //~ cout<<"g("<<iGamma<<") = "<<sys->gamma[iGamma]<<endl;
-  //~ }  
-  //~ cout<<"Deltas: "<<endl;
-  //~ for(int iCode=0; iCode<sys->nCodes; iCode++){
-    //~ cout<<"Code: "<<iCode<<endl;
-    //~ for(int iDelta=0; iDelta<sys->code[iCode].nDelta; iDelta++){
-      //~ cout<<"d("<<iDelta<<") = "<<sys->code[iCode].delta[iDelta]<<endl;
-    //~ }
-  //~ }
+  /*
+  cout<<"x: "<<endl;
+  for(int iX=0; iX<sys->nUnk; iX++){
+    cout<<"x("<<iX<<") = "<<x[iX]<<endl;    
+  }
+  cout<<"Gammas: "<<endl;
+  for(int iGamma=0; iGamma<sys->nGamma; iGamma++){
+    cout<<"g("<<iGamma<<") = "<<sys->gamma[iGamma]<<endl;
+  }  
+  cout<<"Deltas: "<<endl;
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+    cout<<"Code: "<<iCode<<endl;
+    for(int iDelta=0; iDelta<sys->code[iCode].nDelta; iDelta++){
+      cout<<"d("<<iDelta<<") = "<<sys->code[iCode].delta[iDelta]<<endl;
+    }
+  }
+  exit(1);*/
   
 }
 
@@ -391,8 +392,9 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
   // Calculate norm 2 of the residual vector
   residual = math->moduleAbs(resVector, sys->nUnk);
   
-  //~ // TEST
- /*  cout<<sys->nPhasesPerIter<<endl;
+  /*
+   // TEST
+   cout<<sys->nPhasesPerIter<<endl;
    cout<<"ALPHAS, BETAS, GAMMAS & DELTAS post calculating residuals"<<endl;
    for (int iCode=0; iCode<sys->nCodes; iCode++){
      cout<<"Code: "<<iCode<<endl;
@@ -412,13 +414,15 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
     for(int iDelta = 0; iDelta<sys->code[iCode].nDelta; iDelta++){
        cout<<sys->code[iCode].delta[iDelta]<<endl;
      }
-  }*/
-  //~ 
+  }
+  */
+   /*
   //TEST
-  /*cout<<"Beta"<<setw(20)<<"x"<<setw(20)<<"res"<<endl;
+  cout<<"Beta"<<setw(20)<<"x"<<setw(20)<<"res"<<endl;
   for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
     cout<<sys->beta[iUnk]<<setw(20)<<x[iUnk]<<setw(20)<<resVector[iUnk]<<endl; 
   }*/
+  
 }
 
 /* Solver calculateNewGuess

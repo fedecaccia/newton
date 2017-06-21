@@ -1213,7 +1213,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
         while(!wordIsForbidden(word)){
           bool ciLoaded = false;
           for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-            if(word==sys->xName[iUnk]){              
+            if(word==sys->xName[iUnk]){
               word = takeNextWord();
               stringstream(word) >> sol->x[iUnk];
               ciLoaded = true;
@@ -1249,7 +1249,6 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
     //~ cout<<sys->xName[iUnk]<<": "<<sol->x[iUnk]<<endl;
   //~ }
-     
   // Count amount of each code type
   
   for(int iCode=0; iCode<sys->nCodes; iCode++){

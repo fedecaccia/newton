@@ -255,10 +255,10 @@ void Client::updateVars(double time)
     }
   }
   // TEST
-/*  cout<<"BURNUP values: "<<endl;
+  cout<<"BURNUP values: "<<endl;
   for(int iF=0; iF<nFermi; iF++){
     for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
       cout<<fermi[iF].pe[ipe].name<<" "<<fermi[iF].pe[ipe].burnup <<endl;
     }
-  }*/
+  }
 }

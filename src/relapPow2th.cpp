@@ -174,9 +174,8 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
   // Output file
   outputFile.open(output.c_str());
 	if (outputFile.is_open()){
-
+    word = "";
     while(!outputFile.eof()){
-      word = takeNextWord();
       
       // Standing at the beginning of the interest time
       if(word=="0MAJOR"){
@@ -189,11 +188,10 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
 
         if( relap[iR].t<=(relap[iR].tf + relap[iR].maxDt) && relap[iR].t>=(relap[iR].tf - relap[iR].maxDt)){
           
-          while(!outputFile.eof()){
-            
+          while(!outputFile.eof()){            
             
             // Refrigerant temperature
-            if(word=="voidf"){
+            if(word=="voidf"){              
               
               // Standing at the beggining of the interest pipe
               while(word!=relap[iR].pipe[0]){
@@ -219,7 +217,7 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
                 stringstream(word) >> relap[iR].tempg;
                 
                 // Mean temperature
-                relap[iR].tempRef[iZone] = relap[iR].voidf*relap[iR].tempf + relap[iR].voidg*relap[iR].tempg;          
+                relap[iR].tempRef[iZone] = (relap[iR].voidf)*(relap[iR].tempf) + (relap[iR].voidg)*(relap[iR].tempg);          
                 
                 // Taking rest of line
                 word = takeNextLine();
@@ -309,9 +307,11 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
   outputFile.close();
   
   // Saving data
+  // Same order as CALCS in newton.config
+  
   int ivalue=0;
   for(int iZone=0; iZone<relap[iR].nAxialZones; iZone++){
-    // Same order as CALCS in newton.config
+    
     values[ivalue] = relap[iR].tempRef[iZone];
     //cout<<iZone<<" T ref: "<<values[ivalue]<<" ";
     ivalue++;

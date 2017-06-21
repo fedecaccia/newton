@@ -217,14 +217,6 @@ void System::allocate3()
     }
   }
   
-  // Alphas and Deltas
-  for(int iCode=0; iCode<nCodes; iCode++){
-    code[iCode].alpha = new double[code[iCode].nAlpha];
-    code[iCode].delta = new double[code[iCode].nDelta];
-    math->zeros(code[iCode].alpha, code[iCode].nAlpha);
-    math->zeros(code[iCode].delta, code[iCode].nDelta);
-  }
-  
 }
 
 /* System::construct
@@ -239,6 +231,18 @@ void System::construct(Mapper* mapper)
   
   rootPrints("Building system...");
   
+  // Allocate alphas and deltas in each code
+  // Alphas and deltas could had been updated in the last parsing,
+  // reading mappers
+  
+  // Alphas and Deltas
+  for(int iCode=0; iCode<nCodes; iCode++){
+    code[iCode].alpha = new double[code[iCode].nAlpha];
+    code[iCode].delta = new double[code[iCode].nDelta];
+    math->zeros(code[iCode].alpha, code[iCode].nAlpha);
+    math->zeros(code[iCode].delta, code[iCode].nDelta);
+  }
+    
   // Construct the correct links
   
   // Beta to link in residuals
@@ -325,6 +329,19 @@ void System::construct(Mapper* mapper)
     code[iCode].gammaFirstValuePos = gammaPos;
     gammaPos += code[iCode].nGamma;
   }
+  /*
+  // TEST
+  cout<<"b2linkInRes  -  x2linkInRes"<<endl;
+  for(int iRes=0; iRes<nRes; iRes++){
+    cout<<beta2linkInRes[iRes]<<"\t\t"<<x2linkInRes[iRes]<<endl;
+  }
+  
+  cout<<"b2linkInx"<<endl;
+  for(int iRes=0; iRes<nRes; iRes++){
+    cout<<beta2linkInX[iRes]<<endl;
+  }
+  exit(1);
+  */ 
   
   // Initialize file names and command args in I/O case
   error = setFilesAndCommands(0);
