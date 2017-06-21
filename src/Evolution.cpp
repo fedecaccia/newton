@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	EVOLUTION
-calculations			    |
+Multiphysics          | CLASS
+coupling              | EVOLUTION
+maste code            |
                       |
 
 -------------------------------------------------------------------------------

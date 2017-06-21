@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	FUNCTIONS
-in nonlinear			    |	GLOBAL
-calculations			    |
+Multiphysics          | GLOBAL
+coupling              | FUNCTIONS
+maste code            |
                       |
 
 -------------------------------------------------------------------------------

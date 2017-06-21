@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON					       |
-						           |
-Implicit coupling 		 |	CLASS
-in nonlinear			     |	SYSTEM
-calculations			     |
-						           |
+NEWTON                |
+                      |
+Multiphysics          | CLASS
+coupling              | SYSTEM
+maste code            |
+                      |
 
 -------------------------------------------------------------------------------
 
@@ -357,7 +357,7 @@ void System::construct(Mapper* mapper)
   // Configurate mappers
   for(int iMap=0; iMap<nMap; iMap++){
     NewtonMap->config(listOfMaps[iMap]);
-  }  
+  }
   
 	checkError(error,"Error setting system structure.");
 }

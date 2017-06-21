@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON                 |
-                       |
-Implicit coupling      |    CLASS
-in nonlinear           |    PARSER
-calculations           |
-                       |
+NEWTON					      |
+                      |
+Multiphysics          |	CLASS
+coupling              |	PARSER
+maste code            |
+                      |
 
 -------------------------------------------------------------------------------
 
@@ -23,6 +23,7 @@ Date: 8 June 2017
 #include "global.h"
 #include "Client.h"
 #include "Evolution.h"
+#include "Mapper.h"
 #include "Solver.h"
 #include "System.h"
 
@@ -36,12 +37,13 @@ class Parser
 {
 	public:
 		Parser();
-		void parseInput(System*, Evolution*, Solver*, Client*);
+		void parseInput(System*, Evolution*, Solver*, Client*, Mapper*);
 		void checkConsistency(System*);
 
 	private:
 		bool isAComment(std:: string);
 		std::string takeNextWord();
+		std::string takeNextName();
     bool wordIsCard(std::string, std::string);
 	  bool wordIsForbidden(std::string);
 

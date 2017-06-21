@@ -2,9 +2,9 @@
 
 NEWTON					      |
                       |
-Implicit coupling 		|	HEADER
-in nonlinear			    |	GLOBAL
-calculations			    |
+Multiphysics          |	GLOBAL
+coupling              |	HEADER
+maste code            |
                       |
 
 -------------------------------------------------------------------------------

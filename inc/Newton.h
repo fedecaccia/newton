@@ -2,9 +2,9 @@
 
 NEWTON					      |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	NEWTON
-calculations			    |
+Multiphysics          |	CLASS
+coupling              |	NEWTON
+maste code            |
                       |
 
 -------------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	MAPPER
-calculations			    |
+Multiphysics          | CLASS
+coupling              | MAPPER
+maste code            |
                       |
 
 -------------------------------------------------------------------------------
@@ -25,12 +25,32 @@ using namespace::std;
 */
 Mapper::Mapper(Client* clientPtr)
 {
+  // Initialization
+  nMat = 0;
   // Client Object
   client = clientPtr;
   // Math object
   math = new MathLib();
   // Initial error value
 	error = NEWTON_SUCCESS;
+}
+
+/* Mapper::allocate1
+Allocates in first stage.
+
+input: -
+output: -
+
+*/
+void Mapper::allocate1()
+{
+  mat = new material[nMat];
+  energyPerFission = new double[nGroups];
+
+  // Initialization
+  for (int iMat=0; iMat<nMat; iMat++){
+    mat[iMat].nDependencies = 0;
+  }
 }
 
 /* Mapper::config
@@ -43,10 +63,10 @@ output: -
 void Mapper::config(string map)
 {
   // Load data from external files?
-  rootPrints("Checking for mappers...");
+  rootPrints("Setting \""+map+"\" map...");
   
   if(map=="th2xs"){
-    //loadXSfromCRM();
+    loadXSfromCRM();
   }
   else if(map=="" || map=="none"){
     
@@ -78,6 +98,10 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
         mapped[iX] = xToMap[iX];
       }        
     }
+  }
+
+  else if(map == "map_test1"){
+   error = testMap(nxToMap, xToMap, nMapped, mapped);
   }
 
   else if(map == "th2xs"){

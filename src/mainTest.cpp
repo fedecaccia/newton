@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	TEST
-in nonlinear			    |	PROGRAMM
-calculations			    |
+Multiphysics          | TEST
+coupling              | CLASSES
+maste code            |
                       |
 
 -------------------------------------------------------------------------------
@@ -105,6 +105,18 @@ int main(int argc,char **argv)
       system4 = new nonlinear3();
       try{
         system4->solve();
+      }
+      catch(int e){
+        cout<<"ERROR running test."<<endl;
+        return 0;
+      }
+      break;
+
+    case TEST_2_LINEAR_MAPPER:
+      linear2mapper* system5;
+      system5 = new linear2mapper();
+      try{
+        system5->solve();
       }
       catch(int e){
         cout<<"ERROR running test."<<endl;
@@ -845,6 +857,201 @@ void nonlinear3::solve()
         
       default:
 
+        cout<<"ERROR. Bad client number received in arg 2."<<endl;
+        throw TEST_ERROR;
+    }
+  }while(order==RESTART);
+  
+  if(order==ABORT){
+    mpi_finish();
+    cout<<"Finishing program by ABORT order"<<endl;
+    throw TEST_ERROR;
+  }
+  
+  // Finish connections
+  if(comm=="mpi_port"){
+    mpi_finish();
+  }
+}
+
+
+/*-----------------------------------------------------------------------------
+
+System to solve:
+
+ a11*w + a12*x + a13*y + a14*z = b1     (1a)
+ a21*w + a22*x + a23*y + a24*z = b2     (2a)
+ a31*(w+x)     + a33*y + a34*z = b3     (3a)
+ a41*(w+x)     + a43*y + a44*z = b4     (4a)
+
+Code number 0 calculates (w,x) values as function of (y_guess, z_guess) value readed from input, solving the coupled equations (1b, 2b):
+
+ w +  = (b1 - (a12*x + a13*y_guess + a14*z_guess) )/a11    (1b)
+ x +  = (b2 - (a21*w + a13*y_guess + a14*z_guess) )/a21    (2b)
+
+Code number 1 calculates (y,z) values as function of (alpha_guess = w_guess + 
+x_guess) values readed from input, solving (3b, 4b):
+
+ y = (b3 - a31*alpha_guess -a34*z) / a33    (3b)
+ z = (b4 - a41*alpha_guess -a43*y) / a44    (3b)
+
+With matrix of the original system A:    
+  1   2   3   4
+  4   3   2   1
+  2   2   3   1
+  3   3   4   1
+and right hand side b:
+  30
+  20
+  19
+  25
+Analytical solution is:
+  w = 1, x = 2, y = 3, z = 4 
+-----------------------------------------------------------------------------*/
+
+linear2mapper::linear2mapper()
+{
+  // Initialization
+  switch(codeClient){
+
+    case 0:
+      input = new double[2];
+      output = new double[2];
+      mat = new double*[2];
+      for(int i=0; i<2; i++){
+        mat[i] = new double[2];
+      }
+      mat[0][0] = -0.6;
+      mat[0][1] = 0.4;
+      mat[1][0] = 0.8;
+      mat[1][1] = -0.2;
+      b = new double[2];
+      break;
+
+    case 1:
+      input = new double[2];
+      output = new double[2];
+      mat = new double*[2];
+      for(int i=0; i<2; i++){
+        mat[i] = new double[2];
+      }
+      mat[0][0] = -1;
+      mat[0][1] = 1;
+      mat[1][0] = 4;
+      mat[1][1] = -3;
+      b = new double[2];
+      break;
+
+    default:
+      cout<<"ERROR. Bad client number received in arg 2."<<endl;
+      throw TEST_ERROR;
+  }
+  if(comm=="io"){
+    file = commArg;
+    fileInput = file+".dat";
+    fileOutput = file+".out";  
+  }
+  else if(comm=="mpi_port"){
+    stringstream(commArg) >> codeID;
+    // Connection
+    mpi_connection();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){    
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_finish();
+      throw TEST_ERROR;
+    }    
+  }
+}
+
+void linear2mapper::solve()
+{
+  do{
+    switch(codeClient){
+      case 0:
+        // Load guess
+        if(comm=="io"){                
+          input = loaddata(fileInput, 2);
+          y = input[0];
+          z = input[1];
+        }
+        else if(comm=="mpi_port"){
+          mpi_receive(input, 2);
+          y = input[0];
+          z = input[1];
+        }
+        else if(comm=="mpi_comm"){
+          
+        }
+
+        // Set b values
+        b[0] = 30 - 3*y - 4*z;
+        b[1] = 20 - 2*y - 1*z;
+        
+        // Solve system
+        w = mat[0][0] * b[0] + mat[0][1] * b[1];
+        x = mat[1][0] * b[0] + mat[1][1] * b[1];
+
+        // Set solution
+        output[0] = w;
+        output[1] = x;
+
+        // Send results
+        if(comm=="io"){                
+          printResults(output, 2, fileOutput);
+        }
+        else if(comm=="mpi_port"){
+          mpi_send(output, 2);
+          order = mpi_receive_order();         
+        }
+        else if(comm=="mpi_comm"){         
+          
+        }
+        
+        break;
+        
+      case 1:
+        // Load guess
+        if(comm=="io"){
+          input = loaddata(fileInput, 1);
+          alpha = input[0];
+        }
+        else if(comm=="mpi_port"){
+          mpi_receive(input, 1);
+          alpha = input[0];
+        }
+        else if(comm=="mpi_comm"){
+          
+        }
+        // Set b values
+        b[0] = 19 - 2*alpha;
+        b[1] = 25 - 3*alpha;
+
+        // Solve system
+        y = mat[0][0] * b[0] + mat[0][1] * b[1];
+        z = mat[1][0] * b[0] + mat[1][1] * b[1];
+
+        // Set solution
+        output[0] = y;
+        output[1] = z;
+
+        // Send results
+        if(comm=="io"){
+          printResults(output, 2, fileOutput);
+        }
+        else if(comm=="mpi_port"){
+          mpi_send(output, 2);
+          order = mpi_receive_order();         
+        }
+        else if(comm=="mpi_comm"){
+          
+        }
+        break;
+        
+      default:
         cout<<"ERROR. Bad client number received in arg 2."<<endl;
         throw TEST_ERROR;
     }

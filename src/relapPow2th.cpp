@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	CLIENT
-calculations			    |
+Multiphysics          | CLASS
+coupling              | MAPPER
+maste code            |
                       |
 
 -------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ int Client::prepareRelapPow2thInput(string codeName, int nValues, double* values
   nValuesExpected = relap[iR].nAxialZones;
   if(nValues!=nValuesExpected){
     error=NEWTON_ERROR;
-    cout<<"The amount of values received: "<<int2str(nValues)<<" is different from expected: "<<int2str(nValuesExpected)<<" - Client::prepareRelapPow2thInput";
+    cout<<"The amount of values received: "<<int2str(nValues)<<" is different from expected: "<<int2str(nValuesExpected)<<" - Client::prepareRelapPow2thInput"<<endl;
     return error;
   }
   

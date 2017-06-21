@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	CLIENT
-calculations			    |
+Multiphysics          | CLASS
+coupling              | CLIENT
+maste code            |
                       |
 
 -------------------------------------------------------------------------------

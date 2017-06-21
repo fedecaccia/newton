@@ -1,3 +1,22 @@
+/*****************************************************************************\
+
+NEWTON                |
+                      |
+Multiphysics          | CLASS
+coupling              | MATLIB
+maste code            |
+                      |
+
+-------------------------------------------------------------------------------
+
+MatLib is a library of vector and matrix function operations.
+
+Author: Federico A. Caccia
+Date: 4 June 2017
+
+\*****************************************************************************/
+
+
 #ifndef MATHLIB_H
 #define MATHLIB_H
 

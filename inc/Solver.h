@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	SOLVER
-calculations			    |
+Multiphysics          | CLASS
+coupling              | SOLVER
+maste code            |
                       |
 
 -------------------------------------------------------------------------------

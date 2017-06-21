@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	NEWTON
-calculations			    |
+Multiphysics          | CLASS
+coupling              | NEWTON
+maste code            |
                       |
 
 -------------------------------------------------------------------------------
@@ -67,14 +67,12 @@ void Newton::initialize()
   // PETSc init
   PetscInitialize(PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);
   
-  rootPrints("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    Newton    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    rootPrints("                                    Implicit coupling");
-    rootPrints("                                in nonlinear calculations");
-    rootPrints("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");  
+  rootPrints("\nNewton");
+    rootPrints("Multiphysics coupling master code\n");  
   
 	// Objects initialization
 
-	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver, NewtonSolver->NewtonClient);
+	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver, NewtonSolver->NewtonClient, NewtonMap);
 	
 	NewtonSystem->construct(NewtonMap);
 
@@ -122,5 +120,4 @@ void Newton::finish()
 	NewtonComm->disconnect();
   PetscFinalize();
 	MPI_Finalize();
-  rootPrints("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 }

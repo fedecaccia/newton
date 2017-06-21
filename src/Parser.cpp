@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON                 |
-                       |
-Implicit coupling      |    CLASS
-in nonlinear           |    PARSER
-calculations           |
-                       |
+NEWTON                |
+                      |
+Multiphysics          | CLASS
+coupling              | PARSER
+maste code            |
+                      |
 
 -------------------------------------------------------------------------------
 
@@ -182,27 +182,27 @@ bool Parser::wordIsCard(string word, string parent)
       return true;
     }
   }
-  else if(parent=="GUESSES"){
+/*  else if(parent=="GUESSES"){
     if(word=="MAP"){
       return true;
     }
     if(word=="GUESSES_MAPPED"){
       return true;
     }
-  } 
-  else if(parent=="CALCS"){
+  } */
+/*  else if(parent=="CALCS"){
     if(word=="MAP"){
       return true;
     }
     if(word=="CALCS_PRE_MAP"){
       return true;
     }
-  } 
+  } */
   else if(parent=="MAPPER"){
     if(word=="STAGE"){
       return true;
     }
-    if(word=="CLIENT"){
+    if(word=="MAP_CLIENT"){
       return true;
     }
     if(word=="CALCS_PRE_MAP"){
@@ -214,20 +214,24 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="MAP_DATA"){
       return true;
     }
+    if(word=="DATA_N_GROUPS"){
+      return true;
+    }
     if(word=="MATERIAL"){
-      return true;
-    }
-    if(word=="N_BURNUP"){
-      return true;
-    }
-    if(word=="PHYSICAL_ENTITIES"){
       return true;
     }
     if(word=="ENERGY_PER_FISSION"){
       return true;
     }
-  } 
-  
+  }
+  else if(parent=="MATERIAL"){ 
+     if(word=="N_BURNUP"){
+      return true;
+    }
+    if(word=="PHYS_ENT"){
+      return true;
+    }
+  }
   return false;
 }
 
@@ -246,13 +250,45 @@ string Parser::takeNextWord()
   //transform(word.begin(), word.end(), word.begin(), ::tolower);
   
   // Look for a comment
-  while (isAComment(word)){          
+  while (isAComment(word) && !configFile.eof()){
     getline(configFile, word);
     // Next word
     configFile >> word;
     //transform(word.begin(), word.end(), word.begin(), ::tolower);
   }
-  
+
+  return word;
+}
+
+/* Parser::takeNextName
+Get the next phrase until "&".
+
+input: -
+output: phrase string
+
+*/
+string Parser::takeNextName()
+{
+  getline(configFile, word, '&');
+
+  // Erase blank spaces at first and end
+  for(unsigned int i=0; i<word.length(); i++){
+    if(word[0]==' '){
+      word.erase(word.begin());
+    }
+    else{
+      break;
+    }
+  }
+  for(unsigned int i=0; i<word.length(); i++){
+    if(*word.rbegin()==' '){
+      word.erase(word.end()-1);
+    }
+    else{
+      break;
+    }
+  }
+
   return word;
 }
 
@@ -309,8 +345,9 @@ bool Parser::wordIsForbidden(string word)
 {
   if(wordIsCard(word, "INPUT") || 
      wordIsCard(word, "CLIENT") || 
-     wordIsCard(word, "CALCS") || 
-     wordIsCard(word, "GUESSES") ||
+/*     wordIsCard(word, "CALCS") || 
+     wordIsCard(word, "GUESSES") ||*/
+     wordIsCard(word, "MAPPER") ||
      configFile.eof()){
     return true;
   }
@@ -363,7 +400,7 @@ string Parser::loadCalcsAndTakeWord(System* sys)
   
   // Reading other properties of calcs
 
-  while(wordIsCard(word, "CALCS")){
+/*  while(wordIsCard(word, "CALCS")){
     if(word=="MAP"){
       word = takeNextWord();
       if(!wordIsForbidden(word)){
@@ -381,7 +418,7 @@ string Parser::loadCalcsAndTakeWord(System* sys)
       stringstream(word)>>sys->code[clientReaded].nAlpha;
       word = takeNextWord();
     }
-  }
+  }*/
 
   return word;
 }
@@ -432,7 +469,7 @@ string Parser::loadGuessesAndTakeWord(System* sys)
   
   // Reading other properties of calcs
   
-  while(wordIsCard(word, "GUESSES")){
+/*  while(wordIsCard(word, "GUESSES")){
     if(word=="MAP"){
       word = takeNextWord();
       if(!wordIsForbidden(word)){
@@ -450,7 +487,7 @@ string Parser::loadGuessesAndTakeWord(System* sys)
       stringstream(word)>>sys->code[clientReaded].nDelta;
       word = takeNextWord();
     }
-  }
+  }*/
 
   return word;
 }
@@ -478,7 +515,7 @@ string Parser::loadClientAndTakeWord(System* sys)
     error = NEWTON_ERROR;
     checkError(error, "Select a correct name for client. Word "+word+" is avoided - Parser::loadClientAndTakeWord");
   }
-  
+
   // Take properties
 
   while(wordIsCard(word, "CLIENT") && !configFile.eof()){
@@ -646,11 +683,11 @@ string Parser::loadClientAndTakeWord(System* sys)
 
   // Bad position of guesses and calcs properties
 
-  if(wordIsCard(word, "GUESSES") ||
+/*  if(wordIsCard(word, "GUESSES") ||
      wordIsCard(word, "CALCS")){
     error = NEWTON_ERROR;
     checkError(error, "Bad place for input card: \""+word+"\" - Parser::loadClientAndTakeWord");
-  }
+  }*/
   
   checkClientProperties(sys, clientReaded);
 
@@ -720,7 +757,7 @@ input: System pointer
 output: -
 
 */
-void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* client)
+void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* client, Mapper* mapper)
 {
   rootPrints("Parsing configuration file...");
 
@@ -731,7 +768,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
     while(!configFile.eof()){
       
       // Count amount of codes in order to allocate
-      
+
       if(word=="CLIENT"){
         sys->nCodes++;
         word = takeNextWord();
@@ -866,7 +903,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       else{
         word = takeNextWord();
       }
-      
+
     }
   }
   else{
@@ -923,10 +960,10 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
         error = NEWTON_ERROR;
         checkError(error, "Word in bad place. Set "+word+" after CLIENT - Parser::parseInput");
       }
-      else if(wordIsCard(word, "CALCS") || wordIsCard(word, "GUESSES")){
+/*      else if(wordIsCard(word, "CALCS") || wordIsCard(word, "GUESSES")){
         error = NEWTON_ERROR;
         checkError(error, "Set CALCS and GUESSES properties after list variables. Word: "+word+" in bad place - Parser::parseInput");
-      }
+      }*/
     
       else if(word=="DUMMY"){
         word = takeNextWord();
@@ -999,7 +1036,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   betaLoaded = 0;
   gammaLoaded = 0;
   clientReaded =0;
-
+  
   // Third input file opening  
 
   configFile.open("newton.config");
@@ -1205,6 +1242,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       client->nRelap++;
     }
   }
+
   // Allocate things in clients
   client->allocate1();
   
@@ -1421,11 +1459,9 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   //~ }
   //~ exit(1);
   
-  
-  
-  // MAPPER SPECIFIC READINGS
+  // MAPPER READINGS
 
-  // Seventh input file opening  
+  // Seventh input file opening
 
   configFile.open("newton.config");
   if (configFile.is_open()){
@@ -1433,13 +1469,135 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
 
       // Count things in mapper
       if(word=="MAPPER"){
-        
+
+        string mapName;
+        string clientName = "";
+        int stage=-1;
+        int nPreMap = -1;
+        int nPostMap = -1;
+        mapName = takeNextWord();
+        word = takeNextWord();
+        while(!wordIsCard(word, "INPUT") && !configFile.eof()){
+
+          if(word=="STAGE"){
+            word=takeNextWord();
+            transform(word.begin(), word.end(), word.begin(), ::tolower);
+            if(word=="pre_guess"){
+              stage=0;
+            }
+            else if(word=="post_calc"){
+              stage=1;
+            }
+            else{
+              error = NEWTON_ERROR;
+              checkError(error, "ERROR. Bad mapper card STAGE. Select \"pre_guess\" or \" post_calc\" - Parser::parseInput");
+            }
+            word=takeNextWord();
+          }
+
+          else if(word=="MAP_CLIENT"){
+            clientName = takeNextWord();
+            word = takeNextWord();
+          }
+
+          else if(word=="GUESSES_MAPPED"){
+            word = takeNextWord();
+            stringstream(word) >> nPostMap;
+            word = takeNextWord();
+          }
+
+          else if(word=="CALCS_PRE_MAP"){
+            word = takeNextWord();
+            stringstream(word) >> nPreMap;
+            word = takeNextWord();
+          }
+
+          else if(word=="MATERIAL"){
+            mapper->nMat++;
+            word = takeNextWord();
+            while(!wordIsCard(word, "MAPPER") && 
+                  !wordIsCard(word, "INPUT") && 
+                  !configFile.eof()){
+              word = takeNextWord();
+            }
+          }
+
+          else if(word=="ENERGY_PER_FISSION"){
+            word = takeNextWord();
+            while(!wordIsCard(word, "MAPPER") && 
+                  !wordIsCard(word, "INPUT") && 
+                  !configFile.eof()){
+              word = takeNextWord();
+            }
+          }
+
+          else if(word=="MAP_DATA"){
+            mapper->xsFile = takeNextWord();
+            word = takeNextWord();
+          }
+
+          else if(word=="DATA_N_GROUPS"){
+            word = takeNextWord();
+            stringstream(word) >> mapper->nGroups;
+            word = takeNextWord();
+
+            // Looking for the client that corresponds:
+            for(int iF=0; iF<client->nFermi; iF++){
+              if(client->fermi[iF].name==clientName){
+                if(mapper->nGroups != client->fermi[iF].nGroups){
+                  rootPrints("WARNING: Groups used in \""+clientName+"\" are different from data loaded - Parser::parseInput");
+                }
+              }
+            }            
+          }
+
+          else if(!wordIsForbidden(word)){
+            error = NEWTON_ERROR;
+            checkError(error, "ERROR. Bad mapper configuration. Word: \""+word+"\" unknown - Parser::parseInput");
+          }
+
+          else{
+            word = takeNextWord();
+          }
+
+        }
+
+        // Checking consistency of data readed
+        if (stage==0 && nPostMap<0){
+          error = NEWTON_ERROR;
+          checkError(error, "ERROR. Bad mapper configuration. Set GUESSES_MAPPED using STAGE: PRE_GUESS - Parser::parseInput");
+
+        }
+        else if(stage==1 && nPreMap<0) {
+          error = NEWTON_ERROR;
+          checkError(error, "ERROR. Bad mapper configuration. Set CALS_PRE_MAP using STAGE: POST_CALC - Parser::parseInput");
+        }
+        if(clientName==""){
+          error = NEWTON_ERROR;
+          checkError(error, "ERROR. Set MAP_CLIENT card - Parser::parseInput");
+        }
+
+        // Saving data
+        for(int iCode=0; iCode<sys->nCodes; iCode++){
+          if(sys->code[iCode].name==clientName){
+            if(stage==0){
+              sys->code[iCode].gammaMap = mapName;
+              sys->code[iCode].nDelta = nPostMap;
+            }
+            else if(stage==1){
+              sys->code[iCode].alphaMap = mapName;
+              sys->code[iCode].nAlpha = nPreMap;
+            }
+            break;
+          }
+        }
+
       }
 
       else{        
         word = takeNextWord();
-      }
-    
+      }      
+
     } // Finish while(!EOF)
 
   } 
@@ -1449,8 +1607,27 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   }
   configFile.close();
   
+  // TEST
+/*  cout<<"MAPPERS"<<endl;
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+    if(sys->code[iCode].gammaMap!=""){
+      cout<<sys->code[iCode].name<<": "<<sys->code[iCode].gammaMap<<endl;
+      cout<<"number of guesses mapped: "<<sys->code[iCode].nDelta<<endl;
+    }
+    if(sys->code[iCode].alphaMap!=""){
+      cout<<sys->code[iCode].name<<": "<<sys->code[iCode].alphaMap<<endl;
+      cout<<"number of calcs pre map: "<<sys->code[iCode].nAlpha<<endl;
+    }
+  }*/
+
+  // Allocate things
+
+  mapper->allocate1();
+
   
-  
+  // MAPPER SPECIFIC READINGS
+  int materialReaded = 0;
+
   // Eighth input file opening  
 
   configFile.open("newton.config");
@@ -1459,7 +1636,61 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
 
       // Count things in mapper
       if(word=="MAPPER"){
-        
+        word = takeNextWord();
+        while(!wordIsCard(word, "INPUT") && !configFile.eof()){
+
+          if(word=="ENERGY_PER_FISSION"){
+            for(int iE=0; iE<mapper->nGroups; iE++){
+              word = takeNextWord();
+              if(!wordIsForbidden(word)){
+                stringstream(word)>>mapper->energyPerFission[iE];
+              }
+              else{
+                error = NEWTON_ERROR;
+                checkError(error, "Error setting ENERGY_PER_FISSION card - Parser::parseInput");
+              }
+            }
+            word = takeNextWord();
+            if(!wordIsForbidden(word)){
+              rootPrints("WARNING: Setting extra groups in ENERGY_PER_FISSION card? - Parser::parseInput");
+            }
+          }
+
+          else if(word=="MATERIAL"){
+            mapper->mat[materialReaded].name = takeNextName();            
+            word = takeNextWord();            
+            while(wordIsCard(word, "MATERIAL")){
+              if(word=="N_BURNUP"){
+                word = takeNextWord();
+                stringstream(word)>>mapper->mat[materialReaded].nBurnupPoints;
+                word = takeNextWord();
+              }
+              else if(word=="PHYS_ENT"){                
+                // Set material in physical entities structures in fermi client
+                word = takeNextWord();
+                while(!wordIsForbidden(word) && !configFile.eof()){
+                  // Look for this physical entity in fermi clients
+                  for(int iF=0; iF<client->nFermi;iF++){
+                    for(int ipe=0; ipe<client->fermi[iF].nPhysicalEntities;ipe++){
+                      if(word==client->fermi[iF].pe[ipe].name){
+                        client->fermi[iF].pe[ipe].material = materialReaded;
+                      }
+                    }
+                  }
+
+                  word = takeNextWord();
+                }
+              }
+
+            }
+            materialReaded++;
+          }
+
+          else{
+            word = takeNextWord();  
+          }
+
+        }
       }
 
       else{        
@@ -1475,11 +1706,20 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   }
   configFile.close();
   
-  
-  
-  
-  
-  
+ // TEST
+/* cout<<"MAPPER SPECIFICS"<<endl;
+ for(int iF=0; iF<client->nFermi; iF++){
+  cout<<client->fermi[iF].name<<endl;
+  for(int ipe=0; ipe<client->fermi[iF].nPhysicalEntities;ipe++){
+    int imat = client->fermi[iF].pe[ipe].material;
+    cout<<client->fermi[iF].pe[ipe].name<<" - Material: "<< mapper->mat[imat].name<<" - n Burnup points to load: "<<mapper->mat[imat].nBurnupPoints<<endl;
+  }
+  cout<<"Energy per fision per groups:"<<endl;
+  for(int ig=0; ig<mapper->nGroups; ig++){
+    cout<<mapper->energyPerFission[ig]<<" ";
+  }
+ }
+ exit(1); */ 
   
 }
 

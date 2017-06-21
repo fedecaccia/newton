@@ -1,11 +1,11 @@
 /*****************************************************************************\
 
-NEWTON                 |
-                       |
-Implicit coupling      |  CLASS
-in nonlinear           |  SYSTEM
-calculations           |
-                       |
+NEWTON                |
+                      |
+Multiphysics          | CLASS
+coupling              | SYSTEM
+maste code            |
+                      |
 
 -------------------------------------------------------------------------------
 

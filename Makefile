@@ -17,6 +17,7 @@ OBJELEM = $(OBJ_DIR)/Client.o						\
 		  $(OBJ_DIR)/System.o 							\
 		  $(OBJ_DIR)/Solver.o							  \
 		  $(OBJ_DIR)/testClient.o						\
+		  $(OBJ_DIR)/testMap.o	  					\
 		  $(OBJ_DIR)/th2xs.o								\
 		  $(OBJ_DIR)/relapPow2th.o					\
 		  $(OBJ_DIR)/fermiXs2pow.o					\

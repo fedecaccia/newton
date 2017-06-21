@@ -21,34 +21,28 @@ Date: 15 June 2017
 
 using namespace::std;
 
-/*Mapper::th2xs
+/*Mapper::testMap
  
-Map vector of thermal-hydraulic values into another of cross sections.
+Testing map.
 
 input: code, number of elements to map, vector to map, 
-number of elements of image, image vector, & number of:
-zones, physical entities, XS, energy groups
+number of elements of image, image vector, & pointer to the current fermi 
+struct
 output: error
 
 */
-int Mapper::pow2fpow(int nXToMap, double* xToMap, int nMapped, double* mapped)
+int Mapper::testMap(int nxToMap, double* xToMap, int nMapped, double* mapped)
 {
   // Check consistency
-  if(nXToMap!=nMapped){
+  
+  // Make alpha (mapped variable) = x + w (received variables)
+  if(nMapped!=1 || nxToMap!=2){
+    cout<<"Bad mapper formulation in test - Mapper::map"<<endl;
     error = NEWTON_ERROR;
-    cout<<"Different amount of values to analyze - Mapper::pow2fpow"<<endl;
-    return error;
   }
-  
-  // Just sum all powers and calculate each fraction
-  int power = 0;
-  for(int ip=0; ip<nXToMap; ip++){
-    power+=xToMap[ip];
-  }  
-  
-  for(int ifp=0; ifp<nXToMap; ifp++){
-    mapped[ifp] = xToMap[ifp]/power;
-  }  
+
+  // Just map
+  mapped[0] = xToMap[0] + xToMap[1];
      
   return error;
 }

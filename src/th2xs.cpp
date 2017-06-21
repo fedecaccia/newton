@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	MAPPER
-calculations			    |
+Multiphysics          | CLASS
+coupling              | MAPPER
+maste code            |
                       |
 
 -------------------------------------------------------------------------------
@@ -36,22 +36,29 @@ int Mapper::th2xs(int nXToMap, double* xToMap, int nMapped, double* mapped, Clie
   // Check consistency
 
   // Organizing data
-  static double* tRef = new double [fermi->nPhysicalEntities];
-  static double* tFuel = new double [fermi->nPhysicalEntities];
-  static double* nRef = new double [fermi->nPhysicalEntities];
-  static double* burnup = new double [fermi->nPhysicalEntities];
-  static double*** xs = new double** [fermi->nPhysicalEntities];
+  double* tRef = new double [fermi->nPhysicalEntities];
+  double* tFuel = new double [fermi->nPhysicalEntities];
+  double* nRef = new double [fermi->nPhysicalEntities];
+  double* burnup = new double [fermi->nPhysicalEntities];
+  double*** xs = new double** [fermi->nPhysicalEntities];
+  double*** xsDown = new double** [fermi->nPhysicalEntities];
+  double*** xsUp = new double** [fermi->nPhysicalEntities];
   for(int ipe=0; ipe<fermi->nPhysicalEntities; ipe++){
     xs[ipe] = new double*[fermi->nXS];
+    xsDown[ipe] = new double*[fermi->nXS];
+    xsUp[ipe] = new double*[fermi->nXS];
     for(int ixs=0; ixs<fermi->nXS; ixs++){
       xs[ipe][ixs] = new double[fermi->nGroups];
+      xsDown[ipe][ixs] = new double[fermi->nGroups];
+      xsUp[ipe][ixs] = new double[fermi->nGroups];
     }
   }
   
   /* Assuming that in xToMap values are:
    * tRef, tFuel, nRef, (phys ent 1)
    * tRef, tFuel, nRef, (phys ent 2),
-   * ...*/
+   * ...
+  (this is how I set in newton.config)*/
   
   int ivalue=0;
   for (int ipe=0; ipe<fermi->nPhysicalEntities; ipe++){
@@ -97,6 +104,21 @@ int Mapper::th2xs(int nXToMap, double* xToMap, int nMapped, double* mapped, Clie
   xs[7][0][0]=1.5; xs[7][1][0]=0.005;                                   xs[7][2][0]=0;  xs[7][3][0]=0;
   xs[8][0][0]=1.5; xs[8][1][0]=0.004;                                   xs[8][2][0]=0;  xs[8][3][0]=0;
   xs[9][0][0]=1.5; xs[9][1][0]=0.003;                                   xs[9][2][0]=0;  xs[9][3][0]=0;
+
+  // Interpolating with crm data
+  for(int ipe=0; ipe<fermi->nPhysicalEntities; ipe++){
+    for(int ibp=0; ibp<mat[fermi->pe[ipe].material].nBurnupPoints-1; ibp++){
+      if(burnup[ipe]>=mat[fermi->pe[ipe].material].burnup[ibp]){
+        error = NEWTON_ERROR;
+        checkError(error, "XS interpolation not implemented yet - Mapper::th2xs");
+      }
+    }
+  }
+
+
+
+
+
 
   /* Map values in the order that are going to be send to the client.
    * We are setting deltas to the client here. */

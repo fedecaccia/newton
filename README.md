@@ -102,6 +102,5 @@ International journal for numerical methods in engineering, 2010, vol 81, pags 1
 coupling in fluid dynamics calculations”). XXll Congress on Numerical Methods and its
 Applications, 7-11 November 2016, Córdoba, Argentina.](https://goo.gl/mZ3A7o)
 
-## Author
-
-Federico Agustín Caccia - [federicoagustincaccia@gmail.com]
+## Contact
+Any questions or suggestions feel free to contact the author at [federicoagustincaccia@gmail.com]

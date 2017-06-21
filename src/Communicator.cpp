@@ -1,10 +1,10 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Implicit coupling 		|	CLASS
-in nonlinear			    |	COMMUNICATOR
-calculations			    |
+Multiphysics          | CLASS
+coupling              | COMMUNICATOR
+maste code            |
                       |
 
 -------------------------------------------------------------------------------
