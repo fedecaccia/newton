@@ -103,4 +103,4 @@ coupling in fluid dynamics calculations”). XXll Congress on Numerical Methods 
 Applications, 7-11 November 2016, Córdoba, Argentina.](https://goo.gl/mZ3A7o)
 
 ## Contact
-Any questions or suggestions feel free to contact the author at [federicoagustincaccia@gmail.com]
+Any questions or suggestions feel free to contact me at [federicoagustincaccia@gmail.com]
