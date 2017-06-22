@@ -57,6 +57,7 @@ Newton::Newton()
 	NewtonSolver = new Solver();
   NewtonMap = new Mapper(NewtonSolver->NewtonClient);
 	NewtonComm = new Communicator(NewtonSystem, NewtonEvolution);
+	NewtonDebugger = new Debugger();
 }
 
 /* Newton::initialize
@@ -86,7 +87,7 @@ void Newton::initialize()
   PetscInitialize(PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);
   
   rootPrints("\nNewton");
-    rootPrints("Multiphysics coupling master code\n");  
+  rootPrints("Multiphysics coupling master code\n");  
   
 	// Objects initialization
 

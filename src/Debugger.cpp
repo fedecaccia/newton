@@ -1,20 +1,17 @@
 /*****************************************************************************\
 
-NEWTON					      |
+NEWTON                |
                       |
-Multiphysics          |	CLASS
-coupling              |	NEWTON
+Multiphysics          | CLASS
+coupling              | DEBUGGER
 maste code            |
                       |
 
 -------------------------------------------------------------------------------
 
-Newton manages the three main stages in residual calculation: initializing 
-everything to start calculations, administrates evolution parameters, controls 
-that solution to residual equations converge in each evolution step, and ends
-everything safety.
+Debugger is the class that manages all the outputs of the code. 
 
-Date: 3 June 2017
+Date: 22 June 2017
 
 -------------------------------------------------------------------------------
 
@@ -33,48 +30,18 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Newton.  If not, see <http://www.gnu.org/licenses/>.
+along with sNewton.  If not, see <http://www.gnu.org/licenses/>.
 
 \*****************************************************************************/
 
-#ifndef NEWTON_H
-#define NEWTON_H
-
-#include "global.h"
-#include "Parser.h"
-#include "Mapper.h"
-#include "System.h"
-#include "Evolution.h"
-#include "Communicator.h"
-#include "Solver.h"
 #include "Debugger.h"
 
-#include "mpi.h"
-#include "petsc.h"
-#include <time.h>
-#include <string>
+using namespace::std;
 
-class Newton
+/* Debugger constructor
+
+*/
+Debugger::Debugger()
 {
-	public:
-		Newton();
-		void initialize();
-		void run();
-		void finish();
 
-		Parser* NewtonParser;
-		System* NewtonSystem;
-		Evolution* NewtonEvolution;
-		Communicator* NewtonComm;
-		Solver* NewtonSolver;
-    Mapper* NewtonMap;
-    Debugger* NewtonDebugger;
-		
-	private:
-		int error;
-    double firstClick;
-    double click;
-
-};
-
-#endif
+}

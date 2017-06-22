@@ -5,6 +5,7 @@ OBJ_DIR=$(MAIN_DIR)/obj
 BIN_DIR=$(MAIN_DIR)/bin
 OBJELEM = $(OBJ_DIR)/Client.o						\
 		  $(OBJ_DIR)/Communicator.o	        \
+		  $(OBJ_DIR)/Debugger.o	        \
 		  $(OBJ_DIR)/Evolution.o	         	\
 		  $(OBJ_DIR)/global.o		  					\
 		  $(OBJ_DIR)/loadXSfromCRM.o				\
