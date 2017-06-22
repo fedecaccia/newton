@@ -43,6 +43,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include "System.h"
 #include "Communicator.h"
 #include "MathLib.h"
+#include "Debugger.h"
 
 #include <iomanip>
 #include "petsc.h"
@@ -68,7 +69,9 @@ class Solver
     
     int nEvalInStep;
     int nEval;
-		
+    
+		Debugger debug;
+    
 	private:
     int runCode(int, System*);
     int spawnCode(int, System*);
@@ -86,7 +89,7 @@ class Solver
     double residual;    
     int iter;
     int iCode;
-    MathLib* math;
+    MathLib* math;    
     int freeRank;
     int codeConnected;
     MPI_Comm mpi_comm_spawn;

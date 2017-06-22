@@ -41,6 +41,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include "global.h"
 #include "Mapper.h"
 #include "MathLib.h"
+#include "Debugger.h"
 
 #include <string>
 #include <algorithm>
@@ -121,7 +122,9 @@ class System
       std::string binCommand;
       std::string commandToRun;      
     };
-    client* code;    
+    client* code;
+    
+    Debugger debug;
 		
 	private:
 		int error;

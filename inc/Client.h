@@ -39,6 +39,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #define CLIENT_H
 
 #include "global.h"
+#include "Debugger.h"
 
 #include <sstream> 
 #include <fstream> 
@@ -96,6 +97,8 @@ class Client
       double* tempDoppFuel;
     };
     relapStruct* relap;
+    
+    Debugger debug;
 		
 	private:
   

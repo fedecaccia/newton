@@ -44,6 +44,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include "Mapper.h"
 #include "Solver.h"
 #include "System.h"
+#include "Debugger.h"
 
 #include <iostream>
 #include <fstream>
@@ -57,6 +58,8 @@ class Parser
 		Parser();
 		void parseInput(System*, Evolution*, Solver*, Client*, Mapper*);
 		void checkConsistency(System*);
+    
+    Debugger debug;
 
 	private:
 		bool isAComment(std:: string);

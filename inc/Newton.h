@@ -67,13 +67,14 @@ class Newton
 		Evolution* NewtonEvolution;
 		Communicator* NewtonComm;
 		Solver* NewtonSolver;
-    Mapper* NewtonMap;
-    Debugger* NewtonDebugger;
+    Mapper* NewtonMap;    
+    Debugger debug;
 		
 	private:
 		int error;
     double firstClick;
     double click;
+    
 
 };
 

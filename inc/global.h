@@ -88,6 +88,16 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #define FERMI_XS2POW                2
 #define USER_CODE                   3
 
+// Debugger
+#define NEWTON_LOG                  0
+#define PARSER_LOG                  1
+#define SYSTEM_LOG                  2
+#define EVOLUTION_LOG               3
+#define SOLVER_LOG                  4
+#define MAPPER_LOG                  5
+#define COMMUNICATOR_LOG            6
+#define CLIENT_LOG                  7
+
 extern int world_size;
 extern int irank;
 

@@ -41,6 +41,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include "global.h"
 #include "Client.h"
 #include "System.h"
+#include "Debugger.h"
 
 class Evolution
 {
@@ -52,6 +53,8 @@ class Evolution
 		int step;
 		int nSteps;
     double deltaStep;
+    
+    Debugger debug;
 		
 	private:
 		int error;

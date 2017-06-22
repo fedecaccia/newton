@@ -57,6 +57,7 @@ System::System()
   nPhasesPerIter = 0;
   // Math object
   math = new MathLib();
+  
   // Initial error value
 	error = NEWTON_SUCCESS;
 }

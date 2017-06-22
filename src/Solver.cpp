@@ -249,6 +249,7 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
     checkError(error, "Maximum non linear iterations reached - Solver-iterateUntilConverge");      
   }
 
+  debug.log(int2str(step)+" "+int2str(iter)+" "+int2str(nEvalInStep));
   //~ // TEST
   //~ rootPrints("Step solution:");
   //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){

@@ -9,7 +9,7 @@ maste code            |
 
 -------------------------------------------------------------------------------
 
-Debugger is the class that manages all the outputs of the code. 
+Debugger is the class that manages all the specific logs of the code. 
 
 Date: 22 June 2017
 
@@ -37,13 +37,28 @@ along with sNewton.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef DEBUGGER_H
 #define DEBUGGER_H
 
+#include <sstream> 
+#include <fstream> 
+#include <iostream>
+
+#include "global.h"
+
 class Debugger
 {
   public:
-    Debugger();
+    Debugger(int); // cantidad de arvhivos de salida
+    void setOutput(std::string*); //nombres
+    void setOn(int*); // recibe vector con 1 y 0 para prender
+    void setOff(int*); // recibe vector con 1 y 0 para apagar
+    void log(int, std::string); //int salida
+    void allLog(int, std::string);
+    void finish();
     
-  private:
-  
+  private: 
+    int error;
+    bool* debugIsOn;    
+    std::string* logName;
+    std::ofstream* logFile;
 };
 
 

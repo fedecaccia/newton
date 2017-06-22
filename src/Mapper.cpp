@@ -49,6 +49,7 @@ Mapper::Mapper(Client* clientPtr)
   client = clientPtr;
   // Math object
   math = new MathLib();
+  
   // Initial error value
 	error = NEWTON_SUCCESS;
 }

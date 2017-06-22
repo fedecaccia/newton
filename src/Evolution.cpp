@@ -51,6 +51,7 @@ Evolution::Evolution()
   deltaStep = 1;
   // Run status
 	status = NEWTON_INCOMPLETE;
+  
   // Initial state
 	error = NEWTON_SUCCESS;
 }

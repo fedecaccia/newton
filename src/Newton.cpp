@@ -49,15 +49,14 @@ Newton::Newton()
 {
 	// Variables initialization
 	error = NEWTON_SUCCESS;
-
-	// Objects initialization
+  
+  // Other objects creation
 	NewtonParser = new Parser();
 	NewtonSystem = new System();  
 	NewtonEvolution = new Evolution();
 	NewtonSolver = new Solver();
   NewtonMap = new Mapper(NewtonSolver->NewtonClient);
-	NewtonComm = new Communicator(NewtonSystem, NewtonEvolution);
-	NewtonDebugger = new Debugger();
+	NewtonComm = new Communicator(NewtonSystem, NewtonEvolution);	
 }
 
 /* Newton::initialize
@@ -89,8 +88,28 @@ void Newton::initialize()
   rootPrints("\nNewton");
   rootPrints("Multiphysics coupling master code\n");  
   
-	// Objects initialization
-
+  // Set debugger file names
+  this->debug.setOutput("newton.log");
+  NewtonParser->debug.setOutput("parser.log");
+	NewtonSystem->debug.setOutput("system.log");
+  NewtonEvolution->debug.setOutput("evolution.log");
+  NewtonSolver->debug.setOutput("solver.log");
+  NewtonMap->debug.setOutput("mapper.log");
+  NewtonComm->debug.setOutput("communicator.log");
+  NewtonSolver->NewtonClient->debug.setOutput("client.log");
+  
+  // Set debuggers on / off : could be changed by pàrser too
+  this->debug.setOff();
+  NewtonParser->debug.setOff();
+	NewtonSystem->debug.setOff();
+  NewtonEvolution->debug.setOff();
+  NewtonSolver->debug.setOn();
+  NewtonMap->debug.setOff();
+  NewtonComm->debug.setOff();
+  NewtonSolver->NewtonClient->debug.setOff();
+  
+  // Objects initialization
+  
 	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver, NewtonSolver->NewtonClient, NewtonMap);
 	
 	NewtonSystem->construct(NewtonMap);
@@ -139,4 +158,14 @@ void Newton::finish()
 	NewtonComm->disconnect();
   PetscFinalize();
 	MPI_Finalize();
+  
+  // Set debuggers  off
+  this->debug.setOff();
+  NewtonParser->debug.setOff();
+	NewtonSystem->debug.setOff();
+  NewtonEvolution->debug.setOff();
+  NewtonSolver->debug.setOff();
+  NewtonMap->debug.setOff();
+  NewtonComm->debug.setOff();
+  NewtonSolver->NewtonClient->debug.setOff();
 }

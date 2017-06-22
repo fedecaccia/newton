@@ -40,6 +40,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include "global.h"
 #include "Evolution.h"
 #include "System.h"
+#include "Debugger.h"
 
 #include "mpi.h"
 #include <string.h>
@@ -54,6 +55,8 @@ class Communicator
     int sendOrder(int);
     int send(int, int, double*);
     int receive(int, int, double*);
+    
+    Debugger debug;
 		
 	private:
 		int error;

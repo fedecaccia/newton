@@ -41,6 +41,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include "global.h"
 #include "Client.h"
 #include "MathLib.h"
+#include "Debugger.h"
 
 #include <fstream>
 #include <sstream>
@@ -72,6 +73,8 @@ class Mapper
     int nGroups;
     int nXSTypes;
     double* energyPerFission;
+    
+    Debugger debug;
 
   private:
     Client* client;
