@@ -40,22 +40,25 @@ along with sNewton.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream> 
 #include <fstream> 
 #include <iostream>
+#include <iomanip>
 
 #include "global.h"
 
 class Debugger
 {
   public:
-    Debugger(int); // cantidad de arvhivos de salida
-    void setOutput(std::string*); //nombres
-    void setOn(int*); // recibe vector con 1 y 0 para prender
-    void setOff(int*); // recibe vector con 1 y 0 para apagar
-    void log(int, std::string); //int salida
-    void allLog(int, std::string);
+    Debugger();
+    void setOutput(std::string*, int n=1);
+    void setOn(int o=0);
+    void setOff(int o=0);
+    void log(std::string, int o=0, int width=20);
+    void allLog(std::string, int o=0);
     void finish();
     
-  private: 
+  private:
+
     int error;
+    int nLogs;
     bool* debugIsOn;    
     std::string* logName;
     std::ofstream* logFile;

@@ -59,6 +59,7 @@ class Newton
 	public:
 		Newton();
 		void initialize();
+		void configureDebugger();
 		void run();
 		void finish();
 
@@ -72,8 +73,8 @@ class Newton
 		
 	private:
 		int error;
-    double firstClick;
-    double click;
+    double firstClick, lastClick;
+    double click1, click2;
     
 
 };

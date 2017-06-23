@@ -55,7 +55,7 @@ class Solver
     void initialize(System*);
     void setFirstGuess(System*, int);
 		void iterateUntilConverge(System*, Communicator*, int);
-    void calculateNewGuess(System*, Communicator*, int, int);
+    void calculateNewGuess(System*, Communicator*, int);
     void calculateResiduals(System*, Communicator*);
     
     Client* NewtonClient;    

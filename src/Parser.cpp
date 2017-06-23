@@ -110,6 +110,27 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="X_INI"){
       return true;
     }
+    if(word=="DEBUG_NEWTON"){
+      return true;
+    }
+    if(word=="DEBUG_PARSER"){
+      return true;
+    }
+    if(word=="DEBUG_SYSTEM"){
+      return true;
+    }
+    if(word=="DEBUG_EVOLUTION"){
+      return true;
+    }
+    if(word=="DEBUG_SOLVER"){
+      return true;
+    }
+    if(word=="DEBUG_MAPPER"){
+      return true;
+    }
+    if(word=="DEBUG_COMM"){
+      return true;
+    }
   }
   else if(parent=="CLIENT"){
     if(word=="GUESSES"){
@@ -775,7 +796,7 @@ input: System pointer
 output: -
 
 */
-void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* client, Mapper* mapper)
+void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* client, Mapper* mapper, Communicator* comm, Debugger* newtonDebugger)
 {
   rootPrints("Parsing configuration file...");
 
@@ -785,9 +806,65 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   if (configFile.is_open()){
     while(!configFile.eof()){
       
+      // Look at debugger options
+      if(word=="DEBUG_NEWTON"){
+        newtonDebugger->setOn();
+        word = takeNextWord();
+      }
+      else if(word=="DEBUG_PARSER"){
+        debug.setOn();
+        word = takeNextWord();
+      }
+      else if(word=="DEBUG_SYSTEM"){
+        sys->debug.setOn();
+        word = takeNextWord();
+      }
+      else if(word=="DEBUG_EVOLUTION"){
+        evol->debug.setOn();
+        word = takeNextWord();
+      }
+      else if(word=="DEBUG_SOLVER"){
+        word = takeNextWord();
+        do{
+          transform(word.begin(), word.end(), word.begin(), ::tolower);
+          if(word=="global"){
+            sol->debug.setOn(GLOBAL_LOG);  
+          }
+          else if(word=="iter"){
+            sol->debug.setOn(LOCAL_LOG);  
+          }
+          else if(word=="res"){
+            sol->debug.setOn(RES_LOG);  
+          }
+          else if(word=="x"){
+            sol->debug.setOn(X_LOG);  
+          }
+          else if(word=="j"){
+            sol->debug.setOn(J_LOG);  
+          }
+          else if(word=="unk"){
+            sol->debug.setOn(UNK_LOG);  
+          }
+          else{
+            error = NEWTON_ERROR;
+            checkError(error, "ERROR. Bad debbuger: \""+word+"\" selected in DEBUG_SOLVER - Parser::parseInput");
+          }
+          word = takeNextWord();
+        }while(!wordIsForbidden(word));        
+      }
+      else if(word=="DEBUG_MAPPER"){
+        mapper->debug.setOn();
+        word = takeNextWord();
+      }
+      else if(word=="DEBUG_COMM"){
+        comm->debug.setOn();
+        word = takeNextWord();
+      }
+
+
       // Count amount of codes in order to allocate
 
-      if(word=="CLIENT"){
+      else if(word=="CLIENT"){
         sys->nCodes++;
         word = takeNextWord();
         // Client name

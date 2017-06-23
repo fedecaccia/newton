@@ -39,78 +39,94 @@ along with sNewton.  If not, see <http://www.gnu.org/licenses/>.
 using namespace::std;
 
 /* Debugger constructor
-
 */
 Debugger::Debugger()
 {
-  // Default initialization
-  debugIsOn=false;
-  logName = "";
-  
   // Initialize error
   error = NEWTON_SUCCESS;
 }
 
 /* Debugger::setOutput
-Set log file name.
+Set log file name, allocate, etc.
 
-input: string log file name
+input: amount of file names, vector of string log file names
 output: -
 
 */
-void Debugger::setOutput(string fileName)
+void Debugger::setOutput(string* fileName, int n)
 {
-  logName = fileName;
+  // Initialization
+  nLogs = n;
+  debugIsOn = new bool[nLogs];
+  logName = new string[nLogs];
+  logFile = new ofstream[nLogs];
+  for(int i=0; i<nLogs; i++){
+    debugIsOn[i] = false;
+    logName[i] = fileName[i];
+  }
 }
 
 /* Debugger::setOn
-Switch to on debug action.
+Switch to on debug action in specific log file.
 
-input: -
+input: number of file, (default 0)
 output: -
 
 */
-void Debugger::setOn()
+void Debugger::setOn(int o)
 {
-  debugIsOn=true;
-  if (!logFile.is_open()){
-    if(logName!=""){
-      logFile.open(logName.c_str());
+  if(o<nLogs){
+    debugIsOn[o] = true;
+    if (!logFile[o].is_open()){
+      logFile[o].open(logName[o].c_str());
     }
-    else{
-      rootPrints("WARNING: Trying to set on debugger but log file name has not been provided - Debugger::setOn");
-    }
+  }
+  else{
+    error = NEWTON_ERROR;
+    checkError(error, "Trying to set on bad log file - Debugger::setOutput");
   }
 }
 
 /* Debugger::setOff
-Switch to off debug action.
+Switch to off debug action in specific log file.
 
-input: -
+input: number of file, (default 0)
 output: -
 
 */
-void Debugger::setOff()
+void Debugger::setOff(int o)
 {
-  debugIsOn=false;
-  if (logFile.is_open()){
-    logFile.close();
+  if(o<nLogs){
+    debugIsOn[o] = false; 
+    if (logFile[o].is_open()){
+      logFile[o].close();
+    }
+  }
+  else{    
+    error = NEWTON_ERROR;
+    checkError(error, "Trying to set off bad log file - Debugger::setOutput");
   }
 }
 
 /* Debugger::log
 Only root prints some string into output.
 
-input: string
+input: string, output file, width between words (default:20)
 output: -
 
 */
-void Debugger::log(string logStr)
+void Debugger::log(string logStr, int output, int width)
 {
-  if (logFile.is_open()){
-    if(irank==NEWTON_ROOT){
-      logFile << logStr <<endl;
+  if(output<nLogs){
+    if (logFile[output].is_open()){
+      if(irank==NEWTON_ROOT){
+        logFile[output] << setw(width) << logStr <<flush;
+      }
     }
+  }
+  else{
+    error = NEWTON_ERROR;
+    checkError(error, "ERROR. Trying to print in a non valid output - Debugger::log");
   }
 }
 
@@ -122,16 +138,23 @@ input: string
 output: -
 
 */
-void Debugger::allLog(string logStr)
+void Debugger::allLog(string logStr, int output)
 {
-  cout<<irank<<endl;
-  if (logFile.is_open()){
-    logFile << "(irank: "<<int2str(irank)<<") - "<< logStr <<endl;
+  if(output<nLogs){
+    if (logFile[output].is_open()){
+      if(irank==NEWTON_ROOT){
+        logFile[output] << "(irank: "<<int2str(irank)<<") - "<< logStr << endl;
+      }
+    }
+  }
+  else{
+    error = NEWTON_ERROR;
+    checkError(error, "ERROR. Trying to print in a non valid output - Debugger::log");
   }
 }
 
 /* Debugger::finish
-Close log file if it has been opened.
+Close log files if they have been opened.
 
 input: -
 output: -
@@ -139,8 +162,11 @@ output: -
 */
 void Debugger::finish()
 {
-  debugIsOn = false;
-  if (logFile.is_open()){
-    logFile.close();
+  for(int i=0; i<nLogs; i++){
+    debugIsOn[i] = false;
+    if (logFile[i].is_open()){
+      logFile[i]<<endl;
+      logFile[i].close();
+    }
   }
 }

@@ -50,7 +50,8 @@ Communication with client codes via MPI option requieres an script to run the pr
 ## Main features
 
 * Explicit and implicit methods implemented to solve nonlinear residuals.
-Newton uses PETSc functions to solve linear systems in methods that build jacobian matrix of the system.
+
+* Newton uses PETSc functions to solve linear systems in methods that build jacobian matrix of the system.
 
 * Efficient error handling.
 
@@ -59,6 +60,8 @@ Newton uses PETSc functions to solve linear systems in methods that build jacobi
 * Ready-to-use mappers of variables received and sended to clients.
 
 * Sets of specific variables that need to be storage and updated along the evolution of systems.
+
+* Multiple debugger modes that can be activated by keywords from input file.
 
 ## Mappers
 

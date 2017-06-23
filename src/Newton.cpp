@@ -33,7 +33,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with sNewton.  If not, see <http://www.gnu.org/licenses/>.
+along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 \*****************************************************************************/
 
@@ -85,32 +85,17 @@ void Newton::initialize()
   // PETSc init
   PetscInitialize(PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);
   
-  rootPrints("\nNewton");
-  rootPrints("Multiphysics coupling master code\n");  
+  // Set debugger
+  configureDebugger();
   
-  // Set debugger file names
-  this->debug.setOutput("newton.log");
-  NewtonParser->debug.setOutput("parser.log");
-	NewtonSystem->debug.setOutput("system.log");
-  NewtonEvolution->debug.setOutput("evolution.log");
-  NewtonSolver->debug.setOutput("solver.log");
-  NewtonMap->debug.setOutput("mapper.log");
-  NewtonComm->debug.setOutput("communicator.log");
-  NewtonSolver->NewtonClient->debug.setOutput("client.log");
-  
-  // Set debuggers on / off : could be changed by pàrser too
-  this->debug.setOff();
-  NewtonParser->debug.setOff();
-	NewtonSystem->debug.setOff();
-  NewtonEvolution->debug.setOff();
-  NewtonSolver->debug.setOn();
-  NewtonMap->debug.setOff();
-  NewtonComm->debug.setOff();
-  NewtonSolver->NewtonClient->debug.setOff();
-  
+  rootPrints("\n<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>");
+    rootPrints("                    Newton");
+    rootPrints("       Multiphysics coupling master code");
+    rootPrints("<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>\n");
+
   // Objects initialization
   
-	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver, NewtonSolver->NewtonClient, NewtonMap);
+	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver, NewtonSolver->NewtonClient, NewtonMap, NewtonComm, &debug);
 	
 	NewtonSystem->construct(NewtonMap);
 
@@ -129,7 +114,7 @@ void Newton::run()
 {	
   firstClick = clock();
 	while(NewtonEvolution->status != NEWTON_COMPLETE){
-    click = clock();
+    click1 = clock();
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
 		NewtonSolver->setFirstGuess(NewtonSystem, NewtonEvolution->step);
 		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm, NewtonEvolution->step);
@@ -137,10 +122,18 @@ void Newton::run()
     if(NewtonEvolution->status != NEWTON_COMPLETE){
       NewtonComm->sendOrder(NEWTON_CONTINUE);
     }
-    rootPrints(" Total time step: "+dou2str((clock()-click)/ CLOCKS_PER_SEC)+" seconds");
+    click2 = clock();
+    rootPrints(" Total time step: "+dou2str((click2-click1)/ CLOCKS_PER_SEC)+" seconds");
+    debug.log("step: "+int2str(NewtonEvolution->step));
+    debug.log("time: "+dou2str((click2-click1)/ CLOCKS_PER_SEC));
+    debug.log("f_eval: "+int2str(NewtonSolver->nEvalInStep)+"\n");
 	}
   rootPrints("Total function evaluations: "+int2str(NewtonSolver->nEval));
-  rootPrints("Total time: "+dou2str((clock()-firstClick)/ CLOCKS_PER_SEC)+" seconds");
+  lastClick = clock();
+  rootPrints("Total time: "+dou2str((lastClick-firstClick)/ CLOCKS_PER_SEC)+" seconds");
+    debug.log("steps: "+int2str(NewtonEvolution->step));
+    debug.log("time: "+dou2str((lastClick-firstClick)/ CLOCKS_PER_SEC));
+    debug.log("f_evals: "+int2str(NewtonSolver->nEval)+"\n");
   rootPrints("Calculation finished successfully.");
 }
 
@@ -168,4 +161,32 @@ void Newton::finish()
   NewtonMap->debug.setOff();
   NewtonComm->debug.setOff();
   NewtonSolver->NewtonClient->debug.setOff();
+}
+
+void Newton::configureDebugger()
+{
+  string* stringLog = new string[MAX_LOG];
+
+  // Set debugger amount of log files & their names
+  stringLog[0] = "newton.log";
+  this->debug.setOutput(stringLog);
+  stringLog[0] = "parser.log";
+  NewtonParser->debug.setOutput(stringLog);
+  stringLog[0] = "system.log";
+  NewtonSystem->debug.setOutput(stringLog);
+  stringLog[0] = "evolution.log";
+  NewtonEvolution->debug.setOutput(stringLog);
+  stringLog[GLOBAL_LOG] = "solver_global.log";
+  stringLog[LOCAL_LOG] = "solver_iter.log";
+  stringLog[RES_LOG] = "res.log";
+  stringLog[X_LOG] = "x.log";
+  stringLog[J_LOG] = "j.log";
+  stringLog[UNK_LOG] = "unk.log";
+  NewtonSolver->debug.setOutput(stringLog, 6);
+  stringLog[0] = "mapper.log";
+  NewtonMap->debug.setOutput(stringLog);
+  stringLog[0] = "comm.log";
+  NewtonComm->debug.setOutput(stringLog);
+  stringLog[0] = "client.log";
+  NewtonSolver->NewtonClient->debug.setOutput(stringLog);
 }

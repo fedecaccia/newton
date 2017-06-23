@@ -39,6 +39,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #define PARSER_H
 
 #include "global.h"
+#include "Communicator.h"
 #include "Client.h"
 #include "Evolution.h"
 #include "Mapper.h"
@@ -56,7 +57,7 @@ class Parser
 {
 	public:
 		Parser();
-		void parseInput(System*, Evolution*, Solver*, Client*, Mapper*);
+		void parseInput( System*, Evolution*, Solver*, Client*, Mapper*, Communicator*, Debugger*);
 		void checkConsistency(System*);
     
     Debugger debug;

@@ -67,7 +67,7 @@ Solver::Solver()
   nEvalInStep = 0;
   // Total function evaluation in problem
   nEval = 0;
-  
+
   // Initial error value
 	error = NEWTON_SUCCESS;
 }
@@ -229,33 +229,41 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   nEvalInStep = 0;
   calculateResiduals(sys, comm);
   rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
+ 
   while(residual > nltol && iter < maxIter){
     
     // Send NEWTON_RESTART order to clients connected
     order = NEWTON_RESTART;    
     comm->sendOrder(order);
         
-    calculateNewGuess(sys, comm, step, iter);
+    calculateNewGuess(sys, comm, step);
     calculateResiduals(sys, comm);
     iter++;
     
     rootPrints(" Non linear iteration: "+int2str(iter)+"\t Residual: "+dou2str(residual));
+    debug.log("step: "+int2str(step), LOCAL_LOG);
+    debug.log("iter: "+int2str(iter), LOCAL_LOG);
+    debug.log("f_evals: "+int2str(nEvalInStep), LOCAL_LOG);
+    debug.log("res: "+dou2str(residual)+"\n", LOCAL_LOG);
   }
+
   rootPrints(" Total iterations in step: "+int2str(iter)+" - Total funtion evaluations: "+int2str(nEvalInStep));
+  debug.log("step: "+int2str(step), GLOBAL_LOG);
+  debug.log("iters: "+int2str(iter), GLOBAL_LOG);
+  debug.log("f_evals: "+int2str(nEvalInStep), GLOBAL_LOG);
   
   // Bad ending
   if(residual>nltol){
     error = NEWTON_ERROR;
     checkError(error, "Maximum non linear iterations reached - Solver-iterateUntilConverge");      
   }
-
-  debug.log(int2str(step)+" "+int2str(iter)+" "+int2str(nEvalInStep));
-  //~ // TEST
-  //~ rootPrints("Step solution:");
-  //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-    //~ rootPrints(dou2str(x[iUnk]));
-  //~ }
-  
+ 
+  debug.log("step: "+int2str(step), X_LOG, 10);
+  debug.log("x:", X_LOG, 5);
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
+    debug.log(dou2str(x[iUnk]), X_LOG, 10);
+  }
+  debug.log("\n", X_LOG);
 }
 
   
@@ -423,6 +431,43 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
   for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
     cout<<sys->beta[iUnk]<<setw(20)<<x[iUnk]<<setw(20)<<resVector[iUnk]<<endl; 
   }*/
+
+  debug.log("iter: "+int2str(iter)+"\n", UNK_LOG, 0);
+  for (int iCode=0; iCode<sys->nCodes; iCode++){
+    debug.log("code: "+sys->code[iCode].name+"\n", UNK_LOG, 0);
+    debug.log("alphas:\n", UNK_LOG, 0);
+    for(int iAlpha = 0; iAlpha<sys->code[iCode].nAlpha; iAlpha++){
+      debug.log(dou2str(sys->code[iCode].alpha[iAlpha]), UNK_LOG, 10);
+    }
+    debug.log("\n", UNK_LOG);
+    debug.log("betas:\n", UNK_LOG, 0);
+    for(int iBeta = 0; iBeta<sys->code[iCode].nBeta; iBeta++){
+      debug.log(dou2str(sys->beta[sys->code[iCode].betaFirstValuePos+iBeta]), UNK_LOG, 10);
+    }
+    debug.log("\n", UNK_LOG);
+    debug.log("gammas:\n", UNK_LOG, 0);
+    for(int iGamma= 0; iGamma<sys->code[iCode].nGamma; iGamma++){
+      debug.log(dou2str(sys->gamma[sys->code[iCode].gammaFirstValuePos+iGamma]), UNK_LOG, 10);
+    }
+    debug.log("\n", UNK_LOG);
+    debug.log("deltas\n", UNK_LOG, 0);
+    for(int iDelta = 0; iDelta<sys->code[iCode].nDelta; iDelta++){
+      debug.log(dou2str(sys->code[iCode].delta[iDelta]), UNK_LOG, 10);
+    }
+    debug.log("\n\n", UNK_LOG);
+  }
+  debug.log("\n\n", UNK_LOG);
+
+  debug.log("iter: "+int2str(iter)+"\n", RES_LOG);
+  debug.log("beta", RES_LOG);
+  debug.log("x", RES_LOG);
+  debug.log("res\n", RES_LOG);
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    debug.log(dou2str(sys->beta[iUnk]), RES_LOG);
+    debug.log(dou2str(x[iUnk]), RES_LOG);
+    debug.log(dou2str(resVector[iUnk])+"\n", RES_LOG);
+  }
+  debug.log("\n\n", RES_LOG);
   
 }
 
@@ -430,11 +475,11 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
 
 Calculate new guess by different methods.
 
-input: -
+input: System pointer, Communicator pointer, actual evolution step
 output: -
 
 */
-void Solver::calculateNewGuess(System* sys, Communicator* comm, int step, int iter)
+void Solver::calculateNewGuess(System* sys, Communicator* comm, int step)
 {
   switch(method){
     case EXPLICIT_SERIAL:
