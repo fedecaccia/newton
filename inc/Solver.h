@@ -87,7 +87,9 @@ class Solver
     void solveLinearSystem(System*);
     void x2gamma2delta(System*);
     void saveX(System*, int);
-    void extrapolateX(System*);
+    void saveJ(System*, int);
+    void extrapolateX(System*, int);
+    void extrapolateJ(System*, int);
   
 		int error;
     int order;
@@ -108,6 +110,7 @@ class Solver
     double* resVectorBackUp;
     double** J;
     double** JItPrev;
+    double*** JStPrev;
     
     Vec u, b;
     Mat A;

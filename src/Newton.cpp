@@ -113,9 +113,9 @@ output: -
 void Newton::run()
 {	
   firstClick = clock();
+  rootPrints("Nonlinear method: "+NewtonSolver->printMethod());
 	while(NewtonEvolution->status != NEWTON_COMPLETE){
-    click1 = clock();
-    rootPrints("Nonlinear method: "+NewtonSolver->printMethod());
+    click1 = clock();    
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
 		NewtonSolver->setFirstGuess(NewtonSystem, NewtonEvolution->step);
 		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm, NewtonEvolution->step);
@@ -127,6 +127,7 @@ void Newton::run()
     rootPrints(" Total time step: "+dou2str((click2-click1)/ CLOCKS_PER_SEC)+" seconds");
     debug.log("step: "+int2str(NewtonEvolution->step));
     debug.log("time: "+dou2str((click2-click1)/ CLOCKS_PER_SEC));
+    debug.log("total time: "+dou2str((click2-firstClick)/ CLOCKS_PER_SEC), 0, 25);
     debug.log("f_eval: "+int2str(NewtonSolver->nEvalInStep)+"\n");
 	}
   rootPrints("Total function evaluations: "+int2str(NewtonSolver->nEval));
@@ -169,7 +170,7 @@ void Newton::configureDebugger()
   string* stringLog = new string[MAX_LOG];
 
   // Set debugger amount of log files & their names
-  stringLog[0] = "newton.log";
+  stringLog[0] = "time.log";
   this->debug.setOutput(stringLog);
   stringLog[0] = "parser.log";
   NewtonParser->debug.setOutput(stringLog);
@@ -178,7 +179,7 @@ void Newton::configureDebugger()
   stringLog[0] = "evolution.log";
   NewtonEvolution->debug.setOutput(stringLog);
   stringLog[GLOBAL_LOG] = "solver_global.log";
-  stringLog[LOCAL_LOG] = "solver_iter.log";
+  stringLog[ITER_LOG] = "solver_iter.log";
   stringLog[RES_LOG] = "res.log";
   stringLog[X_LOG] = "x.log";
   stringLog[J_LOG] = "j.log";

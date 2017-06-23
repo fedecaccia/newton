@@ -89,6 +89,12 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="DX_JAC_CALC"){
       return true;
     }
+    if(word=="X_EXT_ORDER"){
+      return true;
+    }
+    if(word=="JAC_EXT_ORDER"){
+      return true;
+    }
     if(word=="STEPS_JAC_CALC"){
       return true;
     }
@@ -110,7 +116,7 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="X_INI"){
       return true;
     }
-    if(word=="DEBUG_NEWTON"){
+    if(word=="DEBUG_TIME"){
       return true;
     }
     if(word=="DEBUG_PARSER"){
@@ -810,7 +816,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
     while(!configFile.eof()){
       
       // Look at debugger options
-      if(word=="DEBUG_NEWTON"){
+      if(word=="DEBUG_TIME"){
         newtonDebugger->setOn();
         word = takeNextWord();
       }
@@ -838,7 +844,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
             sol->debug.setOn(GLOBAL_LOG);  
           }
           else if(word=="iter"){
-            sol->debug.setOn(LOCAL_LOG);  
+            sol->debug.setOn(ITER_LOG);  
           }
           else if(word=="res"){
             sol->debug.setOn(RES_LOG);  
@@ -908,6 +914,40 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
         word = takeNextWord();
       }
       
+      else if(word=="X_EXT_ORDER"){
+        word = takeNextWord();
+        int aux;
+        stringstream(word) >> aux;
+        if(aux>1){
+          error = NEWTON_ERROR;
+          checkError(error, "ERROR. X extrapolation only admit order 1 - Parser::parseInput");
+        }
+        else if(aux>=0){
+          sol->nXStPrev = aux + 1;
+        }
+        else{
+          error = NEWTON_ERROR;
+          checkError(error, "ERROR. X extrapolation only admit positive order - Parser::parseInput");
+        }
+        word = takeNextWord();
+      }
+      else if(word=="J_EXT_ORDER"){
+        word = takeNextWord();
+        int aux;
+        stringstream(word) >> aux;
+        if(aux>1){
+          error = NEWTON_ERROR;
+          checkError(error, "ERROR. J extrapolation only admit order 1 - Parser::parseInput");
+        }
+        else if(aux>=0){
+          sol->nJStPrev = aux + 1;
+        }
+        else{
+          error = NEWTON_ERROR;
+          checkError(error, "ERROR. J extrapolation only admit positive order - Parser::parseInput");
+        }
+        word = takeNextWord();
+      }
       else if(word=="METHOD"){
         word = takeNextWord();
         transform(word.begin(), word.end(), word.begin(), ::toupper);

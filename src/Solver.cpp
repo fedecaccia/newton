@@ -55,6 +55,8 @@ Solver::Solver()
   maxIter = 10;
   // Amount of steps to save solution
   nXStPrev = 2;
+  // Amount of steps to save jacobians
+  nJStPrev = 2;
   // Delta x in Jacobian calculation by finitte difference method
   dxJacCalc = 0.1;
   // Steps between Jacobian calculation by finite difference method
@@ -107,6 +109,11 @@ void Solver::initialize(System* sys)
   J = new double*[sys->nUnk];
   // Jacobian matrix previous iteration
   JItPrev = new double*[sys->nUnk];  
+  // Jacobian matrix previous steps
+  JStPrev = new double**[nJStPrev];
+  for(int i=0; i<nJStPrev; i++){
+    JStPrev[i] = new double*[sys->nUnk];  
+  }
   
   // Initialization
   math->zeros(x, sys->nUnk);
@@ -119,10 +126,18 @@ void Solver::initialize(System* sys)
   math->zeros(resVectorItPrev, sys->nUnk);
   for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
     J[iUnk] = new double[sys->nUnk];
-    JItPrev[iUnk] = new double[sys->nUnk];
+    JItPrev[iUnk] = new double[sys->nUnk];    
+  }
+  for(int i=0; i<nJStPrev; i++){
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+      JStPrev[i][iUnk] = new double[sys->nUnk];
+    }
   }
   math->identity(J, sys->nUnk);
   math->identity(JItPrev, sys->nUnk);
+  for(int i=0; i<nJStPrev; i++){
+    math->identity(JStPrev[i], sys->nUnk);
+  }
   
   //~ for(int i=0; i<sys->nUnk; i++){
     //~ for(int j=0; j<sys->nUnk; j++){
@@ -168,10 +183,11 @@ void Solver::setFirstGuess(System* sys, int step)
 {
   if(step>=nXStPrev){
     // Extrapolate previous values? Do nothing to keep last x solution
-    extrapolateX(sys);
+    extrapolateX(sys, step);
   }
   if(step>=nJStPrev){
     // Extrapolate previous values? Do nothing to keep J
+    extrapolateJ(sys,step);
   }
   else{
     // X_CI has been loaded by parser    
@@ -251,17 +267,17 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
     calculateResiduals(sys, comm);
     iter++;
     
-    rootPrints(" Nonlinear iteration: "+int2str(iter)+"\t Residual: "+dou2str(residual));
-    debug.log("step: "+int2str(step), LOCAL_LOG);
-    debug.log("iter: "+int2str(iter), LOCAL_LOG);
-    debug.log("f_evals: "+int2str(nEvalInStep), LOCAL_LOG);
-    debug.log("res: "+dou2str(residual)+"\n", LOCAL_LOG);
+    rootPrints(" Nonlinear iteration: "+int2str(iter)+"   Residual: "+dou2str(residual));
+    debug.log("step: "+int2str(step), ITER_LOG);
+    debug.log("iter: "+int2str(iter), ITER_LOG);
+    debug.log("f_evals: "+int2str(nEvalInStep), ITER_LOG);
+    debug.log("res: "+dou2str(residual)+"\n", ITER_LOG);
   }
 
   rootPrints(" Total iterations in step: "+int2str(iter)+" - Total funtion evaluations: "+int2str(nEvalInStep));
   debug.log("step: "+int2str(step), GLOBAL_LOG);
   debug.log("iters: "+int2str(iter), GLOBAL_LOG);
-  debug.log("f_evals: "+int2str(nEvalInStep), GLOBAL_LOG);
+  debug.log("f_evals: "+int2str(nEvalInStep)+"\n", GLOBAL_LOG);
   
   // Bad ending
   if(residual>nltol){
@@ -269,8 +285,9 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
     checkError(error, "Maximum nonlinear iterations reached - Solver-iterateUntilConverge");      
   }
 
-  // Save solution
+  // Save solution and jacobian
   saveX(sys, step);
+  saveJ(sys, step);  
 }
 
   
@@ -465,7 +482,8 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
   }
   debug.log("\n\n", UNK_LOG);
 
-  debug.log("iter: "+int2str(iter)+"\n", RES_LOG);
+  debug.log("iter: "+int2str(iter), RES_LOG,0);
+  debug.log("|res|:"+dou2str(residual)+"\n", RES_LOG,20);
   debug.log("beta", RES_LOG);
   debug.log("x", RES_LOG);
   debug.log("res\n", RES_LOG);
@@ -594,16 +612,16 @@ void Solver::broydenUpdate(System* sys, int step, int iter)
     // Saving just J
     J = math->sumMat(JItPrev, t2b, sys->nUnk);
     
-    debug.log("step: "+int2str(step), J_LOG, 0);
-    debug.log("iter: "+int2str(iter), J_LOG, 10);
-    debug.log("J:\n", J_LOG, 5);
-    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-      for(int jUnk=0; jUnk<sys->nUnk; jUnk++){
-        debug.log(dou2str(J[iUnk][jUnk]), J_LOG, 12);
-      }
-      debug.log("\n", J_LOG);
-    }
-    debug.log("\n", J_LOG);
+    //~ debug.log("step: "+int2str(step), J_LOG, 0);
+    //~ debug.log("iter: "+int2str(iter), J_LOG, 10);
+    //~ debug.log("J:\n", J_LOG, 5);
+    //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+      //~ for(int jUnk=0; jUnk<sys->nUnk; jUnk++){
+        //~ debug.log(dou2str(J[iUnk][jUnk]), J_LOG, 12);
+      //~ }
+      //~ debug.log("\n", J_LOG);
+    //~ }
+    //~ debug.log("\n", J_LOG);
 
 
     // TEST
@@ -703,7 +721,7 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm, int step)
   // Loop in partial derivative calculation (cols)
   rootPrints("  Calculating Jacobian by finite difference...");
   for(int j=0; j<sys->nUnk; j++){
-    //rootPrints(" Jacobian Row: "+int2str(i+1));
+    rootPrints("   Jacobian Row: "+int2str(j+1));
     math->sumDeltaInPosition(x, j, dxJacCalc, sys->nUnk);
     
     x2gamma2delta(sys);
@@ -725,16 +743,16 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm, int step)
   
   rootPrints("  End Jacobian calculation");
   
-  debug.log("step: "+int2str(step), J_LOG, 0);
-  debug.log("iter: "+int2str(iter), J_LOG, 10);
-  debug.log("J:\n", J_LOG, 5);
-  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
-    for(int jUnk=0; jUnk<sys->nUnk; jUnk++){
-      debug.log(dou2str(J[iUnk][jUnk]), J_LOG, 12);
-    }
-    debug.log("\n", J_LOG);
-  }
-  debug.log("\n", J_LOG);
+  //~ debug.log("step: "+int2str(step), J_LOG, 0);
+  //~ debug.log("iter: "+int2str(iter), J_LOG, 10);
+  //~ debug.log("J:\n", J_LOG, 5);
+  //~ for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    //~ for(int jUnk=0; jUnk<sys->nUnk; jUnk++){
+      //~ debug.log(dou2str(J[iUnk][jUnk]), J_LOG, 12);
+    //~ }
+    //~ debug.log("\n", J_LOG);
+  //~ }
+  //~ debug.log("\n", J_LOG);
 
   //~ // TEST
   //~ if(irank==0){
@@ -1058,18 +1076,12 @@ output: -
 void Solver::saveX(System* sys, int step)
 {
   debug.log("step: "+int2str(step)+"\n", X_LOG, 0);
+    
   debug.log("x:", X_LOG, 10);
   for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
     debug.log(dou2str(x[iUnk]), X_LOG, 10);
   }
   debug.log("\n", X_LOG);
-  if(step>0){
-    debug.log("x Prev:", X_LOG, 10);
-    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
-      debug.log(dou2str(xStPrev[0][iUnk]), X_LOG, 10);
-    }
-    debug.log("\n", X_LOG);
-  }
 
   for (int i=0; i<nXStPrev-1; i++){
     math->copyInVector(xStPrev[nXStPrev-1-i], 0, xStPrev[nXStPrev-1-i-1], 0, sys->nUnk);
@@ -1077,27 +1089,103 @@ void Solver::saveX(System* sys, int step)
   math->copyInVector(xStPrev[0], 0, x, 0, sys->nUnk);
 }
 
-/* Solver::extrapolateX
-Set the first x guess as extrapolation of previous solutions.
+/* Solver::saveJ
+Save the jacobian in vector of previous J.
 
-input: System pointer
+input: System pointer, step
 output: -
 
 */
-void Solver::extrapolateX(System* sys)
+void Solver::saveJ(System* sys, int step)
+{    
+  debug.log("step: "+int2str(step)+"\n", J_LOG, 0);
+  
+  debug.log("J:", J_LOG, 10);
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
+    for(int jUnk=0; jUnk<sys->nUnk; jUnk++){    
+      debug.log(dou2str(J[iUnk][jUnk]), J_LOG);
+    }
+    debug.log("\n", J_LOG);
+  }
+  debug.log("\n", J_LOG);
+  
+  for (int i=0; i<nJStPrev-1; i++){
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+      math->copyInVector(JStPrev[nJStPrev-1-i][iUnk], 0, JStPrev[nJStPrev-1-i-1][iUnk], 0, sys->nUnk);
+    }
+  }  
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    math->copyInVector(JStPrev[0][iUnk], 0, J[iUnk], 0, sys->nUnk);
+  }
+}
+
+/* Solver::extrapolateX
+Set the first x guess as extrapolation of previous solutions.
+
+input: System pointer, int step
+output: -
+
+*/
+void Solver::extrapolateX(System* sys, int step)
 {
   if(nXStPrev==2){
     for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
       x[iUnk] = 2*xStPrev[0][iUnk] - xStPrev[1][iUnk];
+    }
+    debug.log("\n", X_LOG);
+    debug.log("pre step: "+int2str(step)+"\n", X_LOG, 0);
+    debug.log("x prev[-1]:", X_LOG, 10);
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
+      debug.log(dou2str(xStPrev[1][iUnk]), X_LOG, 10);
+    }
+    debug.log("\n", X_LOG);
+    debug.log("x prev[0]:", X_LOG, 10);
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+      debug.log(dou2str(xStPrev[0][iUnk]), X_LOG, 10);
     }
   }
   else if(nXStPrev>2){
     rootPrints("WARNING: Only extrapolation with 2 points has been implemented - Solver::extrapolateX");
   }
 
+  debug.log("\n", X_LOG);
   debug.log("x guess:", X_LOG, 10);
   for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
     debug.log(dou2str(x[iUnk]), X_LOG, 10);
   }
   debug.log("\n", X_LOG);
+  debug.log("\n", X_LOG);
+}
+
+/* Solver::extrapolateJ
+Set the first J guess as extrapolation of previous jacobians.
+
+input: System pointer, int step
+output: -
+
+*/
+void Solver::extrapolateJ(System* sys, int step)
+{
+  if(nJStPrev==2){
+    
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+      for(int jUnk=0; jUnk<sys->nUnk; jUnk++){
+        J[iUnk][jUnk] = 2*JStPrev[0][iUnk][jUnk] - JStPrev[1][iUnk][jUnk];
+      }
+    }
+    debug.log("\n", X_LOG);
+    debug.log("pre step: "+int2str(step)+"\n", J_LOG, 0);
+    debug.log("J:\n", J_LOG, 0);
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
+      for(int jUnk=0; jUnk<sys->nUnk; jUnk++){    
+        debug.log(dou2str(J[iUnk][jUnk]), J_LOG);
+      }
+      debug.log("\n", J_LOG);
+    }
+    debug.log("\n", J_LOG);   
+    
+  }
+  else if(nXStPrev>2){
+    rootPrints("WARNING: Only extrapolation with 2 points has been implemented - Solver::extrapolateJ");
+  }
 }

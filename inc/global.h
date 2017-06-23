@@ -91,7 +91,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 // Debugger
 #define MAX_LOG                    10
 #define GLOBAL_LOG                  0
-#define LOCAL_LOG                   1
+#define ITER_LOG                    1
 #define RES_LOG                     2
 #define X_LOG                       3
 #define J_LOG                       4
