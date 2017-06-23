@@ -45,14 +45,16 @@ Solver::Solver()
 {
   // Default values
   
-  // Non linear method
+  // Nonlinear method
   method = NO_METHOD;
-  // Non linear tolerance
+  // Nonlinear tolerance
   nltol = 1e-07;
-  // Non linear iterations
+  // Nonlinear iterations
   iter = 0;
-  // Maximum amount of non linear iterations allowed in each evolution step
+  // Maximum amount of nonlinear iterations allowed in each evolution step
   maxIter = 10;
+  // Amount of steps to save solution
+  nXStPrev = 2;
   // Delta x in Jacobian calculation by finitte difference method
   dxJacCalc = 0.1;
   // Steps between Jacobian calculation by finite difference method
@@ -86,6 +88,11 @@ void Solver::initialize(System* sys)
   x = new double[sys->nUnk];
   // X previous iteration
   xItPrev = new double[sys->nUnk];
+  // X previous steps
+  xStPrev = new double*[nXStPrev];
+  for(int i=0; i<nXStPrev; i++){
+    xStPrev[i] = new double[sys->nUnk];
+  }
   // x - sItPrev
   deltaX = new double[sys->nUnk];
   // X saved to construct Jacobian
@@ -104,6 +111,9 @@ void Solver::initialize(System* sys)
   // Initialization
   math->zeros(x, sys->nUnk);
   math->zeros(xItPrev, sys->nUnk);
+  for(int i=0; i<nXStPrev; i++){
+    math->zeros(xStPrev[i], sys->nUnk);
+  }
   math->zeros(deltaX, sys->nUnk);
   math->zeros(resVector, sys->nUnk);
   math->zeros(resVectorItPrev, sys->nUnk);
@@ -138,9 +148,7 @@ void Solver::initialize(System* sys)
   VecSetSizes(u,PETSC_DECIDE,sys->nUnk*sys->nUnk);
   VecSetFromOptions(u);
   
-  KSPCreate(PETSC_COMM_WORLD,&ksp);
-  
-  
+  KSPCreate(PETSC_COMM_WORLD,&ksp); 
 }
 
 
@@ -148,9 +156,9 @@ void Solver::initialize(System* sys)
 
 This function sets the intial guess. In first evolution step it corresponds
 to the initial condition loaded from configuration file, or, in case that
-it couldn't be supported, every guess value is zero. In following steps
-it is calculated interpolating previous values.
-It also set guesss for the Jacobian matrix.
+it wasn't supported, every guess value is zero. In following steps
+it is calculated extrapolating previous values.
+It also set guesses for the Jacobian matrix.
 
 input: System pointer, step value
 output: -
@@ -158,13 +166,16 @@ output: -
 */
 void Solver::setFirstGuess(System* sys, int step)
 {
-  if(step!=0){
-    // Interpolate previous values? Do nothing to keep x values    
-    // J?
+  if(step>=nXStPrev){
+    // Extrapolate previous values? Do nothing to keep last x solution
+    extrapolateX(sys);
+  }
+  if(step>=nJStPrev){
+    // Extrapolate previous values? Do nothing to keep J
   }
   else{
-    // Initial condition has been loaded by parser    
-    // J CI?
+    // X_CI has been loaded by parser    
+    // J CI? not yet
   }
 
   // Put x values in xItPrev
@@ -240,7 +251,7 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
     calculateResiduals(sys, comm);
     iter++;
     
-    rootPrints(" Non linear iteration: "+int2str(iter)+"\t Residual: "+dou2str(residual));
+    rootPrints(" Nonlinear iteration: "+int2str(iter)+"\t Residual: "+dou2str(residual));
     debug.log("step: "+int2str(step), LOCAL_LOG);
     debug.log("iter: "+int2str(iter), LOCAL_LOG);
     debug.log("f_evals: "+int2str(nEvalInStep), LOCAL_LOG);
@@ -255,15 +266,11 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   // Bad ending
   if(residual>nltol){
     error = NEWTON_ERROR;
-    checkError(error, "Maximum non linear iterations reached - Solver-iterateUntilConverge");      
+    checkError(error, "Maximum nonlinear iterations reached - Solver-iterateUntilConverge");      
   }
- 
-  debug.log("step: "+int2str(step), X_LOG, 10);
-  debug.log("x:", X_LOG, 5);
-  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
-    debug.log(dou2str(x[iUnk]), X_LOG, 10);
-  }
-  debug.log("\n", X_LOG);
+
+  // Save solution
+  saveX(sys, step);
 }
 
   
@@ -493,23 +500,23 @@ void Solver::calculateNewGuess(System* sys, Communicator* comm, int step)
       break;   
       
     case NEWTON:
-      jacobianConstruction(sys, comm);
+      jacobianConstruction(sys, comm, step);
       solveLinearSystem(sys);
       break;   
       
     case SECANT:
-      updateJacobian(sys, comm, step, iter);
+      updateJacobian(sys, comm, step);
       solveLinearSystem(sys);
       break;   
       
     case BROYDEN:
-      updateJacobian(sys, comm, step, iter);
+      updateJacobian(sys, comm, step);
       solveLinearSystem(sys);
       break;   
       
     default:
       error = NEWTON_ERROR;
-      checkError(error, "Non linear method has not been implemented yet - Solver::calculateNewGuess");
+      checkError(error, "Nonlinear method has not been implemented yet - Solver::calculateNewGuess");
   }
   
   // Put x values in gamma and delta
@@ -523,41 +530,41 @@ void Solver::calculateNewGuess(System* sys, Communicator* comm, int step)
 
 
 */
-void Solver::updateJacobian(System* sys, Communicator* comm, int step, int iter)
+void Solver::updateJacobian(System* sys, Communicator* comm, int step)
 {
   switch(method){
     case SECANT:
       if(step==0 && iter==0){
-        jacobianConstruction(sys, comm);
+        jacobianConstruction(sys, comm, step);
       }
       else if(sJacCalc>0 && iter==0){
         if(step % sJacCalc==0){
-          jacobianConstruction(sys, comm);
+          jacobianConstruction(sys, comm, step);
         }
       }
       else if(iJacCalc>0){
         if(iter>0 && (iter % iJacCalc)==0){
-          jacobianConstruction(sys, comm);
+          jacobianConstruction(sys, comm, step);
         }
       }
       break;
     
     case BROYDEN:
       if(step==0 && iter==0 && sJacCalc>0){
-        jacobianConstruction(sys, comm);
+        jacobianConstruction(sys, comm, step);
       }
       else if(sJacCalc>0 && iter==0){
         if(step % sJacCalc==0){
-          jacobianConstruction(sys, comm);
+          jacobianConstruction(sys, comm, step);
         }
       }
       else if(iJacCalc>0){
         if(iter>0 && (iter % iJacCalc)==0){
-          jacobianConstruction(sys, comm);
+          jacobianConstruction(sys, comm, step);
         }
       }
       else{
-        broydenUpdate(sys, iter);
+        broydenUpdate(sys, step, iter);
       }
       break;
       
@@ -573,7 +580,7 @@ void Solver::updateJacobian(System* sys, Communicator* comm, int step, int iter)
 
 
 */
-void Solver::broydenUpdate(System* sys, int iter)
+void Solver::broydenUpdate(System* sys, int step, int iter)
 {  
   if(iter>0){
     // J = Jk + (deltaRes - Jk*deltaX) / (deltaXT*deltaX) * deltaXT;
@@ -584,11 +591,21 @@ void Solver::broydenUpdate(System* sys, int iter)
     double div = math->vecDotvec(deltaX, deltaX, sys->nUnk);
     double* t2a = math->scaleVec(num, 1.0/div, sys->nUnk);
     double** t2b = math->vecXvec(t2a, deltaX, sys->nUnk);
-    J = math->sumMat(JItPrev, t2b, sys->nUnk);
-    // Saving -J in order to solve deltaX = -J * res
     // Saving just J
-    // J = math->scaleMat(J, -1, sys->nUnk);
+    J = math->sumMat(JItPrev, t2b, sys->nUnk);
     
+    debug.log("step: "+int2str(step), J_LOG, 0);
+    debug.log("iter: "+int2str(iter), J_LOG, 10);
+    debug.log("J:\n", J_LOG, 5);
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+      for(int jUnk=0; jUnk<sys->nUnk; jUnk++){
+        debug.log(dou2str(J[iUnk][jUnk]), J_LOG, 12);
+      }
+      debug.log("\n", J_LOG);
+    }
+    debug.log("\n", J_LOG);
+
+
     // TEST
     //~ cout<<"x:"<<endl;
     //~ for(int i=0; i<sys->nUnk; i++){
@@ -675,7 +692,7 @@ void Solver::broydenUpdate(System* sys, int iter)
 
 
 */
-void Solver::jacobianConstruction(System* sys, Communicator* comm)
+void Solver::jacobianConstruction(System* sys, Communicator* comm, int step)
 {
   // Back up
   math->copyInVector(xBackUp, 0, x, 0, sys->nUnk);
@@ -708,6 +725,17 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm)
   
   rootPrints("  End Jacobian calculation");
   
+  debug.log("step: "+int2str(step), J_LOG, 0);
+  debug.log("iter: "+int2str(iter), J_LOG, 10);
+  debug.log("J:\n", J_LOG, 5);
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+    for(int jUnk=0; jUnk<sys->nUnk; jUnk++){
+      debug.log(dou2str(J[iUnk][jUnk]), J_LOG, 12);
+    }
+    debug.log("\n", J_LOG);
+  }
+  debug.log("\n", J_LOG);
+
   //~ // TEST
   //~ if(irank==0){
     //~ for (int i=0; i<sys->nUnk; i++){
@@ -986,4 +1014,90 @@ int Solver::receiveDataFromCode(int iCode, System* sys, Communicator* comm)
   error = comm->receive(iCode, sys->code[iCode].nAlpha, sys->code[iCode].alpha);
   
   return error;
+}
+
+/* Solver::printMethod()
+Print string name of the nonlinear method selected to solve the problem.
+
+input: -
+output: string
+
+*/
+string Solver::printMethod()
+{
+  switch(method){
+    case EXPLICIT_SERIAL:
+      return("EXPLICIT_SERIAL");
+      
+    case EXPLICIT_PARALLEL:
+      return("EXPLICIT_PARALLEL");
+      
+    case NEWTON:
+      return("NEWTON");
+      
+    case SECANT:
+      return("SECANT");   
+      
+    case BROYDEN:
+      return("BROYDEN"); 
+      
+    default:
+      error = NEWTON_ERROR;
+      checkError(error, "Nonlinear method has not been selected - Solver::printMethod");
+  }
+  return NULL;
+}
+
+/* Solver::saveX
+Save the solution in vector of previous X.
+
+input: System pointer, step
+output: -
+
+*/
+void Solver::saveX(System* sys, int step)
+{
+  debug.log("step: "+int2str(step)+"\n", X_LOG, 0);
+  debug.log("x:", X_LOG, 10);
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
+    debug.log(dou2str(x[iUnk]), X_LOG, 10);
+  }
+  debug.log("\n", X_LOG);
+  if(step>0){
+    debug.log("x Prev:", X_LOG, 10);
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
+      debug.log(dou2str(xStPrev[0][iUnk]), X_LOG, 10);
+    }
+    debug.log("\n", X_LOG);
+  }
+
+  for (int i=0; i<nXStPrev-1; i++){
+    math->copyInVector(xStPrev[nXStPrev-1-i], 0, xStPrev[nXStPrev-1-i-1], 0, sys->nUnk);
+  }
+  math->copyInVector(xStPrev[0], 0, x, 0, sys->nUnk);
+}
+
+/* Solver::extrapolateX
+Set the first x guess as extrapolation of previous solutions.
+
+input: System pointer
+output: -
+
+*/
+void Solver::extrapolateX(System* sys)
+{
+  if(nXStPrev==2){
+    for(int iUnk=0; iUnk<sys->nUnk; iUnk++){
+      x[iUnk] = 2*xStPrev[0][iUnk] - xStPrev[1][iUnk];
+    }
+  }
+  else if(nXStPrev>2){
+    rootPrints("WARNING: Only extrapolation with 2 points has been implemented - Solver::extrapolateX");
+  }
+
+  debug.log("x guess:", X_LOG, 10);
+  for(int iUnk=0; iUnk<sys->nUnk; iUnk++){    
+    debug.log(dou2str(x[iUnk]), X_LOG, 10);
+  }
+  debug.log("\n", X_LOG);
 }

@@ -57,6 +57,7 @@ class Solver
 		void iterateUntilConverge(System*, Communicator*, int);
     void calculateNewGuess(System*, Communicator*, int);
     void calculateResiduals(System*, Communicator*);
+    std::string printMethod();
     
     Client* NewtonClient;    
     double* x;
@@ -66,6 +67,8 @@ class Solver
     double dxJacCalc;
     int sJacCalc;
     int iJacCalc;
+    int nXStPrev;
+    int nJStPrev;
     
     int nEvalInStep;
     int nEval;
@@ -78,11 +81,13 @@ class Solver
     int readOutputFromCode(int, System*);
     int sendDataToCode(int, System*, Communicator*);
     int receiveDataFromCode(int, System*, Communicator*);
-    void jacobianConstruction(System*, Communicator*);
-    void broydenUpdate(System*, int);
-    void updateJacobian(System*, Communicator*, int, int);
+    void jacobianConstruction(System*, Communicator*, int);
+    void broydenUpdate(System*, int, int);
+    void updateJacobian(System*, Communicator*, int);
     void solveLinearSystem(System*);
     void x2gamma2delta(System*);
+    void saveX(System*, int);
+    void extrapolateX(System*);
   
 		int error;
     int order;
@@ -96,6 +101,7 @@ class Solver
     
     double* deltaX;
     double* xItPrev;
+    double** xStPrev;
     double* xBackUp;
     double* resVector;
     double* resVectorItPrev;

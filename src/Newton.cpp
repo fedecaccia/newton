@@ -115,6 +115,7 @@ void Newton::run()
   firstClick = clock();
 	while(NewtonEvolution->status != NEWTON_COMPLETE){
     click1 = clock();
+    rootPrints("Nonlinear method: "+NewtonSolver->printMethod());
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
 		NewtonSolver->setFirstGuess(NewtonSystem, NewtonEvolution->step);
 		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm, NewtonEvolution->step);

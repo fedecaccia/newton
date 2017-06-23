@@ -119,6 +119,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="DEBUG_SYSTEM"){
       return true;
     }
+    if(word=="DEBUG_CLIENT"){
+      return true;
+    }
     if(word=="DEBUG_EVOLUTION"){
       return true;
     }
@@ -813,6 +816,10 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       }
       else if(word=="DEBUG_PARSER"){
         debug.setOn();
+        word = takeNextWord();
+      }
+      else if(word=="DEBUG_CLIENT"){
+        client->debug.setOn();
         word = takeNextWord();
       }
       else if(word=="DEBUG_SYSTEM"){
