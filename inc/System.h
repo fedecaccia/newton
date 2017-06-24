@@ -57,6 +57,7 @@ class System
     int setFilesAndCommands(int);
     void alpha2beta(int);
     void computeResiduals(double*, double*);
+    void computePhaseResiduals(int, double*);
     void x2gamma(double*);
     void beta2x(double*);
     void beta2gamma();

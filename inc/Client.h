@@ -59,10 +59,10 @@ class Client
     
     int nFermi;
     struct fermiStruct{
-      std::string name;
-      int nPhysicalEntities;
+      std::string name;      
       int nGroups;
-      int nXS;
+      int nXS;      
+      int nPhysicalEntities;
       struct physicalEntity{
         std::string name;
         int material;
@@ -71,6 +71,12 @@ class Client
         double* EFissionRate;
       };
       physicalEntity* pe;
+      int nCR;
+      struct controlRod{
+        std::string name;
+        double pos;
+      };
+      controlRod* cr;
     };
     fermiStruct* fermi;
     
@@ -113,6 +119,12 @@ class Client
     
     int prepareFermiXs2powInput(std::string, int, double*, std::string, std::string);
     int readFermiXs2powOutput(std::string, int, double*, std::string);
+
+    int prepareNeutronicKP2crInput(std::string, int, double*, std::string, std::string);
+    int readNeutronicKP2crOutput(std::string, int, double*, std::string);
+
+    int prepareNeutronicCr2kPInput(std::string, int, double*, std::string, std::string);
+    int readNeutronicCr2kPOutput(std::string, int, double*, std::string);
     
     std::string takeNextWord();
     std::string takeNextLine();

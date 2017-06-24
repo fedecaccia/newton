@@ -54,7 +54,7 @@ class Solver
 		Solver();
     void initialize(System*);
     void setFirstGuess(System*, int);
-		void iterateUntilConverge(System*, Communicator*, int);
+	  void iterateUntilConverge(System*, Communicator*, int);
     void calculateNewGuess(System*, Communicator*, int);
     void calculateResiduals(System*, Communicator*);
     std::string printMethod();
@@ -69,11 +69,15 @@ class Solver
     int iJacCalc;
     int nXStPrev;
     int nJStPrev;
+    double* phaseResidual;
+    double* phaseTol;
+    double* phaseIter;
+    double* phaseMaxIter;
     
     int nEvalInStep;
     int nEval;
     
-		Debugger debug;
+	 Debugger debug;
     
 	private:
     int runCode(int, System*);

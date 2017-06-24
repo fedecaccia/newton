@@ -501,6 +501,20 @@ void System::computeResiduals(double* res, double* x)
   }
 }
 
+/* System::computePhaseResiduals
+Compute module of residual in actual phase iteration.
+It is useful using EXPLICIT_SERIAL method, with multiple iterations inside phases.
+
+NOT IMPLEMENTED YET. WE SHOULD COMPUTE DIFFERENCE BETWEEN GAMMAS AND BETAS OF RIGHT CODES.
+
+input: phase number, pointer to the residual
+output: -
+*/
+void System::computePhaseResiduals(int phase, double* res)
+{
+  *res=1;
+}
+
 
 void System::x2gamma(double* x)
 {  

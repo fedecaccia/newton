@@ -163,7 +163,19 @@ void Solver::initialize(System* sys)
   VecSetSizes(u,PETSC_DECIDE,sys->nUnk*sys->nUnk);
   VecSetFromOptions(u);
   
-  KSPCreate(PETSC_COMM_WORLD,&ksp); 
+  KSPCreate(PETSC_COMM_WORLD,&ksp);
+
+  // Phases tolerances and max iterations
+  phaseResidual = new double[sys->nPhasesPerIter];
+  phaseTol = new double[sys->nPhasesPerIter];
+  phaseIter = new double[sys->nPhasesPerIter];
+  phaseMaxIter = new double[sys->nPhasesPerIter];
+  for (int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+    phaseResidual[iPhase] = 0;
+    phaseTol[iPhase] = 1e-7;
+    phaseIter[iPhase] = 0;
+    phaseMaxIter[iPhase] = 1;
+  }
 }
 
 
@@ -304,122 +316,141 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
   // New function evaluation
   nEval++;
   nEvalInStep++;
-  
-  // Zeroing vector that receives calculation values
-  for(int iCode=0; iCode<sys->nCodes; iCode++){    
-    math->zeros(sys->code[iCode].alpha, sys->code[iCode].nAlpha);
-  }
       
   /* Each iteration is composed by phases.
    * After each phase, Beta is updated with previous calculations.
    */    
   for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
+
+    // Initialize phase residual and iterations
+    phaseResidual[iPhase] = 0;
+    phaseIter[iPhase] = 0;
+
+    do{ // Iterations in each phase
+
+      // Zeroing vector that receives calculation values
+      for(int iCode=0; iCode<sys->nCodes; iCode++){    
+        math->zeros(sys->code[iCode].alpha, sys->code[iCode].nAlpha);
+      }
+
+      // Update gamma and beta in each iteration per phase in EXPLICIT_SERIAL
+      // Don't do it at the whole beginnig, because gammas don't have X_INI
+      if(method==EXPLICIT_SERIAL && ( (iPhase > 0) ||  phaseIter[iPhase]>0)){
+        sys->beta2gamma();
+        for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
+          codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
+          // Some gammas has zero values, (alpha->beta->gamma propagated)
+          // Calling mappers with zero values could return innecesary errors
+          sys->gamma2delta(codeConnected);
+        }
+      }
     
-    // Update gamma and beta in each phase>0 in EXPLICIT_SERIAL
-    if(method==EXPLICIT_SERIAL && iPhase!=0){
-      sys->beta2gamma();
+      // Send variables to all clients that connect by MPI in this phase
+      for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){      
+        codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
+        
+        if(sys->code[codeConnected].connection!=NEWTON_SPAWN){
+          error = sendDataToCode(codeConnected, sys, comm);
+          // All processes check
+          checkError(error, "Error sending data to code - Solver::calculateResiduals");
+        }
+      }
+      // Run codes by script in this phase
+      freeRank = 0;
       for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
         codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
-        // Some gammas has zero values, (alpha->beta->gamma propagated)
-        // Calling mappers with zero values could return innecesary errors
-        sys->gamma2delta(codeConnected);
-      }
-    }
-  
-    // Send variables to all clients that connect by MPI in this phase
-    for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){      
-      codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
-      
-      if(sys->code[codeConnected].connection!=NEWTON_SPAWN){
-        error = sendDataToCode(codeConnected, sys, comm);
-        // All processes check
-        checkError(error, "Error sending data to code - Solver::calculateResiduals");
-      }
-    }
-    // Run codes by script in this phase
-    freeRank = 0;
-    for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
-      codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
-      if(sys->code[codeConnected].connection==NEWTON_SPAWN){
-        if(irank==freeRank){
-          error += runCode(codeConnected, sys);
+        if(sys->code[codeConnected].connection==NEWTON_SPAWN){
+          if(irank==freeRank){
+            error += runCode(codeConnected, sys);
+          }
+          freeRank++;
+          // When all processes run particular codes, 
+          // check errors and give them more work
+          
+          if(freeRank==world_size){
+            checkError(error, "Error running code - Solver::calculateResiduals");
+            freeRank = 0;
+          }
         }
-        freeRank++;
-        // When all processes run particular codes, 
-        // check errors and give them more work
+      }
+      // Check errors
+      checkError(error, "Error running code - Solver::calculateResiduals");
+      
+      
+      // Other communication types?
+      
+      
+      
+      // Read output from codes that run by script in this phase
+      freeRank = 0;
+      for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
+        codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
         
-        if(freeRank==world_size){
-          checkError(error, "Error running code - Solver::calculateResiduals");
-          freeRank = 0;
+        if(sys->code[codeConnected].connection==NEWTON_SPAWN){
+          if(irank==freeRank){
+            error += readOutputFromCode(codeConnected, sys);
+          }
+          freeRank++;
+          // When all processes run particular codes, 
+          // check errors and give them more work
+          if(freeRank==world_size){
+            checkError(error, "Error reading output from code - Solver::calculateResiduals");
+            freeRank = 0;
+          }
         }
       }
-    }
-    // Check errors
-    checkError(error, "Error running code - Solver::calculateResiduals");
-    
-    
-    // Other communication types?
-    
-    
-    
-    // Read output from codes that run by script in this phase
-    freeRank = 0;
-    for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
-      codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
+      // Check errors
+      checkError(error, "Error reading output from code - Solver::calculateResiduals");
       
-      if(sys->code[codeConnected].connection==NEWTON_SPAWN){
-        if(irank==freeRank){
-          error += readOutputFromCode(codeConnected, sys);
-        }
-        freeRank++;
-        // When all processes run particular codes, 
-        // check errors and give them more work
-        if(freeRank==world_size){
-          checkError(error, "Error reading output from code - Solver::calculateResiduals");
-          freeRank = 0;
-        }
-      }
-    }
-    // Check errors
-    checkError(error, "Error reading output from code - Solver::calculateResiduals");
-    
-    // Receive variables from all clients  in this phase that connect by MPI
-    for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
-      codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
+      // Receive variables from all clients  in this phase that connect by MPI
+      for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
+        codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
 
-      if(sys->code[codeConnected].connection!=NEWTON_SPAWN){
-        error = receiveDataFromCode(codeConnected, sys, comm);
-        // All processes check
-        checkError(error, "Error receiving data from code - Solver::calculateResiduals");
+        if(sys->code[codeConnected].connection!=NEWTON_SPAWN){
+          error = receiveDataFromCode(codeConnected, sys, comm);
+          // All processes check
+          checkError(error, "Error receiving data from code - Solver::calculateResiduals");
+        }
       }
-    }
-    
-    
-    // Other communication types?
-    
-    
-    
-    
+      
+      
+      // Other communication types?
+      
+      
+      
+      
 
-    for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
-      codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
-      // Update alphas in every process
-      error = MPI_Allreduce(MPI_IN_PLACE, // const void *sendbuf
-                            sys->code[codeConnected].alpha, // void *recvbuf
-                            sys->code[codeConnected].nAlpha, // int count: number of elements in send buffer (integer) 
-                            MPI_DOUBLE_PRECISION, // MPI_Datatype datatype
-                            MPI_SUM, // MPI_Op op
-                            MPI_COMM_WORLD); // MPI_Comm comm  
-      checkError(error, "Error sharing alpha between processes - Solver::calculateResiduals");
-      
-      sys->alpha2beta(codeConnected);
-      
-    }   
+      for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
+        codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
+        // Update alphas in every process
+        error = MPI_Allreduce(MPI_IN_PLACE, // const void *sendbuf
+                              sys->code[codeConnected].alpha, // void *recvbuf
+                              sys->code[codeConnected].nAlpha, // int count: number of elements in send buffer (integer) 
+                              MPI_DOUBLE_PRECISION, // MPI_Datatype datatype
+                              MPI_SUM, // MPI_Op op
+                              MPI_COMM_WORLD); // MPI_Comm comm  
+        checkError(error, "Error sharing alpha between processes - Solver::calculateResiduals");
+        
+        sys->alpha2beta(codeConnected);
+        
+      }
+
+      // Phase residual and iterations
+      sys->computePhaseResiduals(iPhase, &phaseResidual[iPhase]);
+      phaseIter[iPhase]++;
+
+      debug.log("phase: "+int2str(iPhase), ITER_LOG);
+      debug.log("iter: "+int2str(phaseIter[iPhase]), ITER_LOG);
+      debug.log("residual: "+int2str(phaseResidual[iPhase])+"\n", ITER_LOG);
+    }while(phaseResidual[iPhase]>phaseTol[iPhase] && phaseIter[iPhase]<phaseMaxIter[iPhase]);
   }  
   
   // Save previous value of residual
   math->copyInVector(resVectorItPrev, 0, resVector, 0, sys->nUnk); 
   // Compute residuals as (beta - x)
+  /* NOTE: IN EXPLICIT_SERIAL, USING INNER ITERATIONS>1 IN PHASES, THIS IS NOT EXACTLY RIGHT. IN THIS CASE WE HAVE TO DO RES=BETA-GAMMA (RIGHT LINKS).
+  USING RES=BETA-X IT IS GOING TO TAKE ONE MORE ITERATION. (X UPDATES LATELY).
+  */
   sys->computeResiduals(resVector, x);
   
   // Calculate norm 2 of the residual vector

@@ -63,6 +63,14 @@ void Client::allocate1()
   // Client structures
   fermi = new fermiStruct[nFermi];
   relap = new relapStruct[nRelap];
+
+  // Some initializations
+  for(int iF=0; iF<nFermi; iF++){
+    fermi[iF].nGroups = 0;
+    fermi[iF].nXS = 0;
+    fermi[iF].nCR = 0;
+    fermi[iF].nPhysicalEntities = 0;
+  }
 }
 
 /* Client::allocate
@@ -74,8 +82,10 @@ output: -
 */
 void Client::allocate2()
 {
-  // Fermi
+  // Neutronic
+
   for(int iF=0; iF<nFermi; iF++){
+    // Physical entities
     fermi[iF].pe = new fermiStruct::physicalEntity[fermi[iF].nPhysicalEntities];
     for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
       fermi[iF].pe[ipe].EFissionRate = new double[fermi[iF].nGroups];
@@ -84,6 +94,8 @@ void Client::allocate2()
         fermi->pe[ipe].xs[iXS] = new double[fermi[iF].nGroups];
       }
     }
+    // Control rods
+    fermi[iF].cr = new fermiStruct::controlRod[fermi[iF].nCR];
   }
   
   // Initialization
@@ -91,6 +103,10 @@ void Client::allocate2()
     for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
       fermi[iF].pe[ipe].burnup = 0;
       fermi[iF].pe[ipe].material = -1; // Secure initialization
+    }
+    for(int icr=0; icr<fermi[iF].nCR; icr++){
+      fermi[iF].cr[icr].name = "";
+      fermi[iF].cr[icr].pos = 0;
     }
   }
   
@@ -136,6 +152,14 @@ int Client::prepareInput(int type, string name, int nDelta, double* delta, strin
       error = prepareFermiXs2powInput(name, nDelta, delta, actualInput, inputModel);
       break;
       
+    case NEUTRONIC_KP2CR:
+      error = prepareNeutronicKP2crInput(name, nDelta, delta, actualInput, inputModel);
+      break;
+      
+    case NEUTRONIC_CR2KP:
+      error = prepareNeutronicCr2kPInput(name, nDelta, delta, actualInput, inputModel);
+      break;
+      
     default:
       error = NEWTON_ERROR;
       cout<<"Client code type:\""<< type<<"\" not founded - Client::prepareInput"<<endl;
@@ -174,7 +198,15 @@ int Client::readOutput(int type, string name, int nAlpha, double* alpha, string 
     case FERMI_XS2POW:
       error = readFermiXs2powOutput(name, nAlpha , alpha, actualOutput);
       break;
-      
+
+    case NEUTRONIC_KP2CR:
+      error = readNeutronicKP2crOutput(name, nAlpha, alpha, actualOutput);
+      break;
+
+    case NEUTRONIC_CR2KP:
+      error = readNeutronicCr2kPOutput(name, nAlpha, alpha, actualOutput);
+      break;      
+
     default:
       error = NEWTON_ERROR;
       cout<<"Client code type:\""<< type<<"\" not founded - Client::readOutput"<<endl;

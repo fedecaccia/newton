@@ -3,7 +3,7 @@
 NEWTON                |
                       |
 Multiphysics          | CLASS
-coupling              | MAPPER
+coupling              | CLIENT
 maste code            |
                       |
 

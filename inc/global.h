@@ -84,9 +84,11 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 // Client code type
 #define TEST                        0
-#define RELAP_POW2TH                1
-#define FERMI_XS2POW                2
-#define USER_CODE                   3
+#define USER_CODE                   1
+#define RELAP_POW2TH                2
+#define FERMI_XS2POW                3
+#define NEUTRONIC_CR2KP             4
+#define NEUTRONIC_KP2CR             5
 
 // Debugger
 #define MAX_LOG                    10

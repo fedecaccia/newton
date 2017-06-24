@@ -74,10 +74,13 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="METHOD"){
       return true;
     }
-    if(word=="METHOD"){
+    if(word=="PHASES"){
       return true;
     }
-    if(word=="PHASES"){
+    if(word=="PHASES_MAX_ITER"){
+      return true;
+    }
+    if(word=="PHASES_MAX_TOL"){
       return true;
     }
     if(word=="ABS_TOL"){
@@ -196,16 +199,22 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="ID"){
       return true;
     }
-    if(word=="N_PHYSICAL_ENTITIES"){
-      return true;
-    }
     if(word=="N_XS"){
       return true;
     }
     if(word=="N_GROUPS"){
       return true;
+    }    
+    if(word=="N_PHYSICAL_ENTITIES"){
+      return true;
     }
     if(word=="PHYSICAL_ENTITIES"){
+      return true;
+    }
+    if(word=="N_CONTROL_RODS"){
+      return true;
+    }
+    if(word=="CONTROL_RODS"){
       return true;
     }
     if(word=="T_0"){
@@ -362,8 +371,7 @@ void Parser::checkImportantCards(System* sys, Solver* sol)
       error = NEWTON_ERROR;
       checkError(error, "Using EXPLICIT_SERIAL method. PHASES card needed - Parser::checkImportantCards");
     }     
-  }
-  
+  }  
 }
 
 /* Parser::checkConsistency
@@ -589,9 +597,15 @@ string Parser::loadClientAndTakeWord(System* sys)
       else if(word == "fermi_xs2pow"){
          sys->code[clientReaded].type = FERMI_XS2POW;
       }
+      else if(word == "neutronic_kp2cr"){
+         sys->code[clientReaded].type = NEUTRONIC_KP2CR;
+      }
+      else if(word == "neutronic_cr2kp"){
+         sys->code[clientReaded].type = NEUTRONIC_CR2KP;
+      }
       else{
         error = NEWTON_ERROR;
-        cout<<"Client code tye:\""<< word<<"\"not founded - Parser::loadClientAndTakeWord"<<endl;
+        cout<<"Client code type:\""<< word<<"\" not founded - Parser::loadClientAndTakeWord"<<endl;
       }
       word = takeNextWord();
     }
@@ -1320,7 +1334,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   // xName should be updated on second input file opening
   // (and also resName)
   
-  // Load initial conditions
+  // Load initial conditions and phases tolerances and max iterations
   
   // Allocate x
   sol->initialize(sys);
@@ -1353,6 +1367,43 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
         }
       }
 
+      else if(word=="PHASES_MAX_ITER" && sol->method == EXPLICIT_SERIAL){
+        word = takeNextWord();
+        int iPhase=0;
+        while(!wordIsForbidden(word)){
+          if(iPhase<sys->nPhasesPerIter){
+            stringstream(word) >> sol->phaseMaxIter[iPhase];
+            iPhase++;
+            word = takeNextWord();
+          }
+          else{
+            error = NEWTON_ERROR;
+            checkError(error, "ERROR: Non valid amount of phases in card PHASES_MAX_ITER - Parser::parseInput");
+          }
+        }
+        if(iPhase<sys->nPhasesPerIter){
+          rootPrints("WARNING: Setting maximum iterations in just: "+int2str(iPhase)+" phases - Parser::parseInput");
+        }
+      }
+      else if(word=="PHASES_MAX_TOL" && sol->method == EXPLICIT_SERIAL){
+        word = takeNextWord();
+        int iPhase=0;
+        while(!wordIsForbidden(word)){
+          if(iPhase<sys->nPhasesPerIter){
+            stringstream(word) >> sol->phaseTol[iPhase];
+            iPhase++;
+            word = takeNextWord();
+          }
+          else{
+            error = NEWTON_ERROR;
+            checkError(error, "ERROR: Non valid amount of phases in card PHASES_MAX_TOL - Parser::parseInput");
+          }
+        }
+        if(iPhase<sys->nPhasesPerIter){
+          rootPrints("WARNING: Setting tolerance in just: "+int2str(iPhase)+" phases - Parser::parseInput");
+        }
+      }
+
       // Unknown or empty word
 
       else{        
@@ -1379,6 +1430,9 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
     if(sys->code[iCode].type==FERMI_XS2POW){
       client->nFermi++;
     }
+    else if(sys->code[iCode].type==NEUTRONIC_CR2KP){
+      client->nFermi++;
+    }
     else if(sys->code[iCode].type==RELAP_POW2TH){
       client->nRelap++;
     }
@@ -1395,6 +1449,10 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   // Set client names
   for(int iCode=0; iCode<sys->nCodes; iCode++){
     if(sys->code[iCode].type==FERMI_XS2POW){
+      client->fermi[fermiReaded].name = sys->code[iCode].name;
+      fermiReaded++;
+    }
+    if(sys->code[iCode].type==NEUTRONIC_CR2KP){
       client->fermi[fermiReaded].name = sys->code[iCode].name;
       fermiReaded++;
     }
@@ -1436,6 +1494,24 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
               word = takeNextWord();
               stringstream(word) >> client->fermi[fermiReaded].nXS;
             }           
+            word = takeNextWord();
+          }
+
+          fermiReaded++;
+        }
+
+        // NEUTRONIC_CR2KP
+        if(sys->code[clientReaded].type==NEUTRONIC_CR2KP){
+          word = takeNextWord();
+          while((!wordIsCard(word, "INPUT") || (wordIsCard(word, "INPUT") && wordIsCard(word, "CLIENT"))) && !configFile.eof()){
+            if(word=="N_PHYSICAL_ENTITIES"){
+              word = takeNextWord();
+              stringstream(word) >> client->fermi[fermiReaded].nPhysicalEntities;
+            } 
+            if(word=="N_CONTROL_RODS"){
+              word = takeNextWord();
+              stringstream(word) >> client->fermi[fermiReaded].nCR;
+            }          
             word = takeNextWord();
           }
 
@@ -1492,7 +1568,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       checkError(error,"Error opening \"newton.config\"");
   }
   configFile.close();
-  
+
   // Allocate things in clients
   client->allocate2();
 
@@ -1512,7 +1588,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       // Load FERMI amount of things
       if(word=="CLIENT"){
         
-        if(sys->code[clientReaded].type==FERMI_XS2POW){
+        if(sys->code[clientReaded].type==FERMI_XS2POW || sys->code[clientReaded].type==NEUTRONIC_CR2KP){
           word = takeNextWord();
           while((!wordIsCard(word, "INPUT") || (wordIsCard(word, "INPUT") && wordIsCard(word, "CLIENT"))) && !configFile.eof()){
             
@@ -1522,6 +1598,13 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
                 client->fermi[fermiReaded].pe[ipe].name = word;
                }
             }
+
+            if(word=="CONTROL_RODS"){
+              for(int icr=0; icr<client->fermi[fermiReaded].nCR; icr++){
+                word = takeNextWord();
+                client->fermi[fermiReaded].cr[icr].name = word;
+               }
+            }            
             word = takeNextWord();
             
           }
@@ -1874,7 +1957,7 @@ output: -
 */
 void Parser::checkConsistencyInPhases(System* sys)
 {
-/*  string iClient, jClient;
+  string iClient, jClient;
   for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
     for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
       iClient = sys->codeToConnectInPhase[iPhase][iCode];
@@ -1890,7 +1973,7 @@ void Parser::checkConsistencyInPhases(System* sys)
         }
       }
     }    
-  }*/
+  }
   
 }
 
