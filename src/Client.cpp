@@ -98,7 +98,7 @@ void Client::allocate2()
   }
   
   // Relap
-  for(int iR=0; iR<nFermi; iR++){
+  for(int iR=0; iR<nRelap; iR++){
     relap[iR].hs = new string[relap[iR].nAxialZones];
     relap[iR].pipe = new string[relap[iR].nAxialZones];
     relap[iR].fpow = new double[relap[iR].nAxialZones];
