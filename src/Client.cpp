@@ -63,9 +63,6 @@ void Client::allocate1()
   // Client structures
   fermi = new fermiStruct[nFermi];
   relap = new relapStruct[nRelap];
-  
-  // Initial error value
-	error = NEWTON_SUCCESS;
 }
 
 /* Client::allocate
@@ -106,9 +103,6 @@ void Client::allocate2()
     relap[iR].rhomix = new double[relap[iR].nAxialZones];
     relap[iR].tempDoppFuel = new double[relap[iR].nAxialZones];
   }
-  
-  // Initial error value
-	error = NEWTON_SUCCESS;
 }
 
 
