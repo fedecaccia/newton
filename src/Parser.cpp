@@ -1874,7 +1874,7 @@ output: -
 */
 void Parser::checkConsistencyInPhases(System* sys)
 {
-  string iClient, jClient;
+/*  string iClient, jClient;
   for(int iPhase=0; iPhase<sys->nPhasesPerIter; iPhase++){
     for(int iCode=0; iCode<sys->nCodesInPhase[iPhase]; iCode++){
       iClient = sys->codeToConnectInPhase[iPhase][iCode];
@@ -1890,7 +1890,7 @@ void Parser::checkConsistencyInPhases(System* sys)
         }
       }
     }    
-  }
+  }*/
   
 }
 
