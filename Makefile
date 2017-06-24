@@ -26,7 +26,7 @@ OBJELEM = $(OBJ_DIR)/Client.o						\
 TEST_OBJELEM = $(OBJ_DIR)/mainTest.o		  
 EXE=$(BIN_DIR)/Newton
 TEST_EXE=$(BIN_DIR)/Test
-MPICC=mpic++
+MPICC=mpic++ -std=c++11 
 
 #~ all: $(BIN_DIR) $(OBJ_DIR) $(OBJELEM)
 #~ 	$(MPICC) $(OBJELEM) -o $(EXE)
@@ -34,7 +34,7 @@ MPICC=mpic++
 all: newton test
 
 newton: $(BIN_DIR) $(OBJ_DIR) $(OBJELEM)
-	$(FC) $(OBJELEM) \
+	$(MPICC) $(OBJELEM) \
 	$(FFLAGS) -o $(EXE) \
 	$(PETSC_FORTRAN_LIB) $(PETSC_LIB) ${SLEPC_SYS_LIB} -lz
 
