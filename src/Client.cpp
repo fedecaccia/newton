@@ -270,22 +270,23 @@ string Client::takeNextLine()
 
 
 */
-void Client::updateVars(double time)
+void Client::updateVars(int step, double deltaStep)
 {
   // Fermi updates
   for(int iF=0; iF<nFermi; iF++){
     for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
       for(int ig=0; ig<fermi[iF].nGroups; ig++){
-        fermi[iF].pe[ipe].burnup += fermi[iF].pe[ipe].EFissionRate[ig]*24*60*60*time;
+        fermi[iF].pe[ipe].burnup += fermi[iF].pe[ipe].EFissionRate[ig]*24*60*60*deltaStep;
       }
     }
   }
   
+  debug.log("Step:"+int2str(step)+"\n");
   debug.log("BURNUP values:\n");
   for(int iF=0; iF<nFermi; iF++){
     for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
       debug.log(fermi[iF].pe[ipe].name+": "+dou2str(fermi[iF].pe[ipe].burnup)+"\n");
     }
   }
-  debug.log("\n");
+  debug.log("\n\n");
 }

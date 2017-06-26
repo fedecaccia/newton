@@ -59,7 +59,7 @@ int main(int argc,char **argv)
 { 
   // Checking number of arguments
   if(argc!=4){
-    cout<<"ERROR. Running control rod code with bad number of arguments."<<endl;
+    cout<<"ERROR. Running control rod code with bad number: "<<argc<<" of arguments."<<endl;
     return 0;
   }
 
@@ -85,7 +85,7 @@ int main(int argc,char **argv)
     return 0;
   }
 
-  //cout<<" Program finished succesfully"<<endl;  
+  cout<<" Program finished succesfully"<<endl;  
   return CR_SUCCESS;
 }
 

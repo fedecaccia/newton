@@ -64,7 +64,7 @@ int main(int argc,char **argv)
   // Checking number of arguments
   if(argc!=5){
     cout<<"ERROR. Running test code with bad number of arguments."<<endl;
-    return 0;
+    return TEST_ERROR;
   }
 
   // Problem number
@@ -79,6 +79,9 @@ int main(int argc,char **argv)
   }
   // Communication argument
   commArg = argv[4];
+  
+  // MPI initialization
+  MPI_Init(NULL, NULL);
 
   switch(problemNumber){
 
@@ -90,7 +93,7 @@ int main(int argc,char **argv)
       }
       catch(int e){
         cout<<"ERROR running test."<<endl;
-        return 0;
+        return TEST_ERROR;
       }
       break;
 
@@ -102,7 +105,7 @@ int main(int argc,char **argv)
       }
       catch(int e){
         cout<<"ERROR running test."<<endl;
-        return 0;
+        return TEST_ERROR;
       }
       break;
 
@@ -114,7 +117,7 @@ int main(int argc,char **argv)
       }
       catch(int e){
         cout<<"ERROR running test."<<endl;
-        return 0;
+        return TEST_ERROR;
       }
       break;
 
@@ -126,7 +129,7 @@ int main(int argc,char **argv)
       }
       catch(int e){
         cout<<"ERROR running test."<<endl;
-        return 0;
+        return TEST_ERROR;
       }
       break;
 
@@ -138,16 +141,28 @@ int main(int argc,char **argv)
       }
       catch(int e){
         cout<<"ERROR running test."<<endl;
-        return 0;
+        return TEST_ERROR;
       }
       break;
 
     default:
       cout<<"ERROR. Bad problem number received in arg 1."<<endl;
-      return 0;
+      return TEST_ERROR;
   }
 
-  //cout<<" Program finished succesfully"<<endl;  
+  // In case that the process was spawned by a parent, he is waiting for fermi to finish with an MPI_Barrier
+  // With this order sended, the parent can read the output
+  MPI_Comm parent;
+     // Obtain an intercommunicator to the parent MPI job
+  MPI_Comm_get_parent(&parent);
+  // Check if this process is a spawned one and if so enter the barrier
+  if (parent != MPI_COMM_NULL)
+    MPI_Barrier(parent);
+  //cout<<"  Finalizing MPI in client..."<<endl;
+  MPI_Finalize();
+
+  //cout<<" Client finished succesfully"<<endl;
+
   return TEST_SUCCESS;
 }
 
@@ -1154,8 +1169,6 @@ void mpi_connection()
 {
   char Port_Name[MPI_MAX_PORT_NAME];
   
-  MPI_Init(NULL, NULL);
-  
   // codeID is the code ID
   cout<<" MPI connection with code: "<<codeID<<endl;
   // Service Name is constructed in base of code ID codeID
@@ -1245,8 +1258,6 @@ void mpi_finish()
     cout<<"Error disconnecting"<<endl;
     throw TEST_ERROR;
   }
-  cout<<"Finalizing MPI..."<<endl;
-  MPI_Finalize();
 }
 
 /* int2str

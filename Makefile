@@ -16,7 +16,8 @@ OBJELEM = $(OBJ_DIR)/Client.o						\
 		  $(OBJ_DIR)/neutronicCr2kP.o 			\
 		  $(OBJ_DIR)/neutronicKP2cr.o 			\
 		  $(OBJ_DIR)/Parser.o 							\
-		  $(OBJ_DIR)/pow2fpow.o							\
+		  $(OBJ_DIR)/pow2spow.o						  \
+		  $(OBJ_DIR)/spow2fpow.o						\
 		  $(OBJ_DIR)/System.o 							\
 		  $(OBJ_DIR)/Solver.o							  \
 		  $(OBJ_DIR)/testClient.o						\

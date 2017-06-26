@@ -616,6 +616,9 @@ string Parser::loadClientAndTakeWord(System* sys)
       if(word=="mpi"){
         sys->code[clientReaded].spawnType = word;
       }
+      else if(word=="system"){
+        sys->code[clientReaded].spawnType = word;
+      }
       word = takeNextWord();
     }
           
@@ -677,8 +680,10 @@ string Parser::loadClientAndTakeWord(System* sys)
     
     else if(word=="BIN_COMMAND"){
       word = takeNextWord();
+      sys->code[clientReaded].binCommand = word;
+      word = takeNextWord();
       while(!wordIsForbidden(word)){
-        sys->code[clientReaded].binCommand += word+" ";
+        sys->code[clientReaded].binCommand += " " + word;
         word = takeNextWord();
       }
     }

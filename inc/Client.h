@@ -53,7 +53,7 @@ class Client
 		Client();
     void allocate1();
     void allocate2();
-    void updateVars(double);
+    void updateVars(int, double);
     int prepareInput(int, std::string, int, double*, std::string, std::string);
     int readOutput(int, std::string, int, double*, std::string);
     

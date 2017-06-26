@@ -221,29 +221,38 @@ int Mapper::th2xs(int nXToMap, double* xToMap, int nMapped, double* mapped, Clie
   //~ exit(1);  
   
   // Condensing groups in necessary case
+  double fi1=0.1;
+  double fi2=0.1;
+  double fi3=0.2;
+  double fi4=0.3;
+  double fi5=0.3;
   
   for(int ipe=0; ipe<fermi->nPhysicalEntities; ipe++){  
     if(fermi->nGroups==1){ // Just adding values, so invalid!
       // Diffusion coefficient
-      xsCondensed[ipe][0][0] = 0;
-      for(int ig=0; ig<nGroups; ig++){
-        xsCondensed[ipe][0][0] += xs[ipe][0][ig];
-      }
+      xsCondensed[ipe][0][0] = fi1*xs[ipe][0][0]
+                              +fi2*xs[ipe][0][1]
+                              +fi3*xs[ipe][0][2]
+                              +fi4*xs[ipe][0][3]
+                              +fi5*xs[ipe][0][4];
       // XS absortion
-      xsCondensed[ipe][1][0] = 0;
-      for(int ig=0; ig<nGroups; ig++){
-        xsCondensed[ipe][1][0] += xs[ipe][1+ig][ig];
-      }
+      xsCondensed[ipe][1][0] = fi1*xs[ipe][1][0]
+                              +fi2*xs[ipe][2][1]
+                              +fi3*xs[ipe][3][2]
+                              +fi4*xs[ipe][4][3]
+                              +fi5*xs[ipe][5][4];
       // nu XF
-      xsCondensed[ipe][2][0] = 0;
-      for(int ig=0; ig<nGroups; ig++){
-        xsCondensed[ipe][2][0] += xs[ipe][1+nGroups][ig];
-      }
+      xsCondensed[ipe][2][0] = fi1*xs[ipe][6][0]
+                              +fi2*xs[ipe][6][1]
+                              +fi3*xs[ipe][6][2]
+                              +fi4*xs[ipe][6][3]
+                              +fi5*xs[ipe][6][4];
       // E*XF
-      xsCondensed[ipe][3][0] = 0;
-      for(int ig=0; ig<nGroups; ig++){
-        xsCondensed[ipe][3][0] += energyPerFission[ig] * xs[ipe][2+nGroups][ig];
-      }
+      xsCondensed[ipe][3][0] = fi1*xs[ipe][7][0]*energyPerFission[0]
+                              +fi2*xs[ipe][7][1]*energyPerFission[1]
+                              +fi3*xs[ipe][7][2]*energyPerFission[2]
+                              +fi4*xs[ipe][7][3]*energyPerFission[3]
+                              +fi5*xs[ipe][7][4]*energyPerFission[4];
     }
     else if(fermi->nGroups==nGroups){ // Not condensing necessity
       for(int ixs=0; ixs<nXSTypes; ixs++){

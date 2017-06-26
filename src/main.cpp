@@ -47,7 +47,7 @@ int main(int argc,char **argv)
   }
   catch(int e){
     (*Coupling).finish();
-    return 0;
+    return NEWTON_ERROR;
   }
 
   try{
@@ -55,16 +55,16 @@ int main(int argc,char **argv)
   }
   catch(int e){
     (*Coupling).finish();
-    return 0;
+    return NEWTON_ERROR;
   }
 
   try{
     (*Coupling).finish();
   }
   catch(int e){
-    return 0;
+    return NEWTON_ERROR;
   }
 
-  return 0;
+  return NEWTON_SUCCESS;
   
 }

@@ -41,7 +41,7 @@ using namespace::std;
 
 /*Mapper::th2xs
  
-Map vector of thermal-hydraulic values into another of cross sections.
+Map vector of power distribution into fractions of power distribution.
 
 input: code, number of elements to map, vector to map, 
 number of elements of image, image vector, & number of:
@@ -49,12 +49,12 @@ zones, physical entities, XS, energy groups
 output: error
 
 */
-int Mapper::pow2fpow(int nXToMap, double* xToMap, int nMapped, double* mapped)
+int Mapper::pow2spow(int nXToMap, double* xToMap, int nMapped, double* mapped)
 {
   // Check consistency
   if(nXToMap!=nMapped){
     error = NEWTON_ERROR;
-    cout<<"Different amount of values to analyze - Mapper::pow2fpow"<<endl;
+    cout<<"Different amount of values to analyze - Mapper::pow2spow"<<endl;
     return error;
   }
   
@@ -65,7 +65,7 @@ int Mapper::pow2fpow(int nXToMap, double* xToMap, int nMapped, double* mapped)
   }  
   
   for(int ifp=0; ifp<nXToMap; ifp++){
-    mapped[ifp] = xToMap[ifp]/power;
+    mapped[ifp] = xToMap[ifp]/power*1000;
   }  
      
   return error;

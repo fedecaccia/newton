@@ -1,0 +1,32 @@
+<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>
+                    Newton
+       Multiphysics coupling master code
+<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>
+
+Parsing configuration file...
+WARNING: Groups used in "fermi" are different from data loaded - Parser::parseInput
+Building system...
+Setting "pow2fpow" map...
+Setting "th2xs" map...
+Checking communication with clients...
+Nonlinear method: EXPLICIT_SERIAL
+Solving step: 1
+ First guess: 			 Residual: 1028.22
+ Nonlinear iteration: 1   Residual: 40.0151
+ Nonlinear iteration: 2   Residual: 1.0415
+ Nonlinear iteration: 3   Residual: 0.0573005
+ Nonlinear iteration: 4   Residual: 0.00514483
+ Total iterations in step: 4 - Total funtion evaluations: 5
+ Total time step: 0.018299 seconds
+Solving step: 2
+ First guess: 			 Residual: 0.291274
+ Nonlinear iteration: 1   Residual: 0.0121348
+ Nonlinear iteration: 2   Residual: 0.0100884
+ Nonlinear iteration: 3   Residual: 0.0101051
+ Nonlinear iteration: 4   Residual: 0.0101051
+ Nonlinear iteration: 5   Residual: 0.0101051
+ Nonlinear iteration: 6   Residual: 0.0101051
+ Nonlinear iteration: 7   Residual: 0.0101051
+ Nonlinear iteration: 8   Residual: 0.0101051
+ Nonlinear iteration: 9   Residual: 0.0101051
+ Nonlinear iteration: 10   Residual: 0.0101051

@@ -3,16 +3,16 @@
 NEWTON                |
                       |
 Multiphysics          | CLASS
-coupling              | EVOLUTION
+coupling              | MAPPER
 maste code            |
                       |
 
 -------------------------------------------------------------------------------
 
-Evolution updates the evolution parameter and other problem dependent variables
-and configurations.
+Mapper manages the preprocessing and / or postprocessing of the variables 
+received and / or sended to the clients.
 
-Date: 4 June 2017
+Date: 26 June 2017
 
 -------------------------------------------------------------------------------
 
@@ -35,44 +35,42 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 \*****************************************************************************/
 
-#include "Evolution.h"
+#include "Mapper.h"
 
 using namespace::std;
 
-/* Evolution constructor
-*/
-Evolution::Evolution()
-{
-	// Actual evolution step
-	step = 0;
-  // Total steps
-  nSteps = 1;
-  // Delta step
-  deltaStep = 1;
-  // Run status
-	status = NEWTON_INCOMPLETE;
-  
-  // Initial state
-	error = NEWTON_SUCCESS;
-}
+/*Mapper::th2xs
+ 
+Map vector of scaled power distribution into fractions of power distribution.
 
-/* Evolution::update
-Updates evolution parameters.
-
-input: -
-output: -
+input: code, number of elements to map, vector to map, 
+number of elements of image, image vector, & number of:
+zones, physical entities, XS, energy groups
+output: error
 
 */
-void Evolution::update(System* sys, Client* client)
+int Mapper::spow2fpow(int nXToMap, double* xToMap, int nMapped, double* mapped)
 {
-	step++;
-  client->updateVars(step, deltaStep);
-	if(step==nSteps){
-		status = NEWTON_COMPLETE;
-	}
-  else{
-    // Update file names and command args in I/O case
-    sys->setFilesAndCommands(step);
+  // Check consistency
+  if(nXToMap!=nMapped){
+    error = NEWTON_ERROR;
+    cout<<"Different amount of values to analyze - Mapper::pow2spow"<<endl;
+    return error;
   }
-	checkError(error,"Error updating evolution.");
+  
+  // Just sum all powers and calculate each fraction
+  int power = 0;
+  for(int ip=0; ip<nXToMap; ip++){
+  //for(int ip=0; ip<nXToMap-1; ip++){ // IF THE LAST IS KEFF
+    power+=xToMap[ip];
+  }  
+  
+  for(int ifp=0; ifp<nXToMap; ifp++){
+  //for(int ifp=0; ifp<nXToMap-1; ifp++){ // IF THE LAST IS KEFF
+    mapped[ifp] = xToMap[ifp]/power;
+  }
+  //mapped[nXToMap] = xToMap[nXToMap]; // IF THE LAST IS KEFF
+  
+     
+  return error;
 }

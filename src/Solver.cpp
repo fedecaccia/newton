@@ -293,8 +293,9 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   
   // Bad ending
   if(residual>nltol){
-    error = NEWTON_ERROR;
-    checkError(error, "Maximum nonlinear iterations reached - Solver-iterateUntilConverge");      
+    //error = NEWTON_ERROR;
+    //checkError(error, "Maximum nonlinear iterations reached - Solver-iterateUntilConverge");
+    rootPrints("EARNING: Maximum nonlinear iterations reached - Solver-iterateUntilConverge");
   }
 
   // Save solution and jacobian
@@ -926,11 +927,8 @@ output: error
 */
 int Solver::spawnCode(int iCode, System* sys)
 {
-  if(sys->code[iCode].spawnType=="mpi" || sys->code[iCode].nProcs>1){
-    // MPI_Spawn
-    error = NEWTON_ERROR;
-    cout<<"MPI_Spawn is not implemented yet"<<endl;
-    return error;
+  //if(sys->code[iCode].spawnType=="mpi" || sys->code[iCode].nProcs>1){
+  if(sys->code[iCode].nProcs>0 && sys->code[iCode].spawnType!="system"){
     
     const char** argv = new const char*[sys->code[iCode].nArgs+1];
     for(int iArg=0; iArg<sys->code[iCode].nArgs; iArg++){
@@ -952,7 +950,8 @@ int Solver::spawnCode(int iCode, System* sys)
       }
     }
     argv[sys->code[iCode].nArgs] = NULL;
-    cout<<"Spawning..."<<endl;
+    //cout<<"Spawning..."<<endl;
+    //~ 
     error = MPI_Comm_spawn( (sys->code[iCode].binCommand).c_str(), // const char *command
                             (char**)argv, //MPI_ARGV_NULL,// char *argv[] 
                             sys->code[iCode].nProcs,// int maxprocs 
@@ -962,10 +961,12 @@ int Solver::spawnCode(int iCode, System* sys)
                             &mpi_comm_spawn,// MPI_Comm *intercomm
                             MPI_ERRCODES_IGNORE);// int array_of_errcodes[]    
    
-    cout<<"Finish spawing"<<endl;
+    //cout<<"Finish spawing"<<endl;
     // Wait for client (in client there should be a Barrier too)
     error += MPI_Barrier(mpi_comm_spawn);
   }
+  
+  // SYSTEM DOESN'T RUN USING MPIRUN NEWTON... and the programm runned by system starts mpi
   
   else if(sys->code[iCode].nProcs==1){
     // system

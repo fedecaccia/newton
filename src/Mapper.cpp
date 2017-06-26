@@ -141,8 +141,12 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
     error = th2xs(nxToMap, xToMap, nMapped, mapped, &(client->fermi[iFermi]));
   }
   
-  else if(map == "pow2fpow"){
-    error = pow2fpow(nxToMap, xToMap, nMapped, mapped);
+  else if(map == "pow2spow"){
+    error = pow2spow(nxToMap, xToMap, nMapped, mapped);
+  }
+
+  else if(map == "spow2fpow"){
+    error = spow2fpow(nxToMap, xToMap, nMapped, mapped);
   }
   
   else if(map == "v2q"){
