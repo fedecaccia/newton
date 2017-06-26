@@ -63,6 +63,9 @@ int main(int argc,char **argv)
     return 0;
   }
 
+  // MPI initialization
+  MPI_Init(NULL, NULL);
+
   // Communication mode
   comm = argv[1];
   if(comm != "io" && comm != "mpi_port" && comm != "mpi_comm"){
@@ -85,7 +88,18 @@ int main(int argc,char **argv)
     return 0;
   }
 
-  cout<<" Program finished succesfully"<<endl;  
+  // In case that the process was spawned by a parent, he is waiting for fermi to finish with an MPI_Barrier
+  // With this order sended, the parent can read the output
+  MPI_Comm parent;
+     // Obtain an intercommunicator to the parent MPI job
+  MPI_Comm_get_parent(&parent);
+  // Check if this process is a spawned one and if so enter the barrier
+  if (parent != MPI_COMM_NULL)
+    MPI_Barrier(parent);
+  //cout<<"  Finalizing MPI in cr..."<<endl;
+  MPI_Finalize();
+
+  cout<<" Control rod manager finished succesfully"<<endl;  
   return CR_SUCCESS;
 }
 
@@ -277,7 +291,6 @@ void mpi_connection()
 {
   char Port_Name[MPI_MAX_PORT_NAME];
   
-  MPI_Init(NULL, NULL);
   
   // codeID is the code ID
   cout<<" MPI connection with code: "<<codeID<<endl;
@@ -368,8 +381,6 @@ void mpi_finish()
     cout<<"Error disconnecting"<<endl;
     throw CR_ERROR;
   }
-  cout<<"Finalizing MPI..."<<endl;
-  MPI_Finalize();
 }
 
 /* int2str
