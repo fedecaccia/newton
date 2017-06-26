@@ -42,6 +42,18 @@ This card is only necessary using explicit_serial method. Client code names shou
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
 \textcolor{Red}{PHASES}  \textcolor{OliveGreen}{client1 client2 & client3 client4 client5 & client6 &}
 \end{Verbatim}
+It is also posile to use inner iterations in each phase. To hablitite this option, use PHASES_MAX_ITER card.
+
+\subsection{card PHASES_MAX_ITER}
+This option can be only used in EXPLICIT_SERIAL method. It allows to use inner iterations in each phase. To use it set amount of maximum iterations for each phase. For example, if we desire to use up to 10 iterations in phase 1, and just 1 in phase 2, set:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{PHASES_MAX_ITER}  \textcolor{OliveGreen}{10 1}
+\end{Verbatim}
+or just
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{PHASES_MAX_ITER}  \textcolor{OliveGreen}{10}
+\end{Verbatim}
+to leave phase 2 with defafult optiones(just 1 inner iteration).
 
 \subsection{card ABS_TOL}
 Absolute nonlinear tolerance in nonlinear iteations to reach the convergence of the solution. Newton ends with error when norm 2 of the residual falls below ABS_TOL.
@@ -55,7 +67,130 @@ Maximum amount of nonlinear iteations allowed to reach the convergence of the so
 \textcolor{Red}{MAX_ITER}  \textcolor{OliveGreen}{100}
 \end{Verbatim}
 
+\subsection{card X_EXT_ORDER}
+Order of extrapolation to set guess at new evolution step. Now it is only availale order 1. Use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{X_EXT_ORDER}  \textcolor{OliveGreen}{1}
+\end{Verbatim}
 
+\subsection{card J_EXT_ORDER}
+Order of extrapolation to set jacobian at new evolution step. It can be used with any implicit method. Now it is only availale order 1. Use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{J_EXT_ORDER}  \textcolor{OliveGreen}{J}
+\end{Verbatim}
+
+
+\subsection{card X_INI}
+Initial condition in unknowns. It can be used as general card or inside CLIENT card. After this card set unknown name and unknown value. For example, to set $x_0=0.1$ and $y_0=0.2$ values, use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{X_INI}  \textcolor{OliveGreen}{x 0.1 y 0.2}
+\end{Verbatim}
+
+\subsection{card STEPS_JAC_CALC}
+It can be used with any method that builds system's jacobian, but not for newton (newton computes jacobian in each step and iteration). It sets difference between steps in wich jacobian is computed by finite difference. Its default value is $0$. To change it to $100$ for example, use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{STEPS_JAC_CALC}  \textcolor{OliveGreen}{100}
+\end{Verbatim}
+
+\subsection{card ITER_JAC_CALC}
+It can be used with any method that builds system's jacobian, but not for newton (newton computes jacobian in each step and iteration). It sets difference between iterations in wich jacobian is computed by finite difference. Its default value is $0$. To change it to $100$ for example, use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{ITER_JAC_CALC}  \textcolor{OliveGreen}{100}
+\end{Verbatim}
+
+\subsection{card DX_JAC_CALC}
+It can be used with any method that builds system's jacobian. It sets delta in unknown to compute residual derivate by finite difference. Its default value is $0.1$. To change it to $0.01$ for example, use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{DX_JAC_CALC}  \textcolor{OliveGreen}{0.01}
+\end{Verbatim}
+
+\subsection{card N_STEPS}
+Number of evolution coupling steps. For example, in a transitory problem with 10 coupling time steps use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{N_STEPS}  \textcolor{OliveGreen}{10}
+\end{Verbatim}
+
+\subsection{card DELTA_STEP}
+Difference in evolution parameter between two steps. Its units depend on the problem. For example, in a neutronic neutronic-termalhydraulic coupling problem solving quasi-static steps in a burnup evolution, if we update cross sections every 50 dayys, use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{DELTA_STEP}  \textcolor{OliveGreen}{50.0}
+\end{Verbatim}
+
+\subsection{card CLIENT}
+This is a block card. After setting this card, all CLIENT options can be set, until a new general card or end of file is found. The first option that has to be set is client name. To set $client1$ client options use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{CLIENT}  \textcolor{OliveGreen}{client1}
+\textcolor{Red}{...}  \textcolor{OliveGreen}{...}
+\end{Verbatim}
+Use any of the CLIENT cards after that.
+
+\subsection{card MAPPER}
+This is a block card. After setting this card, all MAPPER options can be set, until a new general card or end of file is found. The first option that has to be set is mapper name. To set $map1$ mapper options use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{MAPPER}  \textcolor{OliveGreen}{map1}
+\textcolor{Red}{...}  \textcolor{OliveGreen}{...}
+\end{Verbatim}
+Use any of the MAPPER cards after that.
+
+\subsection{card DEBUG_TIME}
+It can be used to export time calculation values in $time.log$. To use it just set:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{DEBUG_TIME}
+\end{Verbatim}
+
+
+\section{Client cards}
+
+Inside CLIENT block (see general card CLIENT), it can be used any of these cards:
+
+\subsection{card CONNECTION}
+This is an obligatory card. Select one of the connection mode options: 
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{io}
+\end{Verbatim}
+This option is used to communicate master with client by input / output option. This option needs cards: N_PROCS, INPUT_NAME, INPUT_EXT, OUTPUT_NAME, OUTPUT_EXT, BIN_COMMAND, ARGS and IO_TYPE.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{mpi}
+\end{Verbatim}
+This option is used to communicate master with client by mpi functions. Master publish a port to connect to client and then connection has to be stablished using some functions in client. See \ref{mpi-port} section to understand how to implement this communication mode in client.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{mpi-comm}
+\end{Verbatim}
+This option is used to communicate master with client by mpi functions. Newton and client codes should be run from beggining using $mpirun$. Not available yet.
+
+\subsection{card IO_TYPE}
+This card is obligatory using io CONNECTION option.
+If input and output client files are simple (just variable values writen inside), it can be used:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{IO_TYPE}  \textcolor{OliveGreen}{test}
+\end{Verbatim}
+If input and output client files are complex (not just variable values writen inside), it needs some programmed lines in $userClient.cpp$ to help Newton to read and write these files. Use:
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{IO_TYPE}  \textcolor{OliveGreen}{USER_CODE}
+\end{Verbatim}
+Other options pre-programmed are:
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{IO_TYPE}  \textcolor{OliveGreen}{RELAP_POW2TH}
+\end{Verbatim}
+This mode is used running $RELAP$ client with power fraction distribution as input. From the output there are extracted fuel temperatures, refrigerent temperatures and densities in the core.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{IO_TYPE}  \textcolor{OliveGreen}{FERMI_XS2POW}
+\end{Verbatim}
+This mode is used running $FERMI$ client with cross sections as input. From the output there are extracted power spatial distribution values.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{IO_TYPE}  \textcolor{OliveGreen}{NEUTRONIC_CR2KP}
+\end{Verbatim}
+This mode is used running $FERMI$ client with control rod positions as input. From the output there are extracted power spatial distribution values and $k$ effective of the core.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{IO_TYPE}  \textcolor{OliveGreen}{NEUTRONIC_KP2CR}
+\end{Verbatim}
+This mode is used running $CR$ client with power spatial distribution values and $k$ effective of the core as input. From the output there are extracted control rod position values.
 
 
 
