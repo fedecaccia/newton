@@ -1,7 +1,0 @@
-# INPUT SPECIFICATIONS
-
-Comment the rest of the line with: '#' '@' '%' '_' '-' or everything that starts with "NEWTON".
-
-Parser is case sensitive. It is a good practise to use upercase letters for cards and lowercase letters for names, strings and other values.
-
-Char '&' is used as a delimeter, to indicate end of the column or the row of a matrix. For example, to set phases in EXPLICIT_SERIAL method, use "phases client1 client2 & client3 & client4 &".

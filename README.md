@@ -59,6 +59,8 @@ Communication with client codes via MPI option requieres an script to run the pr
 
 * Ready-to-use mappers of variables received and sended to clients.
 
+* Mappers implemented to get cross-sections as function of termal-hydraulic and burnup variables.
+
 * Sets of specific variables that need to be storage and updated along the evolution of systems.
 
 * Multiple debugger modes that can be activated by keywords from input file.
@@ -68,8 +70,9 @@ Communication with client codes via MPI option requieres an script to run the pr
 Newton includes the possibility of using mapings between variables to adecuate them to the unknowns that are used to solve the residuals. For example, in neutronic-temal-hydraulic calculations it is common to treat as unknown temperatures and densities, and cross sections are calculated based on the values of the previous variables. Different mappers could be used for different client codes to adecuate as well guesses as calculated variables. Its implementation requieres minimal programming in ready-to-use functions of class `Mapper`.
 
 ## Documentation
+Documentation is available in ```/doc```. User's manual is available right now and developer's manual is being written.
 
-Compile tex files in /doc to pdf (some packages from ```texlive``` are needed: ```texlive-fonts-recommended``` and ```texlive-latex-recommended```). Type:
+<!-- Compile tex files in /doc to pdf (some packages from ```texlive``` are needed: ```texlive-fonts-recommended``` and ```texlive-latex-recommended```). Type:
 ```bash
 cd doc/
 pdflatex newton-u-m.tex
@@ -79,34 +82,19 @@ to get user's manual and:
 cd doc/
 pdflatex newton-d-m.tex
 ```
-to get developer's manual.
+to get developer's manual. -->
 
 ## The future
 
 * Communication with [Fermi](https://github.com/GG1991/fermi) & RELAP by I/O both connected with different threads of `Newton` (now serial).
 
-* Implement efficient mappers to get cross-sections as function of termal-hydraulic and burnup variables.
-
-* Implement communication using PPLEP.
+* Implement communication using communicators in the same execution.
 
 * Complete documentation.
 
 * More tests.
 
 * Performance evaluation.
-
-## References
-
-[1] Jorge S. Leiva, Pablo J. Blanco and Gustavo C. Buscaglia. 
-"Iterative strong coupling of dimensionally heterogeneous models".
-International journal for numerical methods in engineering, 2010, vol 81, pags 1558–1580.
-
-[2] [Caccia, F. and Dari. E. “Acoplamiento multiescala en cálculos fluidodinámicos" (“Multiscale
-coupling in fluid dynamics calculations”). XXll Congress on Numerical Methods and its
-Applications, 7-11 November 2016, Córdoba, Argentina.](https://goo.gl/mZ3A7o)
-
-## Contact
-Any questions or suggestions feel free to contact me at [federicoagustincaccia@gmail.com]
 
 ## Licensing
 
@@ -124,3 +112,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with Newton.  If not, see <http://www.gnu.org/licenses/>.
+
+## Contact
+Any questions or suggestions feel free to contact me at [federicoagustincaccia@gmail.com]
+
+## References
+
+[1] Jorge S. Leiva, Pablo J. Blanco and Gustavo C. Buscaglia. 
+"Iterative strong coupling of dimensionally heterogeneous models".
+International journal for numerical methods in engineering, 2010, vol 81, pags 1558–1580.
+
+[2] [Caccia, F. and Dari. E. “Acoplamiento multiescala en cálculos fluidodinámicos" (“Multiscale
+coupling in fluid dynamics calculations”). XXll Congress on Numerical Methods and its
+Applications, 7-11 November 2016, Córdoba, Argentina.](https://goo.gl/mZ3A7o)
