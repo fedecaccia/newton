@@ -187,9 +187,6 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="CONNECTION"){
       return true;
     }
-    if(word=="SPAWN_TYPE"){
-      return true;
-    }
     if(word=="X_INI"){
       return true;
     }
@@ -609,18 +606,6 @@ string Parser::loadClientAndTakeWord(System* sys)
       }
       word = takeNextWord();
     }
-    
-    else if(word=="SPAWN_TYPE"){
-      word = takeNextWord();
-      transform(word.begin(), word.end(), word.begin(), ::tolower);
-      if(word=="mpi"){
-        sys->code[clientReaded].spawnType = word;
-      }
-      else if(word=="system"){
-        sys->code[clientReaded].spawnType = word;
-      }
-      word = takeNextWord();
-    }
           
     else if(word=="CALCS"){
       word = loadCalcsAndTakeWord(sys);
@@ -692,18 +677,21 @@ string Parser::loadClientAndTakeWord(System* sys)
       word = takeNextWord();
       transform(word.begin(), word.end(), word.begin(), ::toupper);
 
-      if(word=="MPI"){
-        sys->code[clientReaded].connection = NEWTON_MPI_COMMUNICATION;
-      }
-      else if(word=="IO"){
+      else if(word=="IO_SPAWN"){
         sys->code[clientReaded].connection = NEWTON_SPAWN;
       }
-      else if(word=="PPLEP"){
-        sys->code[clientReaded].connection = NEWTON_PPLEP;
+      else if(word=="IO_SYSTEM"){
+        sys->code[clientReaded].connection = NEWTON_SPAWN;
+      }
+      if(word=="MPI_PORT"){
+        sys->code[clientReaded].connection = NEWTON_MPI_PORT;
+      }
+      else if(word=="MPI_COMM"){
+        sys->code[clientReaded].connection = NEWTON_COMM;
       }
       else{
         error = NEWTON_ERROR;
-        checkError(error, "Unknown connection IO_TYPE: "+word+" - Parser::loadClientAndTakeWord");
+        checkError(error, "Unknown connection type: "+word+" - Parser::loadClientAndTakeWord");
       }
       word = takeNextWord();
     }
@@ -781,7 +769,8 @@ void Parser::checkClientProperties(System* sys, int client)
 
   // I/O connection type
 
-  if(sys->code[client].connection==NEWTON_SPAWN){
+  if(sys->code[client].connection==NEWTON_SPAWN || 
+     sys->code[client].connection==NEWTON_SYSTEM){
     if(sys->code[client].inputModelName==""){
       error = NEWTON_ERROR;
       checkError(error, "INPUT_NAME unknown in client: "+sys->code[client].name+ " - Parser::checkClientProperties");

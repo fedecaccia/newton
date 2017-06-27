@@ -82,7 +82,6 @@ void System::allocate1(int method)
   for(int  iCode=0; iCode<nCodes; iCode++){
       code[iCode].name = "";
       code[iCode].connection = NEWTON_UNKNOWN_CONNECTION;
-      code[iCode].spawnType = "";
       code[iCode].nProcs = 1;
       code[iCode].nArgs = 0;
       code[iCode].nAlpha = 0;

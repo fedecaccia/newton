@@ -62,9 +62,10 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 // Communication way with client   
 #define NEWTON_UNKNOWN_CONNECTION   0
-#define NEWTON_MPI_COMMUNICATION    1
-#define NEWTON_SPAWN                2
-#define NEWTON_PPLEP                3
+#define NEWTON_SPAWN                1
+#define NEWTON_SYSTEM               2
+#define NEWTON_MPI_PORT             3
+#define NEWTON_MPI_COMM             4
 
 // Mapper in each stage
 #define NEWTON_NO_MAP               0
