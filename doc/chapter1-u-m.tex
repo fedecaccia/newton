@@ -146,19 +146,24 @@ Inside CLIENT block (see general card CLIENT), it can be used any of these cards
 \subsection{card CONNECTION}
 This is an obligatory card. Select one of the connection mode options: 
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{io}
+\textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{io_spawn}
 \end{Verbatim}
-This option is used to communicate master with client by input / output option. This option needs cards: N_PROCS, INPUT_NAME, INPUT_EXT, OUTPUT_NAME, OUTPUT_EXT, BIN_COMMAND, ARGS and IO_TYPE.
+This option is used to communicate master with client by input / output option spawning N processes of the client by $MPI_Comm_Spawn$. $MPI_Comm_Spawn$ doesn't wait that the slave ends running and so it is needed an MPI_Barrier after the spawn. Client should have implemented this barrier too, once the output has been printed. $newton_spawn$ needs also theese cards: N_PROCS, INPUT_NAME, INPUT_EXT, OUTPUT_NAME, OUTPUT_EXT, BIN_COMMAND, ARGS and IO_TYPE.
 
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{mpi}
+\textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{io_system}
 \end{Verbatim}
-This option is used to communicate master with client by mpi functions. Master publish a port to connect to client and then connection has to be stablished using some functions in client. See \ref{mpi-port} section to understand how to implement this communication mode in client.
+This option is used to communicate master with client by input / output option spawning 1 process of the client by $system$ function of the standard library of c++. $system$ waits that the slave ends running and so it isn't needed any barrier as in $newton_spawn$. NEWTON_SPAWN needs also theese cards: N_PROCS, INPUT_NAME, INPUT_EXT, OUTPUT_NAME, OUTPUT_EXT, BIN_COMMAND, ARGS and IO_TYPE.
+
+\begin{Verbatim}[frame=single,commandchars=\\\{\}]
+\textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{mpi_port}
+\end{Verbatim}
+This option is used to communicate master with client by mpi functions. Master publishes a port to connect with client and then connection has to be stablished using some functions in client. Also, some functions related to send and receive variable values have to be implemented in client. See \ref{mpi-port} section to understand how to implement this communication mode in client.
 
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
 \textcolor{Red}{CONNECTION}  \textcolor{OliveGreen}{mpi-comm}
 \end{Verbatim}
-This option is used to communicate master with client by mpi functions. Newton and client codes should be run from beggining using $mpirun$. Not available yet.
+This option is used to communicate master with client by mpi functions. Newton and client codes should be run from beggining using $mpirun$. Also, some functions related to send and receive variable values have to be implemented in client. See \ref{mpi-comm} section to understand how to implement this communication mode in client.
 
 \subsection{card IO_TYPE}
 This card is obligatory using io CONNECTION option.

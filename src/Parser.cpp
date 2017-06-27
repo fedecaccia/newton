@@ -677,7 +677,7 @@ string Parser::loadClientAndTakeWord(System* sys)
       word = takeNextWord();
       transform(word.begin(), word.end(), word.begin(), ::toupper);
 
-      else if(word=="IO_SPAWN"){
+      if(word=="IO_SPAWN"){
         sys->code[clientReaded].connection = NEWTON_SPAWN;
       }
       else if(word=="IO_SYSTEM"){
@@ -687,7 +687,7 @@ string Parser::loadClientAndTakeWord(System* sys)
         sys->code[clientReaded].connection = NEWTON_MPI_PORT;
       }
       else if(word=="MPI_COMM"){
-        sys->code[clientReaded].connection = NEWTON_COMM;
+        sys->code[clientReaded].connection = NEWTON_MPI_COMM;
       }
       else{
         error = NEWTON_ERROR;
@@ -713,6 +713,10 @@ string Parser::loadClientAndTakeWord(System* sys)
     else if(word=="N_PROCS"){
       word = takeNextWord();
       stringstream(word) >> sys->code[clientReaded].nProcs;
+      if(sys->code[clientReaded].nProcs<0){
+        error = NEWTON_ERROR;
+        checkError(error, "Wrong number of processes to spawn in code: "+sys->code[clientReaded].name+" - Parser::parseInput");      
+      }
       word = takeNextWord();
     }
     

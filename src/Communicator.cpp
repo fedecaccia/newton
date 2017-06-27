@@ -70,7 +70,7 @@ void Communicator::initialize()
     
     for(int iCode=0; iCode<sys->nCodes; iCode++){      
       
-      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+      if(sys->code[iCode].connection==NEWTON_MPI_PORT){
         char portname[MPI_MAX_PORT_NAME];        
         error += MPI_Open_port(MPI_INFO_NULL, portname);
         Port_Name[iCode].assign(portname);
@@ -89,7 +89,7 @@ void Communicator::initialize()
     Coupling_Comm = new MPI_Comm[sys->nCodes];
     
     for(int iCode=0; iCode<sys->nCodes; iCode++){
-      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+      if(sys->code[iCode].connection==NEWTON_MPI_PORT){
         char portname[MPI_MAX_PORT_NAME];
         strcpy(portname, Port_Name[iCode].c_str());
         error += MPI_Comm_accept(portname, MPI_INFO_NULL, 0, MPI_COMM_SELF, &Coupling_Comm[iCode]);
@@ -132,7 +132,7 @@ void Communicator::disconnect()
   
     if(irank==NEWTON_ROOT){
       for(int iCode=0; iCode<sys->nCodes; iCode++){
-        if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+        if(sys->code[iCode].connection==NEWTON_MPI_PORT){
           char portname[MPI_MAX_PORT_NAME];
           strcpy(portname, Port_Name[iCode].c_str());
 
@@ -194,7 +194,7 @@ int Communicator::sendOrder(int order)
 {
   if(irank==NEWTON_ROOT){    
     for(int iCode=0; iCode<sys->nCodes; iCode++){      
-      if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+      if(sys->code[iCode].connection==NEWTON_MPI_PORT){
         //~ cout<<"Sending order to code: "<<sys->code[iCode].name<<"..."<<endl;
         tag = 0;
         error = MPI_Send (&order, 1, MPI_INTEGER, 0, tag, Coupling_Comm[iCode]);    
@@ -217,7 +217,7 @@ output: error
 int Communicator::send(int iCode, int nDelta, double* delta)
 {
   if(irank==NEWTON_ROOT){
-    if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+    if(sys->code[iCode].connection==NEWTON_MPI_PORT){
         // TEST
       //~ cout<<"Sending data to code: "<<sys->code[iCode].name<<"..."<<endl;
       //~ for(int i=0; i<nDelta; i++){
@@ -243,7 +243,7 @@ output: error
 int Communicator::receive(int iCode, int nAlpha, double* alpha)
 {
   if(irank==NEWTON_ROOT){    
-    if(sys->code[iCode].connection==NEWTON_MPI_COMMUNICATION){
+    if(sys->code[iCode].connection==NEWTON_MPI_PORT){
       //~ cout<<"Receiving data from code: "<<sys->code[iCode].name<<"..."<<endl;  
       error = MPI_Recv (alpha, nAlpha, MPI_DOUBLE_PRECISION, 0, MPI_ANY_TAG, Coupling_Comm[iCode], MPI_STATUS_IGNORE); 
     }

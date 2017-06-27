@@ -350,7 +350,8 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){      
         codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
         
-        if(sys->code[codeConnected].connection!=NEWTON_SPAWN){
+        if(sys->code[codeConnected].connection==NEWTON_MPI_PORT ||
+           sys->code[codeConnected].connection==NEWTON_MPI_COMM){
           error = sendDataToCode(codeConnected, sys, comm);
           // All processes check
           checkError(error, "Error sending data to code - Solver::calculateResiduals");
@@ -360,7 +361,8 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       freeRank = 0;
       for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
         codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
-        if(sys->code[codeConnected].connection==NEWTON_SPAWN){
+        if(sys->code[codeConnected].connection==NEWTON_SPAWN ||
+           sys->code[codeConnected].connection==NEWTON_SYSTEM){
           if(irank==freeRank){
             error += runCode(codeConnected, sys);
           }
@@ -387,7 +389,8 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
         codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
         
-        if(sys->code[codeConnected].connection==NEWTON_SPAWN){
+        if(sys->code[codeConnected].connection==NEWTON_SPAWN ||
+           sys->code[codeConnected].connection==NEWTON_SYSTEM){
           if(irank==freeRank){
             error += readOutputFromCode(codeConnected, sys);
           }
@@ -407,8 +410,8 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
         codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
 
-        if(sys->code[codeConnected].connection!=NEWTON_SPAWN){
-          error = receiveDataFromCode(codeConnected, sys, comm);
+        if(sys->code[codeConnected].connection==NEWTON_MPI_PORT ||
+           sys->code[codeConnected].connection==NEWTON_MPI_COMM){
           // All processes check
           checkError(error, "Error receiving data from code - Solver::calculateResiduals");
         }
@@ -919,7 +922,7 @@ int Solver::runCode(int iCode, System* sys)
 
 /* Solver::spawnCode
 
-Spawn n processes of a particular code.
+Spawn n processes of a particular code by mpi_spawn or just 1 with mpirun
 
 input: code number, System pointer
 output: error
@@ -927,8 +930,7 @@ output: error
 */
 int Solver::spawnCode(int iCode, System* sys)
 {
-  //if(sys->code[iCode].spawnType=="mpi" || sys->code[iCode].nProcs>1){
-  if(sys->code[iCode].nProcs>0 && sys->code[iCode].spawnType!="system"){
+  if(sys->code[iCode].connection==NEWTON_SPAWN){
     
     const char** argv = new const char*[sys->code[iCode].nArgs+1];
     for(int iArg=0; iArg<sys->code[iCode].nArgs; iArg++){
@@ -965,21 +967,21 @@ int Solver::spawnCode(int iCode, System* sys)
     // Wait for client (in client there should be a Barrier too)
     error += MPI_Barrier(mpi_comm_spawn);
   }
-  
-  // SYSTEM DOESN'T RUN USING MPIRUN NEWTON... and the programm runned by system starts mpi
-  
-  else if(sys->code[iCode].nProcs==1){
-    // system
-    error = system((sys->code[iCode].commandToRun).c_str());
-  }
-  else{
-    cout<<"Wrong number of processes to spawn in code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
-    error = NEWTON_ERROR;
+
+  if(error!=NEWTON_SUCCESS){
+    cout<<"Error trying to spawn process from code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
     return error;
   }
   
+  // It seems that SYSTEM DOESN'T RUN USING MPIRUN NEWTON (if the programm runned by system starts mpi)
+  
+  else { // (sys->code[iCode].connection==NEWTON_SYSTEM)
+    // system
+    error = system((sys->code[iCode].commandToRun).c_str());
+  }
+  
   if(error!=NEWTON_SUCCESS){
-    cout<<"Error trying to spawn process from code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
+    cout<<"Error trying to run by system the code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
     return error;
   }
   

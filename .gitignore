@@ -4,7 +4,6 @@ obj/*.o
 *.vtk
 *.msh
 *.png
-*.pdf
 *.txt
 bin/*
 examples/*/bin/*
