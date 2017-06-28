@@ -376,12 +376,12 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
           }
         }
       }
+
       // Check errors
       checkError(error, "Error running code - Solver::calculateResiduals");
       
       
       // Other communication types?
-      
       
       
       // Read output from codes that run by script in this phase
@@ -417,7 +417,6 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
           checkError(error, "Error receiving data from code - Solver::calculateResiduals");
         }
       }
-      
       
       // Other communication types?
       
@@ -963,15 +962,16 @@ int Solver::spawnCode(int iCode, System* sys)
                             MPI_COMM_SELF,// MPI_Comm comm
                             &mpi_comm_spawn,// MPI_Comm *intercomm
                             MPI_ERRCODES_IGNORE);// int array_of_errcodes[]    
-   
-    //cout<<"Finish spawing"<<endl;
+    
+    cout<<"Finish spawing"<<endl;
     // Wait for client (in client there should be a Barrier too)
     error += MPI_Barrier(mpi_comm_spawn);
-  }
+    cout<<"Finish Barrier"<<endl;
 
-  if(error!=NEWTON_SUCCESS){
-    cout<<"Error trying to spawn process from code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
-    return error;
+    if(error!=NEWTON_SUCCESS){
+      cout<<"Error trying to spawn process from code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
+      return error;
+    }
   }
   
   // It seems that SYSTEM DOESN'T RUN USING MPIRUN NEWTON (if the programm runned by system starts mpi)
@@ -979,13 +979,13 @@ int Solver::spawnCode(int iCode, System* sys)
   else { // (sys->code[iCode].connection==NEWTON_SYSTEM)
     // system
     error = system((sys->code[iCode].commandToRun).c_str());
+    
+    if(error!=NEWTON_SUCCESS){
+      cout<<"Error trying to run by system the code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
+      return error;
+    }
   }
-  
-  if(error!=NEWTON_SUCCESS){
-    cout<<"Error trying to run by system the code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;
-    return error;
-  }
-  
+
   // Need to move output?
   if(sys->code[iCode].outputPath!="." && sys->code[iCode].outputPath!=""){
     error = system(("mv "+sys->code[iCode].outputPath+sys->code[iCode].actualOutput+" .").c_str());
@@ -994,7 +994,7 @@ int Solver::spawnCode(int iCode, System* sys)
       return error;
     }
   }
-  
+
   // Need to move restart?
   if(sys->code[iCode].restartPath!="." && sys->code[iCode].restartPath!=""){
     error = system(("mv "+sys->code[iCode].restartPath+sys->code[iCode].actualRestart+" .").c_str());
