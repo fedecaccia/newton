@@ -139,7 +139,7 @@ controlRod::controlRod()
     mpi_connection();
     // Receive first data
     mpi_receive(input, 1);
-    crPos[0] = input[0];
+    newCrPos[0] = input[0];
     // Receiving control instruction
     error = mpi_receive_order();
     
@@ -156,7 +156,7 @@ controlRod::controlRod()
     mpi_split_and_comm();
     // Receive first data
     mpi_receive(input, 1);
-    crPos[0] = input[0];
+    newCrPos[0] = input[0];
     // Receiving control instruction
     error = mpi_receive_order();
     
@@ -201,11 +201,19 @@ void controlRod::solve()
         }
         else{
           dCR[0] = 0;
-        }
-        
+        }      
 
+        // Update position
+        crPos[0] = newCrPos[0];
         // Set absolute solution
         newCrPos[0] = crPos[0] + dCR[0];
+        // Extremes
+        if(newCrPos[0]<0){
+          newCrPos[0]=0;
+        }
+        else if (newCrPos[0]>100){
+          newCrPos[0]=100;
+        }
         
         cout<<"keff: "<<actualK<<" delta: "<<dCR[0]<<" - new pos: "<<newCrPos[0]<<endl;
 
