@@ -211,6 +211,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="PHYSICAL_ENTITIES"){
       return true;
     }
+    if(word=="PHYSICAL_ENTITIES_WEIGHT"){
+      return true;
+    }
     if(word=="N_CONTROL_RODS"){
       return true;
     }
@@ -684,7 +687,7 @@ string Parser::loadClientAndTakeWord(System* sys, Communicator* comm)
         sys->code[clientReaded].connection = NEWTON_SPAWN;
       }
       else if(word=="IO_SYSTEM"){
-        sys->code[clientReaded].connection = NEWTON_SPAWN;
+        sys->code[clientReaded].connection = NEWTON_SYSTEM;
       }
       else if(word=="MPI_PORT"){
         sys->code[clientReaded].connection = NEWTON_MPI_PORT;
@@ -1605,6 +1608,13 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
               for(int ipe=0; ipe<client->fermi[fermiReaded].nPhysicalEntities; ipe++){
                 word = takeNextWord();
                 client->fermi[fermiReaded].pe[ipe].name = word;
+               }
+            }
+            
+            if(word=="PHYSICAL_ENTITIES_WEIGHT"){
+              for(int ipe=0; ipe<client->fermi[fermiReaded].nPhysicalEntities; ipe++){
+                word = takeNextWord();
+                stringstream(word) >> client->fermi[fermiReaded].pe[ipe].weight;
                }
             }
 

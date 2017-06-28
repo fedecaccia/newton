@@ -67,7 +67,7 @@ int main(int argc,char **argv)
 { 
   // Checking number of arguments
   if(argc!=4){
-    cout<<"ERROR. Running control rod code with bad number: "<<argc<<" of arguments."<<endl;
+    cout<<"ERROR. Running control rod manager code with bad number: "<<argc<<" of arguments."<<endl;
     return 0;
   }
 
@@ -77,7 +77,7 @@ int main(int argc,char **argv)
   // Communication mode
   comm = argv[1];
   if(comm != "io" && comm != "mpi_port" && comm != "mpi_comm"){
-    cout<<"ERROR. Bad connection type"<<endl;
+    cout<<"ERROR. Bad connection type in control rod manager"<<endl;
     return CR_ERROR;
   }
   // Communication argument
@@ -92,22 +92,13 @@ int main(int argc,char **argv)
     cr->solve();
   }
   catch(int e){
-    cout<<"ERROR running control rod."<<endl;
-    return 0;
+    cout<<"ERROR running control rod manager."<<endl;
+    return CR_ERROR;
   }
 
-  // In case that the process was spawned by a parent, he is waiting for fermi to finish with an MPI_Barrier
-  // With this order sended, the parent can read the output
-  MPI_Comm parent;
-     // Obtain an intercommunicator to the parent MPI job
-  MPI_Comm_get_parent(&parent);
-  // Check if this process is a spawned one and if so enter the barrier
-  if (parent != MPI_COMM_NULL)
-    MPI_Barrier(parent);
-  //cout<<"  Finalizing MPI in cr..."<<endl;
-  MPI_Finalize();
+  mpi_finalize();
 
-  cout<<" Control rod manager finished succesfully"<<endl;  
+  cout<<" Control rod manager finished successfully"<<endl;  
   return CR_SUCCESS;
 }
 
@@ -128,6 +119,9 @@ controlRod::controlRod()
       input = new double[5];
       output = new double[1];
       crPos = new double[1];
+      newCrPos = new double[1];
+      dCR = new double[1];
+      desiredK = 1.0;
       break;
 
     default:
@@ -143,13 +137,16 @@ controlRod::controlRod()
     stringstream(commArg) >> codeID;
     // Connection
     mpi_connection();
+    // Receive first data
+    mpi_receive(input, 1);
+    crPos[0] = input[0];
     // Receiving control instruction
     error = mpi_receive_order();
     
-    cout<<"First order: "<<order<<endl;
+    //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
-      cout<<"Fatal error. Aborting."<<endl;
-      mpi_finish();
+      cout<<"Fatal error in control rod manager. Aborting."<<endl;
+      mpi_disconnect();
       throw CR_ERROR;
     }    
   }
@@ -157,12 +154,15 @@ controlRod::controlRod()
     stringstream(commArg) >> colorCode;
     // Communication
     mpi_split_and_comm();
+    // Receive first data
+    mpi_receive(input, 1);
+    crPos[0] = input[0];
     // Receiving control instruction
     error = mpi_receive_order();
     
     //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){
-      cout<<"Fatal error. Aborting."<<endl;
+      cout<<"Fatal errori in control rod manager. Aborting."<<endl;
       mpi_free();
       throw CR_ERROR;
     } 
@@ -175,7 +175,7 @@ void controlRod::solve()
     switch(problem){
       case POW4K2CR1:
         // Load guess
-        if(comm=="io"){                
+        if(comm=="io"){
           input = loaddata(fileInput, 5);
           actualK = input[4];
         }
@@ -183,35 +183,34 @@ void controlRod::solve()
           mpi_receive(input, 5);
           actualK = input[4];
         }
-        // Set b values
 
         // Compute solution
-        desiredK = 1.0;
-        // SET ABSOLUT POSITION
-        /*if( (actualK-desiredK) > 0.01 || (actualK-desiredK) < -0.01){
-          crPos[0] = (actualK-desiredK)*200;
-          cout<<actualK<<" "<<actualK-desiredK<<" "<<crPos[0]<<endl;
+        
+        // Move CR only until +/-100 pcm
+        deltaK = actualK-desiredK;
+        
+        
+        if( fabs(deltaK)>0.1 ){
+          dCR[0] = 10000*deltaK;
         }
-        else if( (actualK-desiredK) > 0.001 || (actualK-desiredK) < -0.001){
-          crPos[0] = (actualK-desiredK)*20000;
-          cout<<actualK<<" "<<actualK-desiredK<<" "<<crPos[0]<<endl;
+        else if( fabs(deltaK)>0.01 ){
+          dCR[0] = 10000*deltaK;
         }
-        else if( (actualK-desiredK) > 0.0001 || (actualK-desiredK) < -0.0001){
-          crPos[0] = (actualK-desiredK)*20000;
-          cout<<actualK<<" "<<actualK-desiredK<<" "<<crPos[0]<<endl;
-        }
-        else if( (actualK-desiredK) > 0.00001 || (actualK-desiredK) < -0.00001){
-          crPos[0] = (actualK-desiredK)*1000000;
-          cout<<actualK<<" "<<actualK-desiredK<<" "<<crPos[0]<<endl;
+        else if( fabs(deltaK)>0.001 ){
+          dCR[0] = 10000*deltaK;
         }
         else{
-          crPos[0] = 0;
-          cout<<actualK<<" "<<actualK-desiredK<<" "<<crPos[0]<<endl;
-        }*/
-        crPos[0] = 0;
+          dCR[0] = 0;
+        }
+        
+
+        // Set absolute solution
+        newCrPos[0] = crPos[0] + dCR[0];
+        
+        cout<<"keff: "<<actualK<<" delta: "<<dCR[0]<<" - new pos: "<<newCrPos[0]<<endl;
 
         // Set solution
-        output[0] = crPos[0];
+        output[0] = newCrPos[0];
         
         // Send results
         if(comm=="io"){                
@@ -225,25 +224,26 @@ void controlRod::solve()
         break;
         
       default:
-        cout<<"ERROR. Bad problem number received in arg 3."<<endl;
+        cout<<"ERROR. Bad problem number received in arg 3 in control rod manager."<<endl;
         throw CR_ERROR;
     }
   }while(order==RESTART);
   
   if(order==ABORT){
     if(comm=="mpi_port"){
-      mpi_finish();
+      mpi_disconnect();
     }
     else if(comm=="mpi_comm"){
       mpi_free();
     }
+    mpi_finalize();
     cout<<"Finishing program by ABORT order"<<endl;
     throw CR_ERROR;
   }
   
   // Finish connections
   if(comm=="mpi_port"){
-    mpi_finish();
+    mpi_disconnect();
   }
   else if(comm=="mpi_comm"){
     mpi_free();
@@ -360,25 +360,25 @@ void mpi_connection()
 void mpi_receive(double* input, int n)
 {
   // Values reception
-  cout<<"Receiving "<<n<<" values..."<<endl;
+  //cout<<"Receiving "<<n<<" values..."<<endl;
   error = MPI_Recv (input, n, MPI_DOUBLE_PRECISION, 0, MPI_ANY_TAG, Coupling_Comm, MPI_STATUS_IGNORE);
   if (error != 0){
     cout<<"Error receiving data"<<endl;
     throw CR_ERROR;
   }
-  cout<<"Values received."<<endl;
+  //cout<<"Values received."<<endl;
 }
 
 int mpi_receive_order()
 {
   // Order reception
-  cout<<"Receiving order..."<<endl;
+  //cout<<"Receiving order..."<<endl;
   error = MPI_Recv (&order, 1, MPI_INTEGER, 0, MPI_ANY_TAG, Coupling_Comm, MPI_STATUS_IGNORE);
   if (error != 0){
     cout<<"Error receiving order"<<endl;
     throw CR_ERROR;
   }
-  cout<<"Order received: "<<order<<"."<<endl;
+  //cout<<"Order received: "<<order<<"."<<endl;
   
   return order;
 }
@@ -387,16 +387,16 @@ void mpi_send(double* output, int n)
 {
   // Sending values
   tag = 0;
-  cout<<"Sending values..."<<endl;
+  //cout<<"Sending values..."<<endl;
   error = MPI_Send (output, n, MPI_DOUBLE_PRECISION, 0, tag, Coupling_Comm);
   if (error != 0){
     cout<<"Error sending values"<<endl;
     throw CR_ERROR;
   }
-  cout<<"Values sent."<<endl;
+  //cout<<"Values sent."<<endl;
 }
 
-void mpi_finish()
+void mpi_disconnect()
 {
   // Disconnecting
   cout<<"Disconnecting..."<<endl;
@@ -426,7 +426,7 @@ void mpi_split_and_comm()
 //cout<<" color: "<<colorCode<<" from client "<<codeClient<<endl;
   if(global_rank==0){
     error = CR_ERROR;
-    cout<<"Only mater root has to be global rank 0"<<endl;
+    cout<<"Only master root has to have global rank 0"<<endl;
   }
   if (error != 0){
     cout<<"Error spliting"<<endl;
@@ -476,6 +476,19 @@ void mpi_free()
   }
 }
 
+void mpi_finalize()
+{
+  // In case that the process was spawned by a parent, he is waiting for fermi to finish with an MPI_Barrier
+  // With this order sended, the parent can read the output
+  MPI_Comm parent;
+     // Obtain an intercommunicator to the parent MPI job
+  MPI_Comm_get_parent(&parent);
+  // Check if this process is a spawned one and if so enter the barrier
+  if (parent != MPI_COMM_NULL)
+    MPI_Barrier(parent);
+  //cout<<"  Finalizing MPI in cr..."<<endl;
+  MPI_Finalize();  
+}
 
 /* int2str
 

@@ -39,7 +39,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace::std;
 
-/*Mapper::th2xs
+/*Mapper::spow2fpow
  
 Map vector of scaled power distribution into fractions of power distribution.
 
@@ -58,18 +58,18 @@ int Mapper::spow2fpow(int nXToMap, double* xToMap, int nMapped, double* mapped)
     return error;
   }
   
-  // Just sum all powers and calculate each fraction
+  // Just add all powers and calculate each fraction
   int power = 0;
-  //for(int ip=0; ip<nXToMap; ip++){
-  for(int ip=0; ip<nXToMap-1; ip++){ // IF THE LAST IS KEFF
+  for(int ip=0; ip<nXToMap; ip++){
+  //for(int ip=0; ip<nXToMap-1; ip++){ // IF THE LAST IS KEFF
     power+=xToMap[ip];
   }  
   
-  //for(int ifp=0; ifp<nXToMap; ifp++){
-  for(int ifp=0; ifp<nXToMap-1; ifp++){ // IF THE LAST IS KEFF
+  for(int ifp=0; ifp<nXToMap; ifp++){
+  //for(int ifp=0; ifp<nXToMap-1; ifp++){ // IF THE LAST IS KEFF
     mapped[ifp] = xToMap[ifp]/power;
   }
-  mapped[nXToMap-1] = xToMap[nXToMap-1]; // IF THE LAST IS KEFF 
+  //mapped[nXToMap-1] = xToMap[nXToMap-1]; // IF THE LAST IS KEFF 
 
   return error;
 }

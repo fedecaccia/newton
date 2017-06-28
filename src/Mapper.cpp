@@ -110,7 +110,7 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
   if(map == "" || map=="none"){
     if(nxToMap!=nMapped){
       error = NEWTON_ERROR;
-      cout<<"Number of values to map are differtent to number of values mapped in code: "<<iCode<<" - Mapper::map"<<endl;
+      checkError(error, "Number of values to map are differtent to number of values mapped in code: "+int2str(iCode)+" - Mapper::map");
     }
     else{
       for(int iX=0; iX<nxToMap; iX++){
@@ -134,7 +134,7 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
     }
     if(iFermi==-1){
       error=NEWTON_ERROR;
-      cout<<"Code "<<codeName<<" has not fermi structures data to map with "<<map<<" - Mapper::map"<<endl;
+      checkError(error, "Code "+codeName+" has not fermi structures data to map with "+map+" - Mapper::map");
       return error;
     }
     
@@ -149,13 +149,17 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
     error = spow2fpow(nxToMap, xToMap, nMapped, mapped);
   }
   
+  else if(map == "spowk2fpowk"){
+    error = spowk2fpowk(nxToMap, xToMap, nMapped, mapped);
+  }
+  
   else if(map == "v2q"){
 
   }
   
   else{
     error = NEWTON_ERROR;
-    cout<<"Mapper: "<<map<<" is not founded for code: "<<iCode<<" - Mapper::map"<<endl;        
+    checkError(error, "Mapper: "+map+" is not founded for code: "+int2str(iCode)+" - Mapper::map");
   }
   
   return error;

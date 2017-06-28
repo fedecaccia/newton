@@ -53,7 +53,7 @@ class Client
 		Client();
     void allocate1();
     void allocate2();
-    void updateVars(int, double);
+    void updateVars(int, double, double*, int);
     int prepareInput(int, std::string, int, double*, std::string, std::string);
     int readOutput(int, std::string, int, double*, std::string);
     
@@ -66,6 +66,7 @@ class Client
       struct physicalEntity{
         std::string name;
         int material;
+        double weight;
         double burnup;
         double** xs;
         double* EFissionRate;
@@ -104,6 +105,7 @@ class Client
     };
     relapStruct* relap;
     
+    double* mw2mwd_ton;
     Debugger debug;
 		
 	private:

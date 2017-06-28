@@ -142,9 +142,9 @@ void Debugger::allLog(string logStr, int output)
 {
   if(output<nLogs){
     if (logFile[output].is_open()){
-      if(local_rank==NEWTON_ROOT){
+      //if(local_rank==NEWTON_ROOT){
         logFile[output] << "(local_rank: "<<int2str(local_rank)<<") - "<< logStr << endl;
-      }
+      //}
     }
   }
   else{

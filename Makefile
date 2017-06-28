@@ -18,6 +18,7 @@ OBJELEM = $(OBJ_DIR)/Client.o						\
 		  $(OBJ_DIR)/Parser.o 							\
 		  $(OBJ_DIR)/pow2spow.o						  \
 		  $(OBJ_DIR)/spow2fpow.o						\
+		  $(OBJ_DIR)/spowk2fpowk.o					\
 		  $(OBJ_DIR)/System.o 							\
 		  $(OBJ_DIR)/Solver.o							  \
 		  $(OBJ_DIR)/testClient.o						\

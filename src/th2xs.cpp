@@ -279,6 +279,17 @@ int Mapper::th2xs(int nXToMap, double* xToMap, int nMapped, double* mapped, Clie
     } 
   }
   
+  // Save values as XS values in physical entities structures  
+  ivalue = 0;
+  for(int ipe=0; ipe<fermi->nPhysicalEntities; ipe++){
+    for(int ixs=0; ixs<fermi->nXS; ixs++){
+      for(int ig=0; ig<fermi->nGroups; ig++){
+        fermi->pe[ipe].xs[ixs][ig] = mapped[ivalue];
+        ivalue++;
+      }
+    }
+  }  
+  
   return error;
 }
 

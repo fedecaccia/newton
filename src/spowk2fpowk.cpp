@@ -3,15 +3,16 @@
 NEWTON                |
                       |
 Multiphysics          | CLASS
-coupling              | COMMUNICATOR
+coupling              | MAPPER
 maste code            |
                       |
 
 -------------------------------------------------------------------------------
 
-Stablish mpi communitaction with clients.
+Mapper manages the preprocessing and / or postprocessing of the variables 
+received and / or sended to the clients.
 
-Date: 27 June 2017
+Date: 26 June 2017
 
 -------------------------------------------------------------------------------
 
@@ -34,45 +35,40 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 \*****************************************************************************/
 
-#ifndef COMMUNICATOR_H
-#define COMMUNICATOR_H
+#include "Mapper.h"
 
-#include "global.h"
-#include "Evolution.h"
-#include "System.h"
-#include "Debugger.h"
+using namespace::std;
 
-#include "mpi.h"
-#include <string.h>
+/*Mapper::spowk2fpowk
+ 
+Map vector of scaled power distribution into fractions of power distribution, 
+and leave last value (keff) as it is received.
 
-class Communicator
+input: code, number of elements to map, vector to map, 
+number of elements of image, image vector, & number of:
+zones, physical entities, XS, energy groups
+output: error
+
+*/
+int Mapper::spowk2fpowk(int nXToMap, double* xToMap, int nMapped, double* mapped)
 {
-	public:
-		Communicator(System*, Evolution*);
-    void allocate();
-		void initialize();
-		void disconnect();
-    int firstCommunication(double*, int);
-    int sendOrder(int);
-    int send(int, int, double*);
-    int receive(int, int, double*);
-    
-    Debugger debug;
-    int nCommCodes;
-		
-	private:
-		int error;
-    int tag;
-		int isConnectedByMPI;
-    std::string* Port_Name;
-    MPI_Group world_group; // Global group
-    MPI_Group* roots_group; // Roots group
-    MPI_Comm* Coupling_Comm;
-    int* codeComm;
-    int* clientRootGlobalRank;
-    System* sys;
-    Evolution* evol;
+  // Check consistency
+  if(nXToMap!=nMapped){
+    error = NEWTON_ERROR;
+    cout<<"Different amount of values to analyze - Mapper::pow2spow"<<endl;
+    return error;
+  }
+  
+  // Just add all powers and calculate each fraction
+  int power = 0;
+  for(int ip=0; ip<nXToMap-1; ip++){
+    power+=xToMap[ip];
+  }  
+  
+  for(int ifp=0; ifp<nXToMap-1; ifp++){
+    mapped[ifp] = xToMap[ifp]/power;
+  }
+  mapped[nXToMap-1] = xToMap[nXToMap-1];
 
-};
-
-#endif
+  return error;
+}

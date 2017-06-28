@@ -157,19 +157,8 @@ int main(int argc,char **argv)
       cout<<"ERROR. Bad problem number received in arg 1."<<endl;
       return TEST_ERROR;
   }
-
-  // In case that the process was spawned by a parent, he is waiting for fermi to finish with an MPI_Barrier
-  // With this order sended, the parent can read the output
-  MPI_Comm parent;
-     // Obtain an intercommunicator to the parent MPI job
-  MPI_Comm_get_parent(&parent);
-  // Check if this process is a spawned one and if so enter the barrier
-  if (parent != MPI_COMM_NULL)
-    MPI_Barrier(parent);
-  //cout<<"  Finalizing MPI in client..."<<endl;
-  MPI_Finalize();
-
-  //cout<<" Client finished succesfully"<<endl;
+  
+  mpi_finalize();
 
   return TEST_SUCCESS;
 }
@@ -250,7 +239,7 @@ linear2::linear2()
     //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
-      mpi_finish();
+      mpi_disconnect();
       throw TEST_ERROR;
     }
   }
@@ -365,18 +354,19 @@ void linear2::solve()
   
   if(order==ABORT){
     if(comm=="mpi_port"){
-      mpi_finish();
+      mpi_disconnect();
       }
     else if(comm=="mpi_comm"){
       mpi_free();
     }
+    mpi_finalize();
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
   
   // Finish connections
   if(comm=="mpi_port"){
-    mpi_finish();
+    mpi_disconnect();
   }
   else if(comm=="mpi_comm"){
     mpi_free();
@@ -466,7 +456,7 @@ linear3::linear3()
     //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
-      mpi_finish();
+      mpi_disconnect();
       throw TEST_ERROR;
     }    
   }    
@@ -626,18 +616,19 @@ void linear3::solve()
   
   if(order==ABORT){
     if(comm=="mpi_port"){
-      mpi_finish();
+      mpi_disconnect();
     }
     else if(comm=="mpi_comm"){
       mpi_free();
     }
+    mpi_finalize();
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
   
   // Finish connections
   if(comm=="mpi_port"){
-    mpi_finish();
+    mpi_disconnect();
   }
   else if(comm=="mpi_comm"){
     mpi_free();
@@ -693,7 +684,7 @@ nonlinear2::nonlinear2()
     //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
-      mpi_finish();
+      mpi_disconnect();
       throw TEST_ERROR;
     }    
   }
@@ -783,18 +774,19 @@ void nonlinear2::solve()
   
   if(order==ABORT){
     if(comm=="mpi_port"){
-      mpi_finish();
+      mpi_disconnect();
     }
     else if(comm=="mpi_comm"){
       mpi_free();
     }
+    mpi_finalize();
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
   
   // Finish connections
   if(comm=="mpi_port"){
-    mpi_finish();
+    mpi_disconnect();
   }
   else if(comm=="mpi_comm"){
     mpi_free();
@@ -859,7 +851,7 @@ nonlinear3::nonlinear3()
     //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
-      mpi_finish();
+      mpi_disconnect();
       throw TEST_ERROR;
     }    
   }
@@ -986,18 +978,19 @@ void nonlinear3::solve()
   
   if(order==ABORT){
     if(comm=="mpi_port"){
-      mpi_finish();
+      mpi_disconnect();
     }
     else if(comm=="mpi_comm"){
       mpi_free();
     }
+    mpi_finalize();
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
   
   // Finish connections
   if(comm=="mpi_port"){
-    mpi_finish();
+    mpi_disconnect();
   }
   else if(comm=="mpi_comm"){
     mpi_free();
@@ -1091,7 +1084,7 @@ linear2mapper::linear2mapper()
     //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
-      mpi_finish();
+      mpi_disconnect();
       throw TEST_ERROR;
     }    
   }
@@ -1193,18 +1186,19 @@ void linear2mapper::solve()
   
   if(order==ABORT){
     if(comm=="mpi_port"){
-      mpi_finish();
+      mpi_disconnect();
     }
     else if(comm=="mpi_comm"){
       mpi_free();
     }
+    mpi_finalize();
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
   
   // Finish connections
   if(comm=="mpi_port"){
-    mpi_finish();
+    mpi_disconnect();
   }  
   else if(comm=="mpi_comm"){
     mpi_free();
@@ -1357,7 +1351,7 @@ void mpi_send(double* output, int n)
   //cout<<"Values sent in code "<<codeClient<<endl;
 }
 
-void mpi_finish()
+void mpi_disconnect()
 {
   // Disconnecting
   //cout<<"Disconnecting in code "<<codeClient<<endl;
@@ -1435,6 +1429,22 @@ void mpi_free()
     MPI_Group_free(&roots_group);
     MPI_Comm_free(&Coupling_Comm);
   }
+}
+
+void mpi_finalize()
+{
+  // In case that the process was spawned by a parent, he is waiting for fermi to finish with an MPI_Barrier
+  // With this order sended, the parent can read the output
+  MPI_Comm parent;
+     // Obtain an intercommunicator to the parent MPI job
+  MPI_Comm_get_parent(&parent);
+  // Check if this process is a spawned one and if so enter the barrier
+  if (parent != MPI_COMM_NULL)
+    MPI_Barrier(parent);
+  //cout<<"  Finalizing MPI in client..."<<endl;
+  MPI_Finalize();
+
+  //cout<<" Client finished successfully"<<endl;  
 }
 
 /* int2str

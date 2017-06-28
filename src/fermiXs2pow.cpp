@@ -78,23 +78,11 @@ int Client::prepareFermiXs2powInput(string codeName, int nValues, double* values
     return error;
   }
   
-  // Save values received as XS values in physical entities structures  
-  int ivalue = 0;
-  for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
-    for(int ixs=0; ixs<fermi[iF].nXS; ixs++){
-      for(int ig=0; ig<fermi[iF].nGroups; ig++){
-        fermi[iF].pe[ipe].xs[ixs][ig] = values[ivalue];
-        ivalue++;
-      }
-    }
-  }
   
-  // Save Energy multipled by fission rate in each physical entity - THIS DEPENDS ON XS FISSION POSITION
-  for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
-    for(int ig=0; ig<fermi[iF].nGroups; ig++){
-      fermi[iF].pe[ipe].EFissionRate[ig] = fermi[iF].pe[ipe].xs[2][ig]*fermi[iF].pe[ipe].xs[3][ig];
-    }
-  }
+  /*        NOTE: HERE I DO A TRICK
+   * I am not using "values" because I already have them saved in fermi struct.
+   * Mapper th2xs had saved them.
+   * I prefer use them because they are already ordered.*/
     
   // Input file  
   inputFile.open(input.c_str());
@@ -195,12 +183,6 @@ int Client::readFermiXs2powOutput(string codeName, int nValues, double* values, 
     error = NEWTON_ERROR;
 	}
   outputFile.close(); 
-  
-  // TEST
-  //~ cout<<"power"<<endl;
-  //~ for(int i=0; i<nValues; i++){
-    //~ cout<<values[i]<<endl;
-  //~ }
  
   return error; 
 }

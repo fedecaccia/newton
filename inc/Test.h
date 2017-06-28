@@ -67,9 +67,10 @@ void mpi_connection();
 void mpi_receive(double*, int);
 int mpi_receive_order();
 void mpi_send(double*, int);
-void mpi_finish();
+void mpi_disconnect();
 void mpi_split_and_comm();
 void mpi_free();
+void mpi_finalize();
 
 class linear2
 {

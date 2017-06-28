@@ -63,10 +63,15 @@ input: -
 output: -
 
 */
-void Evolution::update(System* sys, Client* client)
+void Evolution::update(System* sys, Client* client, double* x)
 {
 	step++;
-  client->updateVars(step, deltaStep);
+  
+  // Update state vars
+  for (int iCode=0; iCode<sys->nCodes; iCode++){
+    client->updateVars(step, deltaStep, x, sys->code[iCode].type);
+  }
+  
 	if(step==nSteps){
 		status = NEWTON_COMPLETE;
 	}
@@ -74,5 +79,6 @@ void Evolution::update(System* sys, Client* client)
     // Update file names and command args in I/O case
     sys->setFilesAndCommands(step);
   }
+  
 	checkError(error,"Error updating evolution.");
 }

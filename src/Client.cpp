@@ -103,11 +103,17 @@ void Client::allocate2()
     for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
       fermi[iF].pe[ipe].burnup = 0;
       fermi[iF].pe[ipe].material = -1; // Secure initialization
+      fermi[iF].pe[ipe].weight = 1;
     }
     for(int icr=0; icr<fermi[iF].nCR; icr++){
       fermi[iF].cr[icr].name = "";
       fermi[iF].cr[icr].pos = 0;
     }
+  }
+  
+  // Unit convertion: Mw -> Mwdat / ton
+  for(int iF=0; iF<nFermi; iF++){
+    mw2mwd_ton = new double[fermi[iF].nPhysicalEntities];
   }
   
   // Relap
@@ -270,23 +276,70 @@ string Client::takeNextLine()
 
 
 */
-void Client::updateVars(int step, double deltaStep)
-{
-  // Fermi updates
-  for(int iF=0; iF<nFermi; iF++){
-    for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
-      for(int ig=0; ig<fermi[iF].nGroups; ig++){
-        fermi[iF].pe[ipe].burnup += fermi[iF].pe[ipe].EFissionRate[ig]*24*60*60*deltaStep;
-      }
-    }
-  }
+void Client::updateVars(int step, double deltaStep, double* x, int clientType)
+{  
+  switch(clientType){
   
-  debug.log("Step:"+int2str(step)+"\n");
-  debug.log("BURNUP values:\n");
-  for(int iF=0; iF<nFermi; iF++){
-    for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
-      debug.log(fermi[iF].pe[ipe].name+": "+dou2str(fermi[iF].pe[ipe].burnup)+"\n");
-    }
+    case TEST:
+      break;
+      
+    case USER_CODE:
+      break;
+      
+    case RELAP_POW2TH:
+      break;
+      
+    case FERMI_XS2POW:
+    
+      // Energy units convertion  
+      // MW -> MWday/ton
+      for(int iF=0; iF<nFermi; iF++){
+        for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
+          mw2mwd_ton[ipe] = 1.0 / fermi[iF].pe[ipe].weight;
+        }
+      }
+
+      // Fermi updates
+      
+      // Save Energy multipled by fission rate (power) [MW] in each physical entity
+      fermi[0].pe[0].EFissionRate[0] = x[0];
+      fermi[0].pe[1].EFissionRate[0] = x[1];
+      fermi[0].pe[2].EFissionRate[0] = x[2];
+      fermi[0].pe[3].EFissionRate[0] = x[3];
+      fermi[0].pe[4].EFissionRate[0] = x[4];
+      fermi[0].pe[5].EFissionRate[0] = 0;
+      fermi[0].pe[6].EFissionRate[0] = 0;
+      fermi[0].pe[7].EFissionRate[0] = 0;
+      fermi[0].pe[8].EFissionRate[0] = 0;
+      fermi[0].pe[9].EFissionRate[0] = 0;
+      
+      
+      // Compute Burnup
+      for(int iF=0; iF<nFermi; iF++){
+        for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
+          for(int ig=0; ig<fermi[iF].nGroups; ig++){
+            fermi[iF].pe[ipe].burnup += fermi[iF].pe[ipe].EFissionRate[ig]*mw2mwd_ton[ipe]*deltaStep;
+          }
+        }
+      }
+      
+      debug.log("Step:"+int2str(step)+"\n");
+      debug.log("BURNUP values:\n");
+      for(int iF=0; iF<nFermi; iF++){
+        for(int ipe=0; ipe<fermi[iF].nPhysicalEntities; ipe++){
+          debug.log(fermi[iF].pe[ipe].name+": "+dou2str(fermi[iF].pe[ipe].burnup)+"\n");
+        }
+      }
+      debug.log("\n\n");
+      break;
+      
+    case NEUTRONIC_CR2KP:
+      break;
+      
+    case NEUTRONIC_KP2CR:
+      break;
+      
+    default:
+      break;
   }
-  debug.log("\n\n");
 }

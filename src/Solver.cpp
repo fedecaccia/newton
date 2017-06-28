@@ -266,6 +266,10 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   // New step
   iter = 0;
   nEvalInStep = 0;
+  // First data sharing
+  if (step==0){
+    comm->firstCommunication(x, sys->nUnk);
+  }
   calculateResiduals(sys, comm);
   rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
  
@@ -440,12 +444,11 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       }
 
       // Phase residual and iterations
-      sys->computePhaseResiduals(iPhase, &phaseResidual[iPhase]);
+      sys->computePhaseResiduals(iPhase, &phaseResidual[iPhase]); // DUMMY
       phaseIter[iPhase]++;
 
       debug.log("phase: "+int2str(iPhase), ITER_LOG);
-      debug.log("iter: "+int2str(phaseIter[iPhase]), ITER_LOG);
-      debug.log("residual: "+int2str(phaseResidual[iPhase])+"\n", ITER_LOG);
+      debug.log("phase iter: "+int2str(phaseIter[iPhase]), ITER_LOG);
     }while(phaseResidual[iPhase]>phaseTol[iPhase] && phaseIter[iPhase]<phaseMaxIter[iPhase]);
   }  
   
@@ -963,10 +966,8 @@ int Solver::spawnCode(int iCode, System* sys)
                             &mpi_comm_spawn,// MPI_Comm *intercomm
                             MPI_ERRCODES_IGNORE);// int array_of_errcodes[]    
     
-    cout<<"Finish spawing"<<endl;
     // Wait for client (in client there should be a Barrier too)
     error += MPI_Barrier(mpi_comm_spawn);
-    cout<<"Finish Barrier"<<endl;
 
     if(error!=NEWTON_SUCCESS){
       cout<<"Error trying to spawn process from code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;

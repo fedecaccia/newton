@@ -54,6 +54,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <stdlib.h>
 #include <mpi.h>
+#include <cmath>
 
 std::string int2str (int);
 double* loaddata(std::string, int);
@@ -62,9 +63,10 @@ void mpi_connection();
 void mpi_receive(double*, int);
 int mpi_receive_order();
 void mpi_send(double*, int);
-void mpi_finish();
+void mpi_disconnect();
 void mpi_split_and_comm();
 void mpi_free();
+void mpi_finalize();
 
 class controlRod
 {
@@ -77,7 +79,10 @@ class controlRod
     double* output;
     double desiredK;
     double actualK;
+    double deltaK;
     double* crPos;
+    double* newCrPos;
+    double* dCR;
     std::string file;
     std::string fileInput;
     std::string fileOutput;		

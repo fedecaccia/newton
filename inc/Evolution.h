@@ -47,7 +47,7 @@ class Evolution
 {
 	public:
 		Evolution();
-		void update(System*, Client*);
+		void update(System*, Client*, double*);
 
 		int status;
 		int step;

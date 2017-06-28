@@ -201,15 +201,6 @@ void Communicator::initialize()
   }
   checkError(error, "Error creating group communicator - Communicator::initialize"); 
 
-
-/*-----------------------------------------------------------------------------
-            First Newton->client communication
------------------------------------------------------------------------------*/
-
-  // First communication
-  error = firstCommunication();
-
-  checkError(error, "Error sharing first data with clients by MPI - Communicator::initialize");  
 }
 
 /* Communicator::disconnnect
@@ -269,35 +260,65 @@ void Communicator::disconnect()
 
 /* Communicator::firstCommunication
 
-Share important data in first communication with code iCode.
+Share important data in first communication with codes
 
-input: code number
+input: vector with initial condition values, number of values
 output: error
 
 */
-int Communicator::firstCommunication()
-{    
-  if(local_rank==NEWTON_ROOT){
-    for(int iCode=0; iCode<sys->nCodes; iCode++){
-  
-      switch(sys->code[iCode].type){
+int Communicator::firstCommunication(double* x0, int nx0)
+{
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+
+    switch(sys->code[iCode].type){
+      
+      case TEST:
+        break;
         
-        case TEST:          
-          break;
-          
-        case RELAP_POW2TH:
-          break;
-          
-        case FERMI_XS2POW:
-          break;
-          
-        case USER_CODE:
-          break;    
-      }
+      case USER_CODE:
+        break;              
+        
+      case RELAP_POW2TH:
+        break;
+        
+      case FERMI_XS2POW:
+        break;
+        
+      case NEUTRONIC_CR2KP:
+        break;
+      
+      case NEUTRONIC_KP2CR:
+      
+        // Share initial position of one control rod - Change it to share more data
+        if(local_rank==NEWTON_ROOT){
+          if(sys->code[iCode].connection==NEWTON_MPI_PORT){
+            debug.log("Sending first data to code: "+sys->code[iCode].name+" by MPI_Port...\n");
+            for(int i=0; i<nx0; i++){
+              debug.log(" value: "+dou2str(x0[i]));
+            }
+            tag = 0;
+            error = MPI_Send (x0, 1, MPI_DOUBLE_PRECISION, 0, tag, Coupling_Comm[iCode]);
+            debug.log("Sended\n");
+          }
+          if(sys->code[iCode].connection==NEWTON_MPI_COMM){
+            debug.log("Sending first data to code: "+sys->code[iCode].name+" by MPI_Comm...\n");
+            for(int i=0; i<nx0; i++){
+              debug.log(" value: "+dou2str(x0[i]));
+            }
+            tag = 0;
+            error = MPI_Send (x0, 1, MPI_DOUBLE_PRECISION, 1, tag, Coupling_Comm[iCode]);
+            debug.log("Sended\n");
+          }
+        }
+                
+        break;
+                  
     }
   }
   
-  error = sendOrder(NEWTON_CONTINUE);
+  error += sendOrder(NEWTON_CONTINUE);
+  
+  checkError(error, "Error sharing first data with clients by MPI - Communicator::firstCommunication");  
   
   return error;
 }
@@ -353,7 +374,7 @@ int Communicator::send(int iCode, int nDelta, double* delta)
       debug.log("Sended\n");
     }
     if(sys->code[iCode].connection==NEWTON_MPI_COMM){
-      debug.log("Sending data to code: "+sys->code[iCode].name+" by MPI_Port...\n");
+      debug.log("Sending data to code: "+sys->code[iCode].name+" by MPI_Comm...\n");
       for(int i=0; i<nDelta; i++){
         debug.log(" delta:"+dou2str(delta[i]));
       }
@@ -383,7 +404,7 @@ int Communicator::receive(int iCode, int nAlpha, double* alpha)
       error = MPI_Recv (alpha, nAlpha, MPI_DOUBLE_PRECISION, 0, MPI_ANY_TAG, Coupling_Comm[iCode], MPI_STATUS_IGNORE); 
     }
     else if(sys->code[iCode].connection==NEWTON_MPI_COMM){
-      debug.log("Receiving data from code: "+sys->code[iCode].name+" by MPI_Port...\n"); 
+      debug.log("Receiving data from code: "+sys->code[iCode].name+" by MPI_Comm...\n"); 
       error = MPI_Recv (alpha, nAlpha, MPI_DOUBLE_PRECISION, 1, MPI_ANY_TAG, Coupling_Comm[iCode], MPI_STATUS_IGNORE); 
     }
 
