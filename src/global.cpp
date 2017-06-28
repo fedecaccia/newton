@@ -41,10 +41,16 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 using namespace::std;
 
 // Global variables
-// MPI world size
-int world_size=1;
-// MPI process rank
-int irank=0;
+// MPI world size in the original communicator
+int global_size=1;
+// MPI process rank in the original communicator
+int global_rank=0;
+// MPI world size in the local communicator
+int local_size=1;
+// MPI process rank in the local communicator
+int local_rank=0;
+// Local communicator
+MPI_Comm newton_comm;
 // MPI_Initialized flag
 int flag=0;
 // mpierror
@@ -85,7 +91,7 @@ void checkError(int error, string errorPhrase)
 								 1, // int count,
                  MPI_INTEGER, // MPI_Datatype datatype, 
                  MPI_SUM, // MPI_Op op, 
-                 MPI_COMM_WORLD); // MPI_Comm comm);
+                 newton_comm); // MPI_Comm comm);
 	}
 
 	if(error!=NEWTON_SUCCESS || mpierror != MPI_SUCCESS){
@@ -106,7 +112,7 @@ output: -
 */
 void rootPrints(string phrase)
 {
-	if(irank==NEWTON_ROOT){
+	if(local_rank==NEWTON_ROOT){
 		cout<<phrase<<endl;
 	}
 }

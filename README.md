@@ -31,7 +31,7 @@ The parameters of the problem, as well as parameters needed by the numerical met
 
 Now move on to another test. Type:
 ```bash
-cd ../linear2_MPI/
+cd ../linear2_MPI-port/
 ./run.sh
 ```
 This test solves the same system of coupled equations but now connecting with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now Newton doesn't has to know nothing about file names and paths: communication is between codes while the are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.

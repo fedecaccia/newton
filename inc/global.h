@@ -67,6 +67,9 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #define NEWTON_MPI_PORT             3
 #define NEWTON_MPI_COMM             4
 
+// Communicator color
+#define NEWTON_COLOR								0
+
 // Mapper in each stage
 #define NEWTON_NO_MAP               0
 #define NEWTON_MAP                  1
@@ -100,8 +103,12 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #define J_LOG                       4
 #define UNK_LOG                     5
 
-extern int world_size;
-extern int irank;
+extern int global_size;
+extern int global_rank;
+extern int local_rank;
+extern int local_size;
+extern MPI_Comm newton_comm;
+
 
 //void functionTrying(void (*f)());
 void checkError(int, std::string);

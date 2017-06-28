@@ -73,7 +73,7 @@ class Parser
 	  void checkClientProperties(System*, int);
     void checkConsistencyInPhases(System*);
 
-		std::string loadClientAndTakeWord(System*);
+		std::string loadClientAndTakeWord(System*, Communicator*);
 		std::string loadCalcsAndTakeWord(System*);
 		std::string loadGuessesAndTakeWord(System*);
 

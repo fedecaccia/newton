@@ -119,7 +119,7 @@ void Debugger::log(string logStr, int output, int width)
 {
   if(output<nLogs){
     if (logFile[output].is_open()){
-      if(irank==NEWTON_ROOT){
+      if(local_rank==NEWTON_ROOT){
         logFile[output] << setw(width) << logStr <<flush;
       }
     }
@@ -142,8 +142,8 @@ void Debugger::allLog(string logStr, int output)
 {
   if(output<nLogs){
     if (logFile[output].is_open()){
-      if(irank==NEWTON_ROOT){
-        logFile[output] << "(irank: "<<int2str(irank)<<") - "<< logStr << endl;
+      if(local_rank==NEWTON_ROOT){
+        logFile[output] << "(local_rank: "<<int2str(local_rank)<<") - "<< logStr << endl;
       }
     }
   }

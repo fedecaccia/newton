@@ -13,7 +13,7 @@ This programm is a client code made for manager control rod positions.
 Args: 
   argv[0]: program_name
   argv[1]: string with communication mode
-  argv[2]: communication argument (string file name, client ID)
+  argv[2]: communication argument (string file name, client ID, color code)
   argv[3]: number of problem
 
 Date: 23 June 2017
@@ -45,13 +45,21 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include "control_rod.h"
 
 int codeID;
+int colorCode;
+int global_rank;
+int global_size;
+int local_rank;
+int local_size;
 std::string comm;
 std::string commArg;
 int problem;
 int error=CR_SUCCESS;
 int order=CONTINUE;
 int tag;
+MPI_Group world_group;
+MPI_Group roots_group;
 MPI_Comm Coupling_Comm;
+MPI_Comm Local_Comm;
 
 using namespace::std;
 
@@ -145,6 +153,20 @@ controlRod::controlRod()
       throw CR_ERROR;
     }    
   }
+  else if(comm=="mpi_comm"){
+    stringstream(commArg) >> colorCode;
+    // Communication
+    mpi_split_and_comm();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    //cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_free();
+      throw CR_ERROR;
+    } 
+  }
 }
 
 void controlRod::solve()
@@ -157,12 +179,9 @@ void controlRod::solve()
           input = loaddata(fileInput, 5);
           actualK = input[4];
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpi_comm"){
           mpi_receive(input, 5);
           actualK = input[4];
-        }
-        else if(comm=="mpi_comm"){
-          
         }
         // Set b values
 
@@ -198,12 +217,9 @@ void controlRod::solve()
         if(comm=="io"){                
           printResults(output, 1, fileOutput);
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpi_comm"){
           mpi_send(output, 1);
           order = mpi_receive_order();         
-        }
-        else if(comm=="mpi_comm"){         
-          
         }
         
         break;
@@ -215,7 +231,12 @@ void controlRod::solve()
   }while(order==RESTART);
   
   if(order==ABORT){
-    mpi_finish();
+    if(comm=="mpi_port"){
+      mpi_finish();
+    }
+    else if(comm=="mpi_comm"){
+      mpi_free();
+    }
     cout<<"Finishing program by ABORT order"<<endl;
     throw CR_ERROR;
   }
@@ -223,6 +244,9 @@ void controlRod::solve()
   // Finish connections
   if(comm=="mpi_port"){
     mpi_finish();
+  }
+  else if(comm=="mpi_comm"){
+    mpi_free();
   }
 }
 
@@ -382,6 +406,76 @@ void mpi_finish()
     throw CR_ERROR;
   }
 }
+
+void mpi_split_and_comm()
+{
+/*-----------------------------------------------------------------------------
+            Communicator split, global and local variables
+-----------------------------------------------------------------------------*/
+  // Get the number of processes in the original communicator
+  error = MPI_Comm_size(MPI_COMM_WORLD, &global_size);
+  // Get the rank of the process in the original communicator
+  error = MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
+//cout<<global_size<<" "<<global_rank<<" from client "<<codeClient<<endl;
+  // Split communicator
+  error += MPI_Comm_split(MPI_COMM_WORLD, colorCode, global_rank, &Local_Comm);
+  // Get the number of processes in the local communicator
+  error += MPI_Comm_size(Local_Comm, &local_size);
+  // Get the rank of process in the local communicator
+  error += MPI_Comm_rank(Local_Comm, &local_rank);
+//cout<<" color: "<<colorCode<<" from client "<<codeClient<<endl;
+  if(global_rank==0){
+    error = CR_ERROR;
+    cout<<"Only mater root has to be global rank 0"<<endl;
+  }
+  if (error != 0){
+    cout<<"Error spliting"<<endl;
+    throw CR_ERROR;
+  }
+/*  cout<<"WORLD RANK/SIZE: "<<global_rank <<"/ "<<global_size<<"\t LOCAL RANK/SIZE: "<< local_rank<<"/ "<<local_size<<"\n"<<endl;
+    if (error != 0){
+    cout<<"Error splitting"<<endl;
+    throw CR_ERROR;*/
+
+/*-----------------------------------------------------------------------------
+            Create world group
+-----------------------------------------------------------------------------*/
+
+  // Get the group of processes in MPI_COMM_WORLD 
+  MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+
+/*-----------------------------------------------------------------------------
+            Create one group for master-root communication
+-----------------------------------------------------------------------------*/
+
+  // Create group between master and slave root
+  if(local_rank==0){
+    int* ranks = new int[2];
+    ranks[0] = 0;
+    ranks[1] = global_rank;
+    MPI_Group_incl(world_group, 2, ranks, &roots_group);
+  }
+
+/*-----------------------------------------------------------------------------
+            Create one communicator for master-root communication
+-----------------------------------------------------------------------------*/
+
+  // Now create a communicator in roots_group
+  MPI_Comm_create_group(MPI_COMM_WORLD, roots_group, 0, &Coupling_Comm);
+  //cout<<"Communication set in client: "<<codeClient<<endl;
+
+}
+
+void mpi_free()
+{
+  MPI_Comm_free(&Local_Comm);
+  if(local_rank==0){
+    MPI_Group_free(&world_group);
+    MPI_Group_free(&roots_group);
+    MPI_Comm_free(&Coupling_Comm);
+  }
+}
+
 
 /* int2str
 

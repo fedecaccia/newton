@@ -1,0 +1,2 @@
+i cant understand why 0 is dest in mpi_send by mpi_port but 1 is dest in mpi_end by mpi_comm,
+how mpi_send recognize the group?

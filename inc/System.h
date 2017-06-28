@@ -88,6 +88,7 @@ class System
     struct client{
       std::string name;
       int id;
+      int rootGlobalRank;
       int type;
       int connection;
       int nProcs;

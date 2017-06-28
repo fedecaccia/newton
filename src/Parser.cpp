@@ -183,6 +183,9 @@ bool Parser::wordIsCard(string word, string parent)
     }
     if(word=="N_PROCS"){
       return true;
+    }
+    if(word=="ROOT_GLOBAL_RANK"){
+      return true;
     } 
     if(word=="CONNECTION"){
       return true;
@@ -548,12 +551,12 @@ string Parser::loadGuessesAndTakeWord(System* sys)
 /* Parser::loadClientAndTakeWord
 Load all important data for a particular client and return the next word.
 
-input: System pointer
+input: System pointer, Communicator pointer
 output: next word readed
 
 */
 
-string Parser::loadClientAndTakeWord(System* sys)
+string Parser::loadClientAndTakeWord(System* sys, Communicator* comm)
 {
 
   word = takeNextWord();
@@ -683,16 +686,23 @@ string Parser::loadClientAndTakeWord(System* sys)
       else if(word=="IO_SYSTEM"){
         sys->code[clientReaded].connection = NEWTON_SPAWN;
       }
-      if(word=="MPI_PORT"){
+      else if(word=="MPI_PORT"){
         sys->code[clientReaded].connection = NEWTON_MPI_PORT;
       }
       else if(word=="MPI_COMM"){
         sys->code[clientReaded].connection = NEWTON_MPI_COMM;
+        comm->nCommCodes++;
       }
       else{
         error = NEWTON_ERROR;
         checkError(error, "Unknown connection type: "+word+" - Parser::loadClientAndTakeWord");
       }
+      word = takeNextWord();
+    }
+
+    else if(word=="ROOT_GLOBAL_RANK"){
+      word = takeNextWord();
+      stringstream(word) >> sys->code[clientReaded].rootGlobalRank;
       word = takeNextWord();
     }
     
@@ -1065,7 +1075,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       checkError(error,"Error opening \"newton.config\"");
   }
   configFile.close();
-  
+
   // TEST
   //cout<<"nRes: "<<sys->nRes<<endl;
   
@@ -1106,7 +1116,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       // Analyze all properties of the client and return the word out of that
 
       else if(word=="CLIENT"){        
-        word = loadClientAndTakeWord(sys);        
+        word = loadClientAndTakeWord(sys, comm);        
       }
       
       // Properties in bad order
@@ -1151,7 +1161,8 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
   
   // Allocate elements
   
-  sys->allocate3(); // ********************************************change things
+  sys->allocate3();
+  comm->allocate();
 
   //TEST
   //~ cout<<"Number of clients: "<<sys->nCodes<<endl;
@@ -1268,7 +1279,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
 
       // Read args
       if(word=="CLIENT"){
-        if(sys->code[clientReaded].nArgs>0){          
+        if(sys->code[clientReaded].nArgs>0){
           while(word!="ARGS"){
             word = takeNextWord();
           }

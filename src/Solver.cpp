@@ -295,7 +295,7 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   if(residual>nltol){
     //error = NEWTON_ERROR;
     //checkError(error, "Maximum nonlinear iterations reached - Solver-iterateUntilConverge");
-    rootPrints("EARNING: Maximum nonlinear iterations reached - Solver-iterateUntilConverge");
+    rootPrints("WARNING: Maximum nonlinear iterations reached - Solver-iterateUntilConverge");
   }
 
   // Save solution and jacobian
@@ -363,14 +363,14 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
         codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
         if(sys->code[codeConnected].connection==NEWTON_SPAWN ||
            sys->code[codeConnected].connection==NEWTON_SYSTEM){
-          if(irank==freeRank){
+          if(local_rank==freeRank){
             error += runCode(codeConnected, sys);
           }
           freeRank++;
           // When all processes run particular codes, 
           // check errors and give them more work
           
-          if(freeRank==world_size){
+          if(freeRank==local_size){
             checkError(error, "Error running code - Solver::calculateResiduals");
             freeRank = 0;
           }
@@ -391,13 +391,13 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
         
         if(sys->code[codeConnected].connection==NEWTON_SPAWN ||
            sys->code[codeConnected].connection==NEWTON_SYSTEM){
-          if(irank==freeRank){
+          if(local_rank==freeRank){
             error += readOutputFromCode(codeConnected, sys);
           }
           freeRank++;
           // When all processes run particular codes, 
           // check errors and give them more work
-          if(freeRank==world_size){
+          if(freeRank==local_size){
             checkError(error, "Error reading output from code - Solver::calculateResiduals");
             freeRank = 0;
           }
@@ -408,10 +408,11 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       
       // Receive variables from all clients  in this phase that connect by MPI
       for(int iPhaseCode = 0; iPhaseCode<sys->nCodesInPhase[iPhase]; iPhaseCode++){
-        codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);
+        codeConnected = sys->findCodeInPhase(iPhase, iPhaseCode);        
 
         if(sys->code[codeConnected].connection==NEWTON_MPI_PORT ||
            sys->code[codeConnected].connection==NEWTON_MPI_COMM){
+          error = receiveDataFromCode(codeConnected, sys, comm);
           // All processes check
           checkError(error, "Error receiving data from code - Solver::calculateResiduals");
         }
@@ -432,7 +433,7 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
                               sys->code[codeConnected].nAlpha, // int count: number of elements in send buffer (integer) 
                               MPI_DOUBLE_PRECISION, // MPI_Datatype datatype
                               MPI_SUM, // MPI_Op op
-                              MPI_COMM_WORLD); // MPI_Comm comm  
+                              newton_comm); // MPI_Comm comm  
         checkError(error, "Error sharing alpha between processes - Solver::calculateResiduals");
         
         sys->alpha2beta(codeConnected);
@@ -790,7 +791,7 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm, int step)
   //~ debug.log("\n", J_LOG);
 
   //~ // TEST
-  //~ if(irank==0){
+  //~ if(local_rank==0){
     //~ for (int i=0; i<sys->nUnk; i++){
       //~ for (int j=0; j<sys->nUnk; j++){
         //~ cout<<J[i][j]<<" ";
@@ -855,7 +856,7 @@ void Solver::solveLinearSystem(System* sys)
   PCSetType(pc,PCNONE);
   KSPSolve(ksp,b,u);
 
-  if(irank==NEWTON_ROOT){
+  if(local_rank==NEWTON_ROOT){
     // Get x solution from u
     VecGetArray(u,&deltaX);
   }
@@ -865,7 +866,7 @@ void Solver::solveLinearSystem(System* sys)
                           sys->nUnk,// int count, 
                           MPI_DOUBLE_PRECISION,// MPI_Datatype datatype, 
                           NEWTON_ROOT,// int root, 
-                          MPI_COMM_WORLD);// MPI_Comm comm )
+                          newton_comm);// MPI_Comm comm )
   checkError(error, "Error sharing solution between processes");                            
   
   // Save previous value of x

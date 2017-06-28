@@ -11,7 +11,7 @@ maste code            |
 
 Stablish mpi communitaction with clients.
 
-Date: 14 June 2017
+Date: 27 June 2017
 
 -------------------------------------------------------------------------------
 
@@ -49,6 +49,7 @@ class Communicator
 {
 	public:
 		Communicator(System*, Evolution*);
+    void allocate();
 		void initialize();
 		void disconnect();
     int firstCommunication();
@@ -57,13 +58,18 @@ class Communicator
     int receive(int, int, double*);
     
     Debugger debug;
+    int nCommCodes;
 		
 	private:
 		int error;
     int tag;
 		int isConnectedByMPI;
     std::string* Port_Name;
+    MPI_Group world_group; // Global group
+    MPI_Group* roots_group; // Roots group
     MPI_Comm* Coupling_Comm;
+    int* codeComm;
+    int* clientRootGlobalRank;
     System* sys;
     Evolution* evol;
 

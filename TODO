@@ -3,5 +3,4 @@ install:
 	create folder and links
 	hostname and create mf files
 	make all
-weak coupling (only one link)
 tests should be compiled with preprocessor flags and different names

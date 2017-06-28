@@ -70,36 +70,73 @@ output: -
 */
 void Newton::initialize()
 {
-	// MPI init and main variables
-  
-	// Initialize the MPI environment
+/*-----------------------------------------------------------------------------
+            MPI Initialization
+-----------------------------------------------------------------------------*/
+	
+  // Initialize the MPI environment
 	error = MPI_Init(NULL, NULL);
-	checkError(error, "MPI_INIT error");
-	// Get the number of processes
-	error = MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-	checkError(error, "MPI_Comm_size error");
-	// Get the rank of the process
-	error = MPI_Comm_rank(MPI_COMM_WORLD, &irank);
-	checkError(error, "MPI_Comm_rank error");
+
+/*-----------------------------------------------------------------------------
+            Communicator split, global and local variables
+-----------------------------------------------------------------------------*/
+
+	// Get the number of processes in the original communicator
+  error += MPI_Comm_size(MPI_COMM_WORLD, &global_size);
+	// Get the rank of the process in the original communicator
+	error += MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
+
+  // Master color
+  int color = NEWTON_COLOR;
+  // Split the communicator based on the color and use the
+  // original rank for ordering
+  error += MPI_Comm_split(MPI_COMM_WORLD, color, global_rank, &newton_comm);
+  checkError(error, "Error initializing MPI - Newton::initialize");
+
+  // Get the number of processes in the local communicator
+  error = MPI_Comm_size(newton_comm, &local_size);
+  // Get the rank of process in the local communicator
+  error += MPI_Comm_rank(newton_comm, &local_rank);
+  checkError(error, "Error getting new rank & sizes MPI - Newton::initialize");
+
+  // NOTE: global_rank and local_size are only different if multiple
+  // programms had been executed under the same mpirun or mpiexec execution.
+
+  // Newton root has to be mpi execution group root
+  if(local_rank==0 && global_rank!=0){
+    error = NEWTON_ERROR;
+    checkError(error, "ERROR. Bad execution. Newton root has to be root global process - Newton::initialize");
+  }
+
+/*-----------------------------------------------------------------------------
+            PETSc Initialization
+-----------------------------------------------------------------------------*/
   
-  // PETSc init
-  PetscInitialize(PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);
-  
-  // Set debugger
-  configureDebugger();
+  // PETSc init in a subset of processes
+  PETSC_COMM_WORLD = newton_comm;  
+  error += PetscInitialize(PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);
+
+/*-----------------------------------------------------------------------------
+            Main prints
+-----------------------------------------------------------------------------*/
   
   rootPrints("\n<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>");
     rootPrints("                    Newton");
     rootPrints("       Multiphysics coupling master code");
     rootPrints("<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>\n");
 
-  // Objects initialization
+/*-----------------------------------------------------------------------------
+            Other objects initialization
+-----------------------------------------------------------------------------*/
   
+  // Set debugger
+  configureDebugger();
+
 	NewtonParser->parseInput(NewtonSystem, NewtonEvolution, NewtonSolver, NewtonSolver->NewtonClient, NewtonMap, NewtonComm, &debug);
 	
 	NewtonSystem->construct(NewtonMap);
 
-	NewtonComm->initialize();	
+	NewtonComm->initialize();
 }
 
 /* Newton::run
@@ -152,6 +189,7 @@ void Newton::finish()
 { 
 	NewtonComm->disconnect();
   PetscFinalize();
+  MPI_Comm_free(&newton_comm);
 	MPI_Finalize();
   
   // Set debuggers  off

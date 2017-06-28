@@ -17,9 +17,9 @@ args:
  - arg[3]: communication mode: ("io", "mpi_port", "mpi_comm")
  - arg[4]: communication arg: ("io": string of input file name)
                               ("mpi_port": int of code ID)
-                              ("mpi_comm": string of communicator) ?
+                              ("mpi_comm": communicator color)
 
-Date: 19 June 2017
+Date: 27 June 2017
 
 -------------------------------------------------------------------------------
 
@@ -50,12 +50,20 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 int problemNumber;
 int codeClient;
 int codeID;
+int colorCode;
+int global_rank;
+int global_size;
+int local_rank;
+int local_size;
 std::string comm;
 std::string commArg;
 int error=TEST_SUCCESS;
 int order=CONTINUE;
 int tag;
+MPI_Group world_group;
+MPI_Group roots_group;
 MPI_Comm Coupling_Comm;
+MPI_Comm Local_Comm;
 
 using namespace::std;
 
@@ -239,10 +247,26 @@ linear2::linear2()
     // Receiving control instruction
     error = mpi_receive_order();
     
-    cout<<"First order: "<<order<<endl;
+    //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
       mpi_finish();
+      throw TEST_ERROR;
+    }
+  }
+  else if(comm=="mpi_comm"){
+    // Color code is provided by master as an argument
+    // Usually master has color 0 and slaves color>0
+    stringstream(commArg) >> colorCode;
+    // Communication
+    mpi_split_and_comm();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    //cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_free();
       throw TEST_ERROR;
     }    
   }
@@ -263,7 +287,8 @@ void linear2::solve()
           z = input[0];          
         }
         else if(comm=="mpi_comm"){
-          
+          mpi_receive(input, 1);
+          z = input[0];
         }
         // Set b values
         b[0] = 17 - 4*z;
@@ -286,7 +311,8 @@ void linear2::solve()
           order = mpi_receive_order();         
         }
         else if(comm=="mpi_comm"){         
-          
+          mpi_send(output, 3);
+          order = mpi_receive_order();
         }
         
         break;
@@ -306,7 +332,10 @@ void linear2::solve()
           y = input[2];   
         }
         else if(comm=="mpi_comm"){
-          
+          mpi_receive(input, 3);
+          w = input[0];
+          x = input[1];
+          y = input[2];  
         }
         // Set b values
         b[0] = 20.0/7;
@@ -323,7 +352,8 @@ void linear2::solve()
           order = mpi_receive_order();         
         }
         else if(comm=="mpi_comm"){
-          
+          mpi_send(output, 1);
+          order = mpi_receive_order();          
         }
         break;
         
@@ -334,7 +364,12 @@ void linear2::solve()
   }while(order==RESTART);
   
   if(order==ABORT){
-    mpi_finish();
+    if(comm=="mpi_port"){
+      mpi_finish();
+      }
+    else if(comm=="mpi_comm"){
+      mpi_free();
+    }
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
@@ -342,6 +377,9 @@ void linear2::solve()
   // Finish connections
   if(comm=="mpi_port"){
     mpi_finish();
+  }
+  else if(comm=="mpi_comm"){
+    mpi_free();
   }
 }
 
@@ -425,12 +463,28 @@ linear3::linear3()
     // Receiving control instruction
     error = mpi_receive_order();
     
-    cout<<"First order: "<<order<<endl;
+    //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
       mpi_finish();
       throw TEST_ERROR;
     }    
+  }    
+  else if(comm=="mpi_comm"){
+    // Color code is provided by master as an argument
+    // Usually master has color 0 and slaves color>0
+    stringstream(commArg) >> colorCode;
+    // Communication
+    mpi_split_and_comm();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    //cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_free();
+      throw TEST_ERROR;
+    }
   }
 }
 
@@ -449,10 +503,13 @@ void linear3::solve()
           mpi_receive(input, 2);
           y = input[0];          
           z = input[1];
-        }
+        }        
         else if(comm=="mpi_comm"){
-          
+          mpi_receive(input, 2);
+          y = input[0];          
+          z = input[1];
         }
+
         // Set b values
         b[0] = 17 -  3*y - 4*z;
         b[1] = 18 - 14*y - 5*z;
@@ -470,8 +527,9 @@ void linear3::solve()
           mpi_send(output, 2);
           order = mpi_receive_order();         
         }
-        else if(comm=="mpi_comm"){         
-          
+        else if(comm=="mpi_comm"){
+          mpi_send(output, 2);
+          order = mpi_receive_order();         
         }
         
         break;
@@ -491,8 +549,12 @@ void linear3::solve()
           z = input[2];   
         }
         else if(comm=="mpi_comm"){
-          
+          mpi_receive(input, 3);
+          w = input[0];
+          x = input[1];
+          z = input[2];   
         }
+
         // Set b values
         b[0] = 19.0/15;
         // Solve system
@@ -508,8 +570,10 @@ void linear3::solve()
           order = mpi_receive_order();         
         }
         else if(comm=="mpi_comm"){
-          
+          mpi_send(output, 1);
+          order = mpi_receive_order();         
         }
+
         break;
         
       case 2:
@@ -527,8 +591,12 @@ void linear3::solve()
           y = input[2];   
         }
         else if(comm=="mpi_comm"){
-          
+          mpi_receive(input, 3);
+          w = input[0];
+          x = input[1];
+          y = input[2];   
         }
+
         // Set b values
         b[0] = 20.0/7;
         // Solve system
@@ -544,8 +612,10 @@ void linear3::solve()
           order = mpi_receive_order();         
         }
         else if(comm=="mpi_comm"){
-          
+          mpi_send(output, 1);
+          order = mpi_receive_order();         
         }
+
         break;
         
       default:
@@ -555,7 +625,12 @@ void linear3::solve()
   }while(order==RESTART);
   
   if(order==ABORT){
-    mpi_finish();
+    if(comm=="mpi_port"){
+      mpi_finish();
+    }
+    else if(comm=="mpi_comm"){
+      mpi_free();
+    }
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
@@ -563,6 +638,9 @@ void linear3::solve()
   // Finish connections
   if(comm=="mpi_port"){
     mpi_finish();
+  }
+  else if(comm=="mpi_comm"){
+    mpi_free();
   }
 }
 
@@ -612,12 +690,28 @@ nonlinear2::nonlinear2()
     // Receiving control instruction
     error = mpi_receive_order();
     
-    cout<<"First order: "<<order<<endl;
+    //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
       mpi_finish();
       throw TEST_ERROR;
     }    
+  }
+  else if(comm=="mpi_comm"){
+    // Color code is provided by master as an argument
+    // Usually master has color 0 and slaves color>0
+    stringstream(commArg) >> colorCode;
+    // Communication
+    mpi_split_and_comm();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    //cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_free();
+      throw TEST_ERROR;
+    }
   }
 }
 
@@ -631,12 +725,9 @@ void nonlinear2::solve()
           input = loaddata(fileInput, 1);
           y = input[0];
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_receive(input, 1);
           y = input[0];          
-        }
-        else if(comm=="mpi_comm"){
-          
         }
         
         // Calculate solution
@@ -649,12 +740,9 @@ void nonlinear2::solve()
         if(comm=="io"){                
           printResults(output, 1, fileOutput);
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_send(output, 1);
           order = mpi_receive_order();         
-        }
-        else if(comm=="mpi_comm"){         
-          
         }
         
         break;
@@ -665,12 +753,9 @@ void nonlinear2::solve()
           input = loaddata(fileInput, 1);
           x = input[0];
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_receive(input, 1);
           x = input[0];          
-        }
-        else if(comm=="mpi_comm"){
-          
         }
 
         // Calculate solution
@@ -683,12 +768,9 @@ void nonlinear2::solve()
         if(comm=="io"){                
           printResults(output, 1, fileOutput);
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_send(output, 1);
           order = mpi_receive_order();         
-        }
-        else if(comm=="mpi_comm"){         
-          
         }
 
         break;
@@ -700,7 +782,12 @@ void nonlinear2::solve()
   }while(order==RESTART);
   
   if(order==ABORT){
-    mpi_finish();
+    if(comm=="mpi_port"){
+      mpi_finish();
+    }
+    else if(comm=="mpi_comm"){
+      mpi_free();
+    }
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
@@ -708,6 +795,9 @@ void nonlinear2::solve()
   // Finish connections
   if(comm=="mpi_port"){
     mpi_finish();
+  }
+  else if(comm=="mpi_comm"){
+    mpi_free();
   }
 }
 
@@ -766,12 +856,28 @@ nonlinear3::nonlinear3()
     // Receiving control instruction
     error = mpi_receive_order();
     
-    cout<<"First order: "<<order<<endl;
+    //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
       mpi_finish();
       throw TEST_ERROR;
     }    
+  }
+  else if(comm=="mpi_comm"){
+    // Color code is provided by master as an argument
+    // Usually master has color 0 and slaves color>0
+    stringstream(commArg) >> colorCode;
+    // Communication
+    mpi_split_and_comm();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    //cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_free();
+      throw TEST_ERROR;
+    }
   }
 }
 
@@ -788,13 +894,10 @@ void nonlinear3::solve()
           y = input[0];
           z = input[1];
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_receive(input, 2);
           y = input[0];
           z = input[1];         
-        }
-        else if(comm=="mpi_comm"){
-          
         }
         
         // Calculate solution
@@ -807,12 +910,9 @@ void nonlinear3::solve()
         if(comm=="io"){                
           printResults(output, 1, fileOutput);
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_send(output, 1);
           order = mpi_receive_order();         
-        }
-        else if(comm=="mpi_comm"){         
-          
         }
         
         break;
@@ -824,12 +924,9 @@ void nonlinear3::solve()
           input = loaddata(fileInput, 1);
           x = input[0];
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_receive(input, 1);
           x = input[0];          
-        }
-        else if(comm=="mpi_comm"){
-          
         }
 
         // Calculate solution
@@ -842,12 +939,9 @@ void nonlinear3::solve()
         if(comm=="io"){                
           printResults(output, 1, fileOutput);
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_send(output, 1);
           order = mpi_receive_order();         
-        }
-        else if(comm=="mpi_comm"){         
-          
         }
 
         break;
@@ -860,13 +954,10 @@ void nonlinear3::solve()
           x = input[0];
           y = input[1];
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_receive(input, 2);
           x = input[0];
           y = input[1];
-        }
-        else if(comm=="mpi_comm"){
-          
         }
 
         // Calculate solution
@@ -879,12 +970,9 @@ void nonlinear3::solve()
         if(comm=="io"){                
           printResults(output, 1, fileOutput);
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_send(output, 1);
           order = mpi_receive_order();         
-        }
-        else if(comm=="mpi_comm"){         
-          
         }
 
         break;
@@ -897,7 +985,12 @@ void nonlinear3::solve()
   }while(order==RESTART);
   
   if(order==ABORT){
-    mpi_finish();
+    if(comm=="mpi_port"){
+      mpi_finish();
+    }
+    else if(comm=="mpi_comm"){
+      mpi_free();
+    }
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
@@ -905,6 +998,9 @@ void nonlinear3::solve()
   // Finish connections
   if(comm=="mpi_port"){
     mpi_finish();
+  }
+  else if(comm=="mpi_comm"){
+    mpi_free();
   }
 }
 
@@ -992,12 +1088,28 @@ linear2mapper::linear2mapper()
     // Receiving control instruction
     error = mpi_receive_order();
     
-    cout<<"First order: "<<order<<endl;
+    //cout<<"First order: "<<order<<endl;
     if(order!=CONTINUE){    
       cout<<"Fatal error. Aborting."<<endl;
       mpi_finish();
       throw TEST_ERROR;
     }    
+  }
+  else if(comm=="mpi_comm"){
+    // Color code is provided by master as an argument
+    // Usually master has color 0 and slaves color>0
+    stringstream(commArg) >> colorCode;
+    // Communication
+    mpi_split_and_comm();
+    // Receiving control instruction
+    error = mpi_receive_order();
+    
+    //cout<<"First order: "<<order<<endl;
+    if(order!=CONTINUE){
+      cout<<"Fatal error. Aborting."<<endl;
+      mpi_free();
+      throw TEST_ERROR;
+    }
   }
 }
 
@@ -1012,13 +1124,10 @@ void linear2mapper::solve()
           y = input[0];
           z = input[1];
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_receive(input, 2);
           y = input[0];
           z = input[1];
-        }
-        else if(comm=="mpi_comm"){
-          
         }
 
         // Set b values
@@ -1037,12 +1146,9 @@ void linear2mapper::solve()
         if(comm=="io"){                
           printResults(output, 2, fileOutput);
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_send(output, 2);
           order = mpi_receive_order();         
-        }
-        else if(comm=="mpi_comm"){         
-          
         }
         
         break;
@@ -1053,12 +1159,9 @@ void linear2mapper::solve()
           input = loaddata(fileInput, 1);
           alpha = input[0];
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_receive(input, 1);
           alpha = input[0];
-        }
-        else if(comm=="mpi_comm"){
-          
         }
         // Set b values
         b[0] = 19 - 2*alpha;
@@ -1076,12 +1179,9 @@ void linear2mapper::solve()
         if(comm=="io"){
           printResults(output, 2, fileOutput);
         }
-        else if(comm=="mpi_port"){
+        else if(comm=="mpi_port" || comm=="mpit_comm"){
           mpi_send(output, 2);
           order = mpi_receive_order();         
-        }
-        else if(comm=="mpi_comm"){
-          
         }
         break;
         
@@ -1092,7 +1192,12 @@ void linear2mapper::solve()
   }while(order==RESTART);
   
   if(order==ABORT){
-    mpi_finish();
+    if(comm=="mpi_port"){
+      mpi_finish();
+    }
+    else if(comm=="mpi_comm"){
+      mpi_free();
+    }
     cout<<"Finishing program by ABORT order"<<endl;
     throw TEST_ERROR;
   }
@@ -1100,6 +1205,9 @@ void linear2mapper::solve()
   // Finish connections
   if(comm=="mpi_port"){
     mpi_finish();
+  }  
+  else if(comm=="mpi_comm"){
+    mpi_free();
   }
 }
 
@@ -1213,25 +1321,25 @@ void mpi_connection()
 void mpi_receive(double* input, int n)
 {
   // Values reception
-  cout<<"Receiving "<<n<<" values..."<<endl;
+  //cout<<"Receiving "<<n<<" values in code "<<codeClient<<endl;
   error = MPI_Recv (input, n, MPI_DOUBLE_PRECISION, 0, MPI_ANY_TAG, Coupling_Comm, MPI_STATUS_IGNORE);
   if (error != 0){
     cout<<"Error receiving data"<<endl;
     throw TEST_ERROR;
   }
-  cout<<"Values received."<<endl;
+  //cout<<"Values received in code "<<codeClient<<endl;
 }
 
 int mpi_receive_order()
 {
   // Order reception
-  cout<<"Receiving order..."<<endl;
+  //cout<<"Receiving order in code "<<codeClient<<endl;
   error = MPI_Recv (&order, 1, MPI_INTEGER, 0, MPI_ANY_TAG, Coupling_Comm, MPI_STATUS_IGNORE);
   if (error != 0){
     cout<<"Error receiving order"<<endl;
     throw TEST_ERROR;
   }
-  cout<<"Order received: "<<order<<"."<<endl;
+  //cout<<"Order received in code "<<codeClient<<endl;
   
   return order;
 }
@@ -1240,23 +1348,92 @@ void mpi_send(double* output, int n)
 {
   // Sending values
   tag = 0;
-  cout<<"Sending values..."<<endl;
+  //cout<<"Sending values in code "<<codeClient<<endl;
   error = MPI_Send (output, n, MPI_DOUBLE_PRECISION, 0, tag, Coupling_Comm);
   if (error != 0){
-    cout<<"Error sending values"<<endl;
+    cout<<"Error sending values "<<endl;
     throw TEST_ERROR;
   }
-  cout<<"Values sent."<<endl;
+  //cout<<"Values sent in code "<<codeClient<<endl;
 }
 
 void mpi_finish()
 {
   // Disconnecting
-  cout<<"Disconnecting..."<<endl;
+  //cout<<"Disconnecting in code "<<codeClient<<endl;
   error = MPI_Comm_disconnect(&(Coupling_Comm));
   if (error != 0){
     cout<<"Error disconnecting"<<endl;
     throw TEST_ERROR;
+  }
+}
+
+void mpi_split_and_comm()
+{
+/*-----------------------------------------------------------------------------
+            Communicator split, global and local variables
+-----------------------------------------------------------------------------*/
+  // Get the number of processes in the original communicator
+  error = MPI_Comm_size(MPI_COMM_WORLD, &global_size);
+  // Get the rank of the process in the original communicator
+  error = MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
+//cout<<global_size<<" "<<global_rank<<" from client "<<codeClient<<endl;
+  // Split communicator
+  error += MPI_Comm_split(MPI_COMM_WORLD, colorCode, global_rank, &Local_Comm);
+  // Get the number of processes in the local communicator
+  error += MPI_Comm_size(Local_Comm, &local_size);
+  // Get the rank of process in the local communicator
+  error += MPI_Comm_rank(Local_Comm, &local_rank);
+//cout<<" color: "<<colorCode<<" from client "<<codeClient<<endl;
+  if(global_rank==0){
+    error = TEST_ERROR;
+    cout<<"Only mater root has to be global rank 0"<<endl;
+  }
+  if (error != 0){
+    cout<<"Error spliting"<<endl;
+    throw TEST_ERROR;
+  }
+/*  cout<<"WORLD RANK/SIZE: "<<global_rank <<"/ "<<global_size<<"\t LOCAL RANK/SIZE: "<< local_rank<<"/ "<<local_size<<"\n"<<endl;
+    if (error != 0){
+    cout<<"Error splitting"<<endl;
+    throw TEST_ERROR;*/
+
+/*-----------------------------------------------------------------------------
+            Create world group
+-----------------------------------------------------------------------------*/
+
+  // Get the group of processes in MPI_COMM_WORLD 
+  MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+
+/*-----------------------------------------------------------------------------
+            Create one group for master-root communication
+-----------------------------------------------------------------------------*/
+
+  // Create group between master and slave root
+  if(local_rank==0){
+    int* ranks = new int[2];
+    ranks[0] = 0;
+    ranks[1] = global_rank;
+    MPI_Group_incl(world_group, 2, ranks, &roots_group);
+  }
+
+/*-----------------------------------------------------------------------------
+            Create one communicator for master-root communication
+-----------------------------------------------------------------------------*/
+
+  // Now create a communicator in roots_group
+  MPI_Comm_create_group(MPI_COMM_WORLD, roots_group, 0, &Coupling_Comm);
+  //cout<<"Communication set in client: "<<codeClient<<endl;
+
+}
+
+void mpi_free()
+{
+  MPI_Comm_free(&Local_Comm);
+  if(local_rank==0){
+    MPI_Group_free(&world_group);
+    MPI_Group_free(&roots_group);
+    MPI_Comm_free(&Coupling_Comm);
   }
 }
 

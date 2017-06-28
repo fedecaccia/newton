@@ -83,6 +83,8 @@ void System::allocate1(int method)
       code[iCode].name = "";
       code[iCode].connection = NEWTON_UNKNOWN_CONNECTION;
       code[iCode].nProcs = 1;
+      code[iCode].id = -1;
+      code[iCode].rootGlobalRank = -1;
       code[iCode].nArgs = 0;
       code[iCode].nAlpha = 0;
       //code[iCode].alpha = new

@@ -11,7 +11,7 @@ maste code            |
 
 Stablish mpi communitaction with clients.
 
-Date: 14 June 2017
+Date: 27 June 2017
 
 -------------------------------------------------------------------------------
 
@@ -48,9 +48,48 @@ Communicator::Communicator(System* sysPointer, Evolution* evolPointer)
   // Pointers
   sys = sysPointer;
   evol = evolPointer;
+
+  // Initial amount of codes connected by special communicators.
+  nCommCodes = 0;
   
   // Initial state of error
 	error = NEWTON_SUCCESS;
+}
+
+/* Communicator::allocate
+Set number of clients connected by communicators.
+
+input: -
+output: -
+
+*/
+void Communicator::allocate()
+{
+  clientRootGlobalRank = new int[nCommCodes];
+  roots_group = new MPI_Group[nCommCodes];
+  codeComm = new int[nCommCodes];
+  int codeConnected = -1;
+  for(int iCode=0; iCode<sys->nCodes; iCode++){
+    if(sys->code[iCode].connection==NEWTON_MPI_COMM){
+      if(sys->code[iCode].rootGlobalRank<1){
+        error = NEWTON_ERROR;
+        checkError(error, "Bad root global rank in code: "+int2str(iCode)+" - Communicator::allocate");
+      }
+      codeConnected++;
+      if(codeConnected==nCommCodes){
+        error = NEWTON_ERROR;
+        checkError(error, "Error setting code roots - Communicator::allocate ");
+      }
+      if(sys->code[iCode].rootGlobalRank>global_size-1){
+        error = NEWTON_ERROR;
+        checkError(error, "Bad client global rank: "+int2str(sys->code[iCode].rootGlobalRank) +" in client: "+int2str(iCode)+". Remember you should run Newton in MIMD paradigm - Communicator::allocate");
+      }
+      clientRootGlobalRank[codeConnected] = sys->code[iCode].rootGlobalRank;
+      codeComm[codeConnected] = iCode;
+    }
+  }
+  debug.log("Allocating "+int2str(nCommCodes)+" communications by colors\n\n");
+
 }
 
 /* Communicator::initialize
@@ -64,8 +103,12 @@ void Communicator::initialize()
 {
   rootPrints("Checking communication with clients...");
   
+/*-----------------------------------------------------------------------------
+            Publishing ports
+-----------------------------------------------------------------------------*/
+
   // Only roots stablish communication
-  if(irank==NEWTON_ROOT){
+  if(local_rank==NEWTON_ROOT){
     Port_Name = new string[sys->nCodes];
     
     for(int iCode=0; iCode<sys->nCodes; iCode++){      
@@ -79,15 +122,26 @@ void Communicator::initialize()
         rootPrints("Publishing service:"+Srvc_NameCPP);
         const char* Srvc_Name=(char*)Srvc_NameCPP.c_str();
         error += MPI_Publish_name(Srvc_Name, MPI_INFO_NULL, portname);
+
+        debug.log("Publising port: "+Port_Name[iCode]+" to code: "+int2str(iCode)+"\n");
       }    
     }
-  }
-  
+  }  
   checkError(error, "Error publishing services with clients by MPI");
+
+/*-----------------------------------------------------------------------------
+            Creating communicator
+-----------------------------------------------------------------------------*/
   
-  if(irank==NEWTON_ROOT){
+  if(local_rank==NEWTON_ROOT){
     Coupling_Comm = new MPI_Comm[sys->nCodes];
-    
+  }
+
+/*-----------------------------------------------------------------------------
+            Accepting port communication
+-----------------------------------------------------------------------------*/
+
+  if(local_rank==NEWTON_ROOT){
     for(int iCode=0; iCode<sys->nCodes; iCode++){
       if(sys->code[iCode].connection==NEWTON_MPI_PORT){
         char portname[MPI_MAX_PORT_NAME];
@@ -98,15 +152,64 @@ void Communicator::initialize()
         char* Srvc_Name=(char*)Srvc_NameCPP.c_str();
         error += MPI_Unpublish_name(Srvc_Name, MPI_INFO_NULL, portname);
         isConnectedByMPI=NEWTON_CONNECTED;
+
+        debug.log("Communication accepted with code: "+int2str(iCode)+"\n");
       }
     }
   }
   checkError(error, "Error accepting communication with clients by MPI");  
-  
+
+/*-----------------------------------------------------------------------------
+            Create world group
+-----------------------------------------------------------------------------*/
+
+  // Get the group of processes in MPI_COMM_WORLD 
+  error = MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+  checkError(error, "Error creating world group - Communicator::initialize"); 
+  debug.log("World group created\n");
+
+/*-----------------------------------------------------------------------------
+            Create one group for each master-root communication
+-----------------------------------------------------------------------------*/
+
+  if(local_rank==NEWTON_ROOT){
+
+    int* ranks = new int[2];
+    ranks[0] = local_rank;
+    for(int i=0; i<nCommCodes; i++){
+      ranks[1] = clientRootGlobalRank[i];
+
+      /* This MPI_Group_incl only runs if client root ranks provided are real,
+      I mean, mpirun should has be executed in MIMD paradigm */
+
+      error = MPI_Group_incl(world_group, 2, ranks, &roots_group[i]);
+      debug.log("Master-client root group created with client root global rank:"+int2str(ranks[1])+"\n");
+    }
+  }
+  checkError(error, "Error creating group - Communicator::initialize"); 
+
+/*-----------------------------------------------------------------------------
+            Create one communicator for each master-root communication
+-----------------------------------------------------------------------------*/
+
+  if(local_rank==NEWTON_ROOT){
+    for(int i=0; i<nCommCodes; i++){
+      error = MPI_Comm_create_group(MPI_COMM_WORLD, roots_group[i], 0, &Coupling_Comm[codeComm[i]]);
+      isConnectedByMPI=NEWTON_CONNECTED;
+      debug.log("Master-client root communicator created with client :"+int2str(codeComm[i])+"\n");
+    }
+  }
+  checkError(error, "Error creating group communicator - Communicator::initialize"); 
+
+
+/*-----------------------------------------------------------------------------
+            First Newton->client communication
+-----------------------------------------------------------------------------*/
+
   // First communication
   error = firstCommunication();
-  
-  checkError(error, "Error sharing first data with clients by MPI");  
+
+  checkError(error, "Error sharing first data with clients by MPI - Communicator::initialize");  
 }
 
 /* Communicator::disconnnect
@@ -118,6 +221,7 @@ output: -
 */
 void Communicator::disconnect()
 {
+  error = NEWTON_SUCCESS;
 	if(isConnectedByMPI==NEWTON_CONNECTED){
 	
     // Clients are waiting for order at the end of the evolution step
@@ -130,7 +234,9 @@ void Communicator::disconnect()
     }     
     error += sendOrder(order);   
   
-    if(irank==NEWTON_ROOT){
+    if(local_rank==NEWTON_ROOT){
+
+      // Disconnect ports
       for(int iCode=0; iCode<sys->nCodes; iCode++){
         if(sys->code[iCode].connection==NEWTON_MPI_PORT){
           char portname[MPI_MAX_PORT_NAME];
@@ -138,14 +244,27 @@ void Communicator::disconnect()
 
           error += MPI_Comm_disconnect(&Coupling_Comm[iCode]);
           error += MPI_Close_port(portname);
-          rootPrints("Communication with code id: "+int2str(sys->code[iCode].id)+" closed");
+          debug.log("Communication with code id: "+int2str(sys->code[iCode].id)+" closed\n");
         }
       }
+      
+      // Free groups and communicators
+      MPI_Group_free(&world_group);
+      debug.log("World group released\n");
+      for(int i=0; i<nCommCodes; i++){
+        MPI_Group_free(&roots_group[i]);
+        MPI_Comm_free(&Coupling_Comm[codeComm[i]]);
+        debug.log("Group with code id: "+int2str(codeComm[i])+" released\n");
+        debug.log("Communicator with code id: "+int2str(codeComm[i])+" released\n");
+      }
+
     }
     isConnectedByMPI=NEWTON_DISCONNECTED;
-  }  
+    if(error!=NEWTON_SUCCESS){
+      rootPrints("Error finishing communication.");
+    }
+  }
 
-	checkError(error,"Error finishing communication.");
 }
 
 /* Communicator::firstCommunication
@@ -158,7 +277,7 @@ output: error
 */
 int Communicator::firstCommunication()
 {    
-  if(irank==NEWTON_ROOT){
+  if(local_rank==NEWTON_ROOT){
     for(int iCode=0; iCode<sys->nCodes; iCode++){
   
       switch(sys->code[iCode].type){
@@ -192,13 +311,19 @@ output: error
 */
 int Communicator::sendOrder(int order)
 {
-  if(irank==NEWTON_ROOT){    
+  if(local_rank==NEWTON_ROOT){    
     for(int iCode=0; iCode<sys->nCodes; iCode++){      
-      if(sys->code[iCode].connection==NEWTON_MPI_PORT){
-        //~ cout<<"Sending order to code: "<<sys->code[iCode].name<<"..."<<endl;
+      if(sys->code[iCode].connection==NEWTON_MPI_PORT ){
+        debug.log("Sending order "+ int2str(order)+" to code: "+sys->code[iCode].name+" by MPI_Port...\n");
         tag = 0;
         error = MPI_Send (&order, 1, MPI_INTEGER, 0, tag, Coupling_Comm[iCode]);    
-        //~ cout<<"Sended."<<endl;
+        debug.log("Sended\n");
+      }   
+      else if(sys->code[iCode].connection==NEWTON_MPI_COMM ){
+        debug.log("Sending order "+ int2str(order)+" to code: "+sys->code[iCode].name+" by MPI_Comm...\n");
+        tag = 0;
+        error = MPI_Send (&order, 1, MPI_INTEGER, 1, tag, Coupling_Comm[iCode]);    
+        debug.log("Sended\n");
       }      
     }
     
@@ -216,16 +341,26 @@ output: error
 */
 int Communicator::send(int iCode, int nDelta, double* delta)
 {
-  if(irank==NEWTON_ROOT){
+  if(local_rank==NEWTON_ROOT){
     if(sys->code[iCode].connection==NEWTON_MPI_PORT){
-        // TEST
-      //~ cout<<"Sending data to code: "<<sys->code[iCode].name<<"..."<<endl;
-      //~ for(int i=0; i<nDelta; i++){
-        //~ cout<<" d:"<<delta[i]<<endl;
-      //~ }
+      debug.log("Sending data to code: "+sys->code[iCode].name+" by MPI_Port...\n");
+      for(int i=0; i<nDelta; i++){
+        debug.log(" delta: "+dou2str(delta[i]));
+      }
+      debug.log("\n");
       tag = 0;
       error = MPI_Send (delta, nDelta, MPI_DOUBLE_PRECISION, 0, tag, Coupling_Comm[iCode]);
-      //~ cout<<"Sended."<<endl;
+      debug.log("Sended\n");
+    }
+    if(sys->code[iCode].connection==NEWTON_MPI_COMM){
+      debug.log("Sending data to code: "+sys->code[iCode].name+" by MPI_Port...\n");
+      for(int i=0; i<nDelta; i++){
+        debug.log(" delta:"+dou2str(delta[i]));
+      }
+      debug.log("\n");
+      tag = 0;
+      error = MPI_Send (delta, nDelta, MPI_DOUBLE_PRECISION, 1, tag, Coupling_Comm[iCode]);
+      debug.log("Sended\n");
     }
   }
 
@@ -242,16 +377,21 @@ output: error
 */
 int Communicator::receive(int iCode, int nAlpha, double* alpha)
 {
-  if(irank==NEWTON_ROOT){    
+  if(local_rank==NEWTON_ROOT){    
     if(sys->code[iCode].connection==NEWTON_MPI_PORT){
-      //~ cout<<"Receiving data from code: "<<sys->code[iCode].name<<"..."<<endl;  
+      debug.log("Receiving data from code: "+sys->code[iCode].name+" by MPI_Port...\n");
       error = MPI_Recv (alpha, nAlpha, MPI_DOUBLE_PRECISION, 0, MPI_ANY_TAG, Coupling_Comm[iCode], MPI_STATUS_IGNORE); 
     }
-    //~ // TEST
-    //~ cout<<"Received."<<endl;
-    //~ for(int i=0; i<nAlpha; i++){
-      //~ cout<<" a:"<<alpha[i]<<endl;
-    //~ }
+    else if(sys->code[iCode].connection==NEWTON_MPI_COMM){
+      debug.log("Receiving data from code: "+sys->code[iCode].name+" by MPI_Port...\n"); 
+      error = MPI_Recv (alpha, nAlpha, MPI_DOUBLE_PRECISION, 1, MPI_ANY_TAG, Coupling_Comm[iCode], MPI_STATUS_IGNORE); 
+    }
+
+    debug.log("Values received:\n");
+    for(int i=0; i<nAlpha; i++){
+      debug.log(dou2str(alpha[i]));
+    }
+    debug.log("\n");
   }    
   return error;
 }
