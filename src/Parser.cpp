@@ -74,6 +74,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="METHOD"){
       return true;
     }
+    if(word=="NORM"){
+      return true;
+    }
     if(word=="PHASES"){
       return true;
     }
@@ -930,6 +933,15 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       else if(word=="ABS_TOL"){
         word = takeNextWord();
         stringstream(word) >> sol->nltol;
+        word = takeNextWord();
+      }
+      
+      else if(word=="NORM"){
+        sol->norm = takeNextWord();
+        if(sol->norm!= "2" && sol->norm!="inf"){
+          error = NEWTON_ERROR;
+          checkError(error, "ERROR. Check NORM card - Parser:parseInput");
+        }
         word = takeNextWord();
       }
       

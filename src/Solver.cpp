@@ -47,6 +47,8 @@ Solver::Solver()
   
   // Nonlinear method
   method = NO_METHOD;
+  // Norm of the residual
+  norm = "2";
   // Nonlinear tolerance
   nltol = 1e-07;
   // Nonlinear iterations
@@ -63,6 +65,8 @@ Solver::Solver()
   sJacCalc = 0;    
   // Iterations between Jacobian calculation by finite difference method
   iJacCalc = 0;
+  // Flag first jacobian calculation
+  jacobianIsNotBuildYet = true;
   // Math object
   math = new MathLib();
   // client code object
@@ -460,8 +464,14 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
   */
   sys->computeResiduals(resVector, x);
   
-  // Calculate norm 2 of the residual vector
-  residual = math->moduleAbs(resVector, sys->nUnk);
+  if(norm=="2"){
+    // Calculate norm 2 of the residual vector
+    residual = math->moduleAbs(resVector, sys->nUnk);
+  }
+  else if(norm=="inf"){
+    // Calculate norm inf of the residual vector
+    residual = math->infNorm(resVector, sys->nUnk);
+  }
   
   /*
    // TEST
@@ -590,7 +600,8 @@ void Solver::updateJacobian(System* sys, Communicator* comm, int step)
 {
   switch(method){
     case SECANT:
-      if(step==0 && iter==0){
+      if((step==0 && iter==0) || 
+          jacobianIsNotBuildYet){
         jacobianConstruction(sys, comm, step);
       }
       else if(sJacCalc>0 && iter==0){
@@ -606,7 +617,8 @@ void Solver::updateJacobian(System* sys, Communicator* comm, int step)
       break;
     
     case BROYDEN:
-      if(step==0 && iter==0 && sJacCalc>0){
+      if((step==0 && iter==0 && sJacCalc>0) || 
+         (jacobianIsNotBuildYet && sJacCalc>0)){
         jacobianConstruction(sys, comm, step);
       }
       else if(sJacCalc>0 && iter==0){
@@ -750,6 +762,8 @@ void Solver::broydenUpdate(System* sys, int step, int iter)
 */
 void Solver::jacobianConstruction(System* sys, Communicator* comm, int step)
 {
+  // Set flag
+  jacobianIsNotBuildYet = false;
   // Back up
   math->copyInVector(xBackUp, 0, x, 0, sys->nUnk);
   math->copyInVector(resVectorBackUp, 0, resVector, 0, sys->nUnk);

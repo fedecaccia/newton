@@ -55,8 +55,10 @@ class MathLib
     double* differenceInVectors(double*, double*, int);    
     // Vector negativo
     double* negateVector(double*, int);
-    // |x|
+    // |x|_2
     double moduleAbs(double*, int);
+    // |x|_inf
+    double infNorm(double*, int);
     // Copia de vectores
     void copyInVector(double*, int, double*, int, int);
     // Copia de matrices

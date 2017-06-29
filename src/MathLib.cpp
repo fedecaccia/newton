@@ -79,6 +79,21 @@ double MathLib::moduleAbs(double* x1, int N)
   return mod;
 }
 
+// |x|_inf
+double MathLib::infNorm(double* x1, int N)
+{
+  double mod = 0;
+  for (int i=0; i<N; i++){
+    if(x1[i]>mod){
+      mod = x1[i];
+    }
+    else if(-x1[i]>mod){
+      mod = -x1[i];
+    }
+  }
+  return mod;
+}
+
 // En la Pos1 de x1 copio desde la Pos2 de x2, x2Amount elementos
 void MathLib::copyInVector(double* x1, int x1Pos1, double* x2, int x2Pos1, int x2Amount)
 {

@@ -190,13 +190,13 @@ void controlRod::solve()
         deltaK = actualK-desiredK;
         
         
-        if( fabs(deltaK)>0.1 ){
+        if( fabs(deltaK)>0.10000 ){
           dCR[0] = 10000*deltaK;
         }
-        else if( fabs(deltaK)>0.01 ){
+        else if( fabs(deltaK)>0.01000){
           dCR[0] = 10000*deltaK;
         }
-        else if( fabs(deltaK)>0.001 ){
+        else if( fabs(deltaK)>0.00100 ){
           dCR[0] = 10000*deltaK;
         }
         else{

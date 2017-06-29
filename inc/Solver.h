@@ -64,6 +64,7 @@ class Solver
     double nltol;
     int maxIter;
     int method;
+    std::string norm;
     double dxJacCalc;
     int sJacCalc;
     int iJacCalc;
@@ -100,6 +101,7 @@ class Solver
     double residual;    
     int iter;
     int iCode;
+    bool jacobianIsNotBuildYet;
     MathLib* math;    
     int freeRank;
     int codeConnected;
