@@ -274,18 +274,22 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   if (step==0){
     comm->firstCommunication(x, sys->nUnk);
   }
-  calculateResiduals(sys, comm);
+  calculateResiduals(sys, comm, step);
   rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
+  debug.log("step: "+int2str(step), ITER_LOG);
+  debug.log("iter: "+int2str(iter), ITER_LOG);
+  debug.log("f_evals: "+int2str(nEvalInStep), ITER_LOG);
+  debug.log("res: "+dou2str(residual)+"\n", ITER_LOG);
  
   while(residual > nltol && iter < maxIter){
+    iter++;
     
     // Send NEWTON_RESTART order to clients connected
     order = NEWTON_RESTART;    
     comm->sendOrder(order);
         
     calculateNewGuess(sys, comm, step);
-    calculateResiduals(sys, comm);
-    iter++;
+    calculateResiduals(sys, comm, step);
     
     rootPrints(" Nonlinear iteration: "+int2str(iter)+"   Residual: "+dou2str(residual));
     debug.log("step: "+int2str(step), ITER_LOG);
@@ -320,7 +324,7 @@ input: -
 output: -
 
 */
-void Solver::calculateResiduals(System* sys, Communicator* comm)
+void Solver::calculateResiduals(System* sys, Communicator* comm, int step)
 {  
   // New function evaluation
   nEval++;
@@ -451,8 +455,9 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
       sys->computePhaseResiduals(iPhase, &phaseResidual[iPhase]); // DUMMY
       phaseIter[iPhase]++;
 
-      debug.log("phase: "+int2str(iPhase), ITER_LOG);
-      debug.log("phase iter: "+int2str(phaseIter[iPhase]), ITER_LOG);
+      //~ debug.log("phase: "+int2str(iPhase), ITER_LOG);
+      //~ debug.log("phase iter: "+int2str(phaseIter[iPhase]), ITER_LOG);
+      //~ debug.log("\n", ITER_LOG);
     }while(phaseResidual[iPhase]>phaseTol[iPhase] && phaseIter[iPhase]<phaseMaxIter[iPhase]);
   }  
   
@@ -504,7 +509,8 @@ void Solver::calculateResiduals(System* sys, Communicator* comm)
     cout<<sys->beta[iUnk]<<setw(20)<<x[iUnk]<<setw(20)<<resVector[iUnk]<<endl; 
   }*/
 
-  debug.log("iter: "+int2str(iter)+"\n", UNK_LOG, 0);
+  debug.log("step: "+int2str(step), UNK_LOG, 0);
+  debug.log("iter: "+int2str(iter)+"\n", UNK_LOG);
   for (int iCode=0; iCode<sys->nCodes; iCode++){
     debug.log("code: "+sys->code[iCode].name+"\n", UNK_LOG, 0);
     debug.log("alphas:\n", UNK_LOG, 0);
@@ -600,34 +606,34 @@ void Solver::updateJacobian(System* sys, Communicator* comm, int step)
 {
   switch(method){
     case SECANT:
-      if((step==0 && iter==0) || 
+      if((step==0 && iter==1) || 
           jacobianIsNotBuildYet){
         jacobianConstruction(sys, comm, step);
       }
-      else if(sJacCalc>0 && iter==0){
+      else if(sJacCalc>0 && iter==1){
         if(step % sJacCalc==0){
           jacobianConstruction(sys, comm, step);
         }
       }
       else if(iJacCalc>0){
-        if(iter>0 && (iter % iJacCalc)==0){
+        if(iter>1 && ((iter-1) % iJacCalc)==0){
           jacobianConstruction(sys, comm, step);
         }
       }
       break;
     
     case BROYDEN:
-      if((step==0 && iter==0 && sJacCalc>0) || 
+      if((step==0 && iter==1 && sJacCalc>0) || 
          (jacobianIsNotBuildYet && sJacCalc>0)){
         jacobianConstruction(sys, comm, step);
       }
-      else if(sJacCalc>0 && iter==0){
+      else if(sJacCalc>0 && iter==1){
         if(step % sJacCalc==0){
           jacobianConstruction(sys, comm, step);
         }
       }
       else if(iJacCalc>0){
-        if(iter>0 && (iter % iJacCalc)==0){
+        if(iter>1 && ((iter-1) % iJacCalc)==0){
           jacobianConstruction(sys, comm, step);
         }
       }
@@ -650,7 +656,7 @@ void Solver::updateJacobian(System* sys, Communicator* comm, int step)
 */
 void Solver::broydenUpdate(System* sys, int step, int iter)
 {  
-  if(iter>0){
+  if(iter>1){
     // J = Jk + (deltaRes - Jk*deltaX) / (deltaXT*deltaX) * deltaXT;
     math->copyMat(JItPrev, J, sys->nUnk);
     double* deltaRes = math->differenceInVectors(resVector, resVectorItPrev, sys->nUnk);
@@ -776,7 +782,7 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm, int step)
     math->sumDeltaInPosition(x, j, dxJacCalc, sys->nUnk);
     
     x2gamma2delta(sys);
-    calculateResiduals(sys, comm);
+    calculateResiduals(sys, comm, step);
     // Loop in residuals (rows)
     // Saving -J in order to solve deltaX = -J * res
     // Now just saving J

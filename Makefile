@@ -32,13 +32,11 @@ USR_OBJELEM = 	$(USR_OBJ_DIR)/loadXSfromCRM.o	  \
 								$(USR_OBJ_DIR)/fermiXs2pow.o			\
 								$(USR_OBJ_DIR)/userClient.o
 TEST_OBJELEM = $(USR_OBJ_DIR)/mainTest.o		
-CR_OBJELEM = $(USR_OBJ_DIR)/mainCR.o  
 EXE=$(BIN_DIR)/Newton
 TEST_EXE=$(USR_BIN_DIR)/Test
-CR_EXE=$(USR_BIN_DIR)/cr
 MPICC=mpic++ -std=c++11 
 
-all: newton test cr
+all: newton test
 	
 newton: $(BIN_DIR)  $(OBJ_DIR) $(OBJELEM) $(USR_OBJ_DIR) $(USR_OBJELEM)
 	$(MPICC) $(OBJELEM) $(USR_OBJELEM) \
@@ -48,11 +46,8 @@ newton: $(BIN_DIR)  $(OBJ_DIR) $(OBJELEM) $(USR_OBJ_DIR) $(USR_OBJELEM)
 test: $(BIN_DIR) $(OBJ_DIR) $(TEST_OBJELEM)
 	$(MPICC) $(TEST_OBJELEM) -o $(TEST_EXE)
 
-cr: $(BIN_DIR) $(OBJ_DIR) $(CR_OBJELEM)
-	$(MPICC) $(CR_OBJELEM) -o $(CR_EXE)
-
 clean_:
-	$(RM) $(OBJELEM) $(USR_OBJELEM) $(TEST_OBJELEM) $(EXE) $(TEST_EXE) $(CR_EXE)
+	$(RM) $(OBJELEM) $(USR_OBJELEM) $(TEST_OBJELEM) $(EXE) $(TEST_EXE)
 
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	${PETSC_COMPILE} -c ${CFLAGS} -o $@ $< -I${DEP_DIR} -I${USR_DEP_DIR}
