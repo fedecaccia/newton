@@ -14,27 +14,28 @@ It has been demostrated in several works([1], [2]) that implicit approaches impr
 ## Quickstart
 
 ### Compiling `Newton`
+Make sure you have set MPI_DIR and PETSC_DIR environmental variables, also set NEWTON_DIR in your path, then:
 
 ```bash
-sh createLinksAndFolders.sh
 # After setting MPI_DIR and PETSC_DIR environmental variables:
-make
+source install.sh
 ```
+
 ### Running tests
 Several tests has been included as examples to demonstrate the capabilities of the code. Type in console:
 ```bash
-cd examples/linear2_IO/
+cd examples/linear_system_2_clients/io-io/
 ./run.sh
 ```
 This example solves a system of four coupled equations with four unknowns (`w`, `x`, `y`, `z`). Client `code 0` solves `x`, `y`, `z` as funcion of `w` and client `code 1` solves `w` as funtion of `x`, `y`, `z`. Both clients are spawned by `Newton` as many times as necessary until the converged solution is reached. 
-The parameters of the problem, as well as parameters needed by the numerical methods implemented in `Newton` and all that `Newton` has to know to spawn the clients is set in the configuration file `examples/test_IO-test_IO/newton.config`. Change value `explicit_serial` in METHOD card to `secant` and run again the test. Then look what happends.
+The parameters of the problem, as well as parameters needed by the numerical methods implemented in `Newton` and all that `Newton` has to know to spawn the clients is set in the configuration file `examples/linear_system_2_clients/io-io/newton.config`. Change value `broyden` in METHOD card to `secant` and run again the test. Then look what happends.
 
 Now move on to another test. Type:
 ```bash
-cd ../linear2_MPI-port/
+cd ../mpi_comm-mpi_comm/
 ./run.sh
 ```
-This test solves the same system of coupled equations but now connecting with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now Newton doesn't has to know nothing about file names and paths: communication is between codes while the are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.
+This test solves the same system of coupled equations but now connecting with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now `Newton` doesn't have to know nothing about file names and paths: communication is between codes while they are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.
 
 ## Running `Newton` on multiple processors
 
@@ -42,10 +43,9 @@ This test solves the same system of coupled equations but now connecting with cl
 Wether it is better one or other choice depends on the way that `Newton` connects with clients. Problems involving more than one spawn of codes are adressed more eficiently running `Newton` on multiple threads:
 
 ```bash
-mpirun -np N -machinefile mf bin/Newton # N threads, mf file with node names
+mpirun -np N -machinefile mf ${NEWTON_DIR}/bin/Newton # N threads, mf file with node names
 ```
-To see an example of this look at ```examples/nonlinear3_IO/run3procs.sh```.
-Communication with client codes via MPI option requieres an script to run the problem. (Look at any example inside ```_MPI``` folder).
+To see an example running with 3 threads take a look at ```examples/nonlinear_system_3_clients/io-io-io/run.sh```.
 
 ## Main features
 
@@ -55,7 +55,11 @@ Communication with client codes via MPI option requieres an script to run the pr
 
 * Efficient error handling.
 
+* Multiple connection modes with clients: input writing and output reading (I/O), communication by MPI ports and communication by MPI communicators stablished in the same execution.
+
 * Ready-to-use functions to read outputs & write inputs of clients that connect by I/O.
+
+* Implemented communication with [Fermi](https://github.com/GG1991/fermi) & RELAP by I/O both connected with different threads of `Newton`.
 
 * Ready-to-use mappers of variables received and sended to clients.
 
@@ -85,10 +89,6 @@ pdflatex newton-d-m.tex
 to get developer's manual. -->
 
 ## The future
-
-* Communication with [Fermi](https://github.com/GG1991/fermi) & RELAP by I/O both connected with different threads of `Newton` (now serial).
-
-* Implement communication using communicators in the same execution.
 
 * Complete documentation.
 

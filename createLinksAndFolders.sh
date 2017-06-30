@@ -1,2 +1,0 @@
-mkdir obj
-mkdir bin

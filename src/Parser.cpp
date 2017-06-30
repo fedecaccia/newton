@@ -1002,7 +1002,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
         }
         else if(word=="BROYDEN"){
           sol->method = BROYDEN;
-        }       
+        }
         else{
           error = NEWTON_ERROR;
           checkError(error, "Unknown method: \""+word+"\" - Parser::parseInput");

@@ -1,2 +1,0 @@
-rm *.log
-rm ompiuri

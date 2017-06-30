@@ -578,7 +578,7 @@ void Solver::calculateNewGuess(System* sys, Communicator* comm, int step)
     case BROYDEN:
       updateJacobian(sys, comm, step);
       solveLinearSystem(sys);
-      break;   
+      break;
       
     default:
       error = NEWTON_ERROR;
@@ -751,7 +751,6 @@ void Solver::broydenUpdate(System* sys, int step, int iter)
     //exit(1); 
   }
 }
-
 
 /* Solver::jacobianConstruction
 
@@ -1096,22 +1095,28 @@ string Solver::printMethod()
   switch(method){
     case EXPLICIT_SERIAL:
       return("EXPLICIT_SERIAL");
+      break;
       
     case EXPLICIT_PARALLEL:
       return("EXPLICIT_PARALLEL");
+      break;
       
     case NEWTON:
       return("NEWTON");
+      break;
       
     case SECANT:
-      return("SECANT");   
+      return("SECANT");
+      break;
       
     case BROYDEN:
-      return("BROYDEN"); 
+      return("BROYDEN");
+      break;
       
     default:
       error = NEWTON_ERROR;
       checkError(error, "Nonlinear method has not been selected - Solver::printMethod");
+      break;
   }
   return NULL;
 }

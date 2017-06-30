@@ -2,7 +2,6 @@ syntax: glob
 
 obj/*.o
 *.vtk
-*.msh
 *.png
 *.txt
 bin/*
