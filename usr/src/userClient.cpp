@@ -72,7 +72,7 @@ int Client::prepareUserClientInput(string codeName, int nValues, double* values,
     //~ inputModelFile.close();  
 	}
 	else{
-		cout<<"Error writing input file for code: "<<codeName<<" - Client::prepareTestClientInput"<<endl;
+		cout<<"Error writing input file for code: "<<codeName<<" - Client::prepareUserClientInput"<<endl;
     error = NEWTON_ERROR;
 	}
   inputFile.close();
@@ -103,7 +103,7 @@ int Client::readUserClientOutput(string codeName, int nValues, double* values, s
     }
 	}
 	else{
-		cout<<"Error reading output file from code: "<<codeName<<" - Client::readTestClientOutput"<<endl;
+		cout<<"Error reading output file from code: "<<codeName<<" - Client::readUserClientOutput"<<endl;
     error = NEWTON_ERROR;
 	}
   outputFile.close();  

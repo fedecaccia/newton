@@ -128,6 +128,9 @@ class Client
     int prepareNeutronicCr2kPInput(std::string, int, double*, std::string, std::string);
     int readNeutronicCr2kPOutput(std::string, int, double*, std::string);
     
+    int preparePumaInput(std::string, int, double*, std::string, std::string);
+    int readPumaOutput(std::string, int, double*, std::string);
+    
     std::string takeNextWord();
     std::string takeNextLine();
     

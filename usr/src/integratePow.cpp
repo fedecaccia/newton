@@ -12,7 +12,7 @@ maste code            |
 Mapper manages the preprocessing and / or postprocessing of the variables 
 received and / or sended to the clients.
 
-Date: 26 June 2017
+Date: 15 June 2017
 
 -------------------------------------------------------------------------------
 
@@ -39,38 +39,35 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace::std;
 
-/*Mapper::spow2fpow
+/*Mapper::integratePow
  
-Map vector of scaled power distribution into fractions of power distribution.
+User map.
 
 input: code, number of elements to map, vector to map, 
-number of elements of image, image vector, & number of:
-zones, physical entities, XS, energy groups
+number of elements of image, image vector, & pointer to the current fermi 
+struct
 output: error
 
 */
-int Mapper::spow2fpow(int nXToMap, double* xToMap, int nMapped, double* mapped)
+int Mapper::integratePow(int nxToMap, double* xToMap, int nMapped, double* mapped)
 {
   // Check consistency
   
-  int variablesIWantToReceive = 28;
-  int variablesIWantToSend = 28;
+  int variablesIWantToReceive = 28*61;
+  int variablesIWantToSend = 28;  
   
-  if(nMapped!=variablesIWantToSend || nXToMap!=variablesIWantToReceive){
+  if(nMapped!=variablesIWantToSend || nxToMap!=variablesIWantToReceive){
+    cout<<"Bad mapper formulation in test. xToMap: "<<nxToMap<<"; xMapped: "<<nMapped<<" - Mapper::integratePow"<<endl;
     error = NEWTON_ERROR;
-    cout<<"Bad mapper formulation in test. xToMap: "<<nXToMap<<"; nMapped: "<<nMapped<<" - Mapper::spow2fpow"<<endl;
-    return error;
-  }
-  
-  // Just add all powers and calculate each fraction
-  double power = 0;
-  for(int ip=0; ip<nXToMap; ip++){
-    power+=xToMap[ip];
-  }  
-  
-  for(int ifp=0; ifp<nXToMap; ifp++){
-    mapped[ifp] = xToMap[ifp]/power;
   }
 
+  // Just map
+  for(int iz=0; iz<28; iz++){
+    mapped[iz] = 0;
+    for(int ich=0; ich<61; ich++){
+      mapped[iz] += xToMap[61*iz+ich];
+    }
+  }
+     
   return error;
 }

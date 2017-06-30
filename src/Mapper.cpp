@@ -157,6 +157,14 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
     error = spowk2fpowk(nxToMap, xToMap, nMapped, mapped);
   }
   
+  else if(map == "integratePow"){
+    error = integratePow(nxToMap, xToMap, nMapped, mapped);
+  }
+  
+  else if(map == "channel2FE"){
+    error = channel2FE(nxToMap, xToMap, nMapped, mapped);
+  }
+  
   else if(map == "v2q"){
 
   }

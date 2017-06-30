@@ -609,9 +609,12 @@ string Parser::loadClientAndTakeWord(System* sys, Communicator* comm)
       else if(word == "neutronic_cr2kp"){
          sys->code[clientReaded].type = NEUTRONIC_CR2KP;
       }
+      else if(word == "puma_th2pow"){
+         sys->code[clientReaded].type = PUMA_TH2POW;
+      }
       else{
         error = NEWTON_ERROR;
-        cout<<"Client code type:\""<< word<<"\" not founded - Parser::loadClientAndTakeWord"<<endl;
+        checkError(error, "Client code type:\""+ word+"\" not founded - Parser::loadClientAndTakeWord");
       }
       word = takeNextWord();
     }
@@ -1825,7 +1828,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
         }
         else if(stage==1 && nPreMap<0) {
           error = NEWTON_ERROR;
-          checkError(error, "ERROR. Bad mapper configuration. Set CALS_PRE_MAP using STAGE: POST_CALC - Parser::parseInput");
+          checkError(error, "ERROR. Bad mapper configuration. Set CALCS_PRE_MAP using STAGE: POST_CALC - Parser::parseInput");
         }
         if(clientName==""){
           error = NEWTON_ERROR;

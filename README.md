@@ -72,12 +72,12 @@ To see an example running with 3 threads take a look at ```examples/nonlinear_sy
 ## Mappers
 
 Newton includes the possibility of using mappings between variables to adecuate them to the unknowns that are used to solve the residuals. For example, in neutronic-termal-hydraulic calculations it is common to treat as unknown temperatures and densities, and cross sections are calculated based on the values of the previous variables. Different mappers could be used for different client codes to adecuate as well guesses as calculated variables. Its implementation requieres minimal programming in ready-to-use functions of class `Mapper`. To implement a mapper, just modify ```${NEWTON_DIR}/usr/src/userMap.cpp``` and then use ```MAPPER user_mapper``` in newton.config. To add more mappers, just copy from the originals more functions in the same file, change their names and programm what is necessary. Then put a keywords for them, like ```user_mapper2```, and add the case in 
-```${NEWTON_DIR}/src/Mapper.cpp```.
+```${NEWTON_DIR}/src/Mapper.cpp```. Also, add the function declarations in ```${NEWTON_DIR}/src/Mapper.h```.
 
 ## Input writing and output reading
 To implement I/O with your own client code, just modify ```${NEWTON_DIR}/usr/src/userClient.cpp``` and then use ```IO_TYPE USER_CODE``` in newton_config.
 To implement it in several client codes, just copy from the originals more functions in the same file, change their names and programm what is necessary. Then put a keywords for them, like ```USER_CODE2```, and add the case in 
-```${NEWTON_DIR}/src/Client.cpp```.
+```${NEWTON_DIR}/src/Parser.cpp``` and in ```${NEWTON_DIR}/src/Client.cpp```. Also, add the function declarations in ```${NEWTON_DIR}/src/Client.h```.
 
 ## Documentation
 Documentation is available in ```${NEWTON_DIR}/doc```. User's manual is available right now and developer's manual is being written.
@@ -120,7 +120,7 @@ You should have received a copy of the GNU General Public License
 along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Contact
-Any questions or suggestions feel free to contact me at [federicoagustincaccia@gmail.com]
+Any questions or suggestions feel free to contact me at [federicoagustincaccia@gmail.com].
 
 ## References
 

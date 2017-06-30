@@ -987,6 +987,7 @@ int Solver::spawnCode(int iCode, System* sys)
     
     // Wait for client (in client there should be a Barrier too)
     error += MPI_Barrier(mpi_comm_spawn);
+    error += MPI_Comm_free(&mpi_comm_spawn);
 
     if(error!=NEWTON_SUCCESS){
       cout<<"Error trying to spawn process from code: "<<sys->code[iCode].name<<" - Solver::spawnCode"<<endl;

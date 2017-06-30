@@ -21,7 +21,9 @@ OBJELEM = $(OBJ_DIR)/Client.o						   				\
 					$(OBJ_DIR)/Solver.o							 				\
 					$(OBJ_DIR)/testClient.o									\
 					$(OBJ_DIR)/testMap.o
-USR_OBJELEM = 	$(USR_OBJ_DIR)/loadXSfromCRM.o	  \
+USR_OBJELEM = 	$(USR_OBJ_DIR)/channel2FE.o    		\
+								$(USR_OBJ_DIR)/integratePow.o	    \
+								$(USR_OBJ_DIR)/loadXSfromCRM.o	  \
 								$(USR_OBJ_DIR)/neutronicCr2kP.o 	\
 								$(USR_OBJ_DIR)/neutronicKP2cr.o 	\
 								$(USR_OBJ_DIR)/pow2spow.o					\
@@ -30,6 +32,7 @@ USR_OBJELEM = 	$(USR_OBJ_DIR)/loadXSfromCRM.o	  \
 								$(USR_OBJ_DIR)/th2xs.o						\
 								$(USR_OBJ_DIR)/relapPow2th.o			\
 								$(USR_OBJ_DIR)/fermiXs2pow.o			\
+								$(USR_OBJ_DIR)/pumaTh2Pow.o       \
 								$(USR_OBJ_DIR)/userClient.o       \
 								$(USR_OBJ_DIR)/userMap.o
 TEST_OBJELEM = $(USR_OBJ_DIR)/mainTest.o		

@@ -93,6 +93,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #define FERMI_XS2POW                3
 #define NEUTRONIC_CR2KP             4
 #define NEUTRONIC_KP2CR             5
+#define PUMA_TH2POW                 6
 
 // Debugger
 #define MAX_LOG                    10

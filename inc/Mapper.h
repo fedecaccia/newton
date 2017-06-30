@@ -83,6 +83,8 @@ class Mapper
     int th2xs(int, double*, int, double*, Client::fermiStruct*);
     double calculateDeltaXS(int, int, int, int, int, double);
     int pow2spow(int, double*, int, double*);
+    int integratePow(int, double*, int, double*);
+    int channel2FE(int, double*, int, double*);
     int spow2fpow(int, double*, int, double*);
     int spowk2fpowk(int, double*, int, double*);
     void loadXSfromCRM();

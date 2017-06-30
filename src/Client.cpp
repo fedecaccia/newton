@@ -165,6 +165,10 @@ int Client::prepareInput(int type, string name, int nDelta, double* delta, strin
     case NEUTRONIC_CR2KP:
       error = prepareNeutronicCr2kPInput(name, nDelta, delta, actualInput, inputModel);
       break;
+
+    case PUMA_TH2POW:
+      error = preparePumaInput(name, nDelta, delta, actualInput, inputModel);
+      break;
       
     default:
       error = NEWTON_ERROR;
@@ -211,6 +215,10 @@ int Client::readOutput(int type, string name, int nAlpha, double* alpha, string 
 
     case NEUTRONIC_CR2KP:
       error = readNeutronicCr2kPOutput(name, nAlpha, alpha, actualOutput);
+      break;      
+
+    case PUMA_TH2POW:
+      error = readPumaOutput(name, nAlpha, alpha, actualOutput);
       break;      
 
     default:
@@ -337,6 +345,11 @@ void Client::updateVars(int step, double deltaStep, double* x, int clientType)
       break;
       
     case NEUTRONIC_KP2CR:
+      break;
+      
+    case PUMA_TH2POW:
+      // Save burnup state in MAESTRO.PUM
+      system("./run_puma.sh runPumaAndBurn.py");
       break;
       
     default:
