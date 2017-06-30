@@ -79,6 +79,7 @@ class Mapper
   private:
     Client* client;
     int testMap(int, double*, int, double*);
+    int userMap(int, double*, int, double*);
     int th2xs(int, double*, int, double*, Client::fermiStruct*);
     double calculateDeltaXS(int, int, int, int, int, double);
     int pow2spow(int, double*, int, double*);

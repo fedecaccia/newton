@@ -30,7 +30,8 @@ USR_OBJELEM = 	$(USR_OBJ_DIR)/loadXSfromCRM.o	  \
 								$(USR_OBJ_DIR)/th2xs.o						\
 								$(USR_OBJ_DIR)/relapPow2th.o			\
 								$(USR_OBJ_DIR)/fermiXs2pow.o			\
-								$(USR_OBJ_DIR)/userClient.o
+								$(USR_OBJ_DIR)/userClient.o       \
+								$(USR_OBJ_DIR)/userMap.o
 TEST_OBJELEM = $(USR_OBJ_DIR)/mainTest.o		
 EXE=$(BIN_DIR)/Newton
 TEST_EXE=$(USR_BIN_DIR)/Test

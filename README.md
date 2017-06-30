@@ -71,7 +71,12 @@ To see an example running with 3 threads take a look at ```examples/nonlinear_sy
 
 ## Mappers
 
-Newton includes the possibility of using mapings between variables to adecuate them to the unknowns that are used to solve the residuals. For example, in neutronic-temal-hydraulic calculations it is common to treat as unknown temperatures and densities, and cross sections are calculated based on the values of the previous variables. Different mappers could be used for different client codes to adecuate as well guesses as calculated variables. Its implementation requieres minimal programming in ready-to-use functions of class `Mapper`.
+Newton includes the possibility of using mappings between variables to adecuate them to the unknowns that are used to solve the residuals. For example, in neutronic-termal-hydraulic calculations it is common to treat as unknown temperatures and densities, and cross sections are calculated based on the values of the previous variables. Different mappers could be used for different client codes to adecuate as well guesses as calculated variables. Its implementation requieres minimal programming in ready-to-use functions of class `Mapper`. To implement a mapper, just modify ```${NEWTON_DIR}/usr/src/userMap.cpp``` and then use ```MAPPER user_mapper``` in newton.config.
+
+## Input writing and output reading
+To implement I/O with your own client code, just modify ```${NEWTON_DIR}/usr/src/userClient.cpp``` and then use ```IO_TYPE USER_CODE``` in newton_config.
+To implement it in several client codes, just copy from the originals more functions in the same file, change their names and programm what is necessary. Then put a keywords for them, like ```USER_CODE2```, and add the case in 
+```${NEWTON_DIR}/src/Client.cpp```.
 
 ## Documentation
 Documentation is available in ```${NEWTON_DIR}/doc```. User's manual is available right now and developer's manual is being written.

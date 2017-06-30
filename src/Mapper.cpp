@@ -122,6 +122,10 @@ int Mapper::map(int iCode, string codeName, string map, int nxToMap, double* xTo
   else if(map == "map_test1"){
    error = testMap(nxToMap, xToMap, nMapped, mapped);
   }
+  
+  else if(map == "user_map"){
+   error = userMap(nxToMap, xToMap, nMapped, mapped);
+  }
 
   else if(map == "th2xs"){
     // Look which is the number of Fermi clients of Client
