@@ -9,7 +9,7 @@ in CFD-temalhydraulic problems, in neutronic-termalhydraulic problems,
 and others.
  
 `Newton` solves residual coupling equations explicitly or implicitly.
-It has been demostrated in several works([1], [2]) that implicit approaches improve convergence of the iterations.
+It has been demostrated in several works([1], [2]) that in some kind of problems implicit approaches improve convergence of the iterations.
 
 ## Quickstart
 
@@ -21,13 +21,13 @@ Make sure you have set MPI_DIR and PETSC_DIR environmental variables, also set N
 source install.sh
 ```
 
-### Running tests
-Several tests has been included as examples to demonstrate the capabilities of the code. Type in console:
+### Running examples
+Several examples has been included to demonstrate the capabilities of the code. Programm `${NEWOTN_DIR}/bin/Test` acts as different client codes calling it with different arguments. Type in console:
 ```bash
 cd ${NEWOTN_DIR}/examples/linear_system_2_clients/io-io/
 ./run.sh
 ```
-This example solves a system of four coupled equations with four unknowns (`w`, `x`, `y`, `z`). Client `code 0` solves `x`, `y`, `z` as funcion of `w` and client `code 1` solves `w` as funtion of `x`, `y`, `z`. Both clients are spawned by `Newton` as many times as necessary until the converged solution is reached. 
+This example solves a system of four coupled equations with four unknowns (`w`, `x`, `y`, `z`). Client `linear1` solves `x`, `y`, `z` as funcion of `w` and client `linear2` solves `w` as funtion of `x`, `y`, `z`. Both clients are spawned by `Newton` as many times as necessary until the converged solution is reached. 
 The parameters of the problem, as well as parameters needed by the numerical methods implemented in `Newton` and all that `Newton` has to know to spawn the clients is set in the configuration file `examples/linear_system_2_clients/io-io/newton.config`. Change value `broyden` in METHOD card to `secant` and run again the test. Then look what happends.
 
 Now move on to another test. Type:
@@ -35,7 +35,7 @@ Now move on to another test. Type:
 cd ${NEWOTN_DIR}/examples/linear_system_2_clients/mpi_comm-mpi_comm/
 ./run.sh
 ```
-This test solves the same system of coupled equations but now connecting with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now `Newton` doesn't have to know nothing about file names and paths: communication is between codes while they are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.
+This example solves the same system of coupled equations but now connecting with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now `Newton` doesn't have to know nothing about file names and paths: communication is between codes while they are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.
 
 ## Running `Newton` on multiple processors
 
@@ -49,7 +49,7 @@ To see an example running with 3 threads take a look at ```examples/nonlinear_sy
 
 ## Main features
 
-* Explicit and implicit methods implemented to solve nonlinear residuals.
+* Explicit and implicit methods implemented to solve residual equations.
 
 * Newton uses PETSc functions to solve linear systems in methods that build jacobian matrix of the system.
 
