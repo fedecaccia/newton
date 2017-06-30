@@ -24,7 +24,7 @@ source install.sh
 ### Running tests
 Several tests has been included as examples to demonstrate the capabilities of the code. Type in console:
 ```bash
-cd examples/linear_system_2_clients/io-io/
+cd ${NEWOTN_DIR}/examples/linear_system_2_clients/io-io/
 ./run.sh
 ```
 This example solves a system of four coupled equations with four unknowns (`w`, `x`, `y`, `z`). Client `code 0` solves `x`, `y`, `z` as funcion of `w` and client `code 1` solves `w` as funtion of `x`, `y`, `z`. Both clients are spawned by `Newton` as many times as necessary until the converged solution is reached. 
@@ -32,7 +32,7 @@ The parameters of the problem, as well as parameters needed by the numerical met
 
 Now move on to another test. Type:
 ```bash
-cd ../mpi_comm-mpi_comm/
+cd ${NEWOTN_DIR}/examples/linear_system_2_clients/mpi_comm-mpi_comm/
 ./run.sh
 ```
 This test solves the same system of coupled equations but now connecting with client codes by MPI. Now take a look at the configuration file. It is so much simpler! This is because now `Newton` doesn't have to know nothing about file names and paths: communication is between codes while they are running. Again, you can play as much as you want with the configuration file. For example, change the value of the initial conditions and see how change the amount of iterations needed to convege to the solution using different methods.
@@ -74,7 +74,7 @@ To see an example running with 3 threads take a look at ```examples/nonlinear_sy
 Newton includes the possibility of using mapings between variables to adecuate them to the unknowns that are used to solve the residuals. For example, in neutronic-temal-hydraulic calculations it is common to treat as unknown temperatures and densities, and cross sections are calculated based on the values of the previous variables. Different mappers could be used for different client codes to adecuate as well guesses as calculated variables. Its implementation requieres minimal programming in ready-to-use functions of class `Mapper`.
 
 ## Documentation
-Documentation is available in ```/doc```. User's manual is available right now and developer's manual is being written.
+Documentation is available in ```${NEWOTN_DIR}/doc```. User's manual is available right now and developer's manual is being written.
 
 <!-- Compile tex files in /doc to pdf (some packages from ```texlive``` are needed: ```texlive-fonts-recommended``` and ```texlive-latex-recommended```). Type:
 ```bash
