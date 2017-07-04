@@ -149,10 +149,10 @@ output: -
 */
 void Newton::run()
 {	
-  firstClick = clock();
+  firstClick = time(NULL);
   rootPrints("Nonlinear method: "+NewtonSolver->printMethod());
 	while(NewtonEvolution->status != NEWTON_COMPLETE){
-    click1 = clock();    
+    click1 = time(NULL);   
     rootPrints("Solving step: "+int2str(NewtonEvolution->step+1));
 		NewtonSolver->setFirstGuess(NewtonSystem, NewtonEvolution->step);
 		NewtonSolver->iterateUntilConverge(NewtonSystem, NewtonComm, NewtonEvolution->step);
@@ -160,7 +160,8 @@ void Newton::run()
     if(NewtonEvolution->status != NEWTON_COMPLETE){
       NewtonComm->sendOrder(NEWTON_CONTINUE);
     }
-    click2 = clock();
+    MPI_Barrier(newton_comm);
+    click2 = time(NULL);
     rootPrints(" Total time step: "+dou2str((click2-click1)/ CLOCKS_PER_SEC)+" seconds");
     debug.log("step: "+int2str(NewtonEvolution->step));
     debug.log("time: "+dou2str((click2-click1)/ CLOCKS_PER_SEC));
@@ -168,7 +169,7 @@ void Newton::run()
     debug.log("f_eval: "+int2str(NewtonSolver->nEvalInStep)+"\n");
 	}
   rootPrints("Total function evaluations: "+int2str(NewtonSolver->nEval));
-  lastClick = clock();
+  lastClick = time(NULL);
   rootPrints("Total time: "+dou2str((lastClick-firstClick)/ CLOCKS_PER_SEC)+" seconds");
     debug.log("steps: "+int2str(NewtonEvolution->step));
     debug.log("time: "+dou2str((lastClick-firstClick)/ CLOCKS_PER_SEC));
