@@ -66,11 +66,18 @@ int Mapper::spow2fpow(int nXToMap, double* xToMap, int nMapped, double* mapped)
   double power = 0;
   for(int ip=0; ip<nXToMap; ip++){
     power+=xToMap[ip];
-  }  
+  }
   
   for(int ifp=0; ifp<nXToMap; ifp++){
     mapped[ifp] = xToMap[ifp]/power;
   }
+  
+  debug.log("Power: " + dou2str(power) +"\n",0,0);
+  debug.log("Power distribution scaled to fraction:\n",0,0);
+  for(int ifp=0; ifp<nXToMap; ifp++){
+    debug.log(dou2str(mapped[ifp]));
+  }
+  debug.log("\n");
 
   return error;
 }

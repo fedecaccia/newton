@@ -41,7 +41,7 @@ using namespace::std;
 
 /*Mapper::integratePow
  
-User map.
+Integrate pow in each section, and scale it.
 
 input: code, number of elements to map, vector to map, 
 number of elements of image, image vector, & pointer to the current fermi 
@@ -65,9 +65,23 @@ int Mapper::integratePow(int nxToMap, double* xToMap, int nMapped, double* mappe
   for(int iz=0; iz<28; iz++){
     mapped[iz] = 0;
     for(int ich=0; ich<61; ich++){
-      mapped[iz] += xToMap[61*iz+ich];
+      mapped[iz] += xToMap[61*iz+ich]/10000;
     }
   }
+  
+  debug.log("Power distribution received:\n", 0, 0);
+  for(int iz=0; iz<28; iz++){
+    for(int ich=0; ich<61; ich++){
+      debug.log(dou2str(xToMap[61*iz+ich]));;
+    }
+    debug.log("\n");
+  }
+  debug.log("\n");
+  debug.log("Power distribution integrated and scaled:\n", 0, 0);
+  for(int iz=0; iz<28; iz++){
+    debug.log(dou2str(mapped[iz]));
+  }
+  debug.log("\n");
      
   return error;
 }

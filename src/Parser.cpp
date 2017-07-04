@@ -107,6 +107,9 @@ bool Parser::wordIsCard(string word, string parent)
     if(word=="ITER_JAC_CALC"){
       return true;
     }
+    if(word=="JAC_CALC_PARALLELIZED"){
+      return true;
+    }
     if(word=="CLIENT"){
       return true;
     }
@@ -375,7 +378,7 @@ void Parser::checkImportantCards(System* sys, Solver* sol)
   if(sol->method==EXPLICIT_SERIAL){
     if(sys->nPhasesPerIter==0){
       error = NEWTON_ERROR;
-      checkError(error, "Using EXPLICIT_SERIAL method. PHASES card needed - Parser::checkImportantCards");
+      checkError(error, "Using PICCARD method. PHASES card needed - Parser::checkImportantCards");
     }     
   }  
 }
@@ -991,7 +994,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       else if(word=="METHOD"){
         word = takeNextWord();
         transform(word.begin(), word.end(), word.begin(), ::toupper);
-        if(word=="EXPLICIT_SERIAL"){
+        if(word=="EXPLICIT_SERIAL" || word=="PICCARD"){
           sol->method = EXPLICIT_SERIAL;
         }
         else if(word=="EXPLICIT_PARALLEL"){
@@ -1016,6 +1019,11 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       else if(word=="DX_JAC_CALC"){
         word = takeNextWord();
         stringstream(word) >> sol->dxJacCalc;
+        word = takeNextWord();
+      }
+      
+      else if(word=="JAC_CALC_PARALLELIZED"){
+        sys->jacParallelized = true;
         word = takeNextWord();
       }
       

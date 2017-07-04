@@ -44,6 +44,7 @@ along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 #include "Communicator.h"
 #include "MathLib.h"
 #include "Debugger.h"
+#include <unistd.h> // sleep
 
 #include <iomanip>
 #include "petsc.h"

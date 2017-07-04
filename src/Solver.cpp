@@ -447,7 +447,8 @@ void Solver::calculateResiduals(System* sys, Communicator* comm, int step)
                               newton_comm); // MPI_Comm comm  
         checkError(error, "Error sharing alpha between processes - Solver::calculateResiduals");
         
-        sys->alpha2beta(codeConnected);
+        error = sys->alpha2beta(codeConnected);
+        checkError(error, "Error building beta - Solver::calculateResiduals");
         
       }
 
@@ -767,6 +768,9 @@ void Solver::broydenUpdate(System* sys, int step, int iter)
 */
 void Solver::jacobianConstruction(System* sys, Communicator* comm, int step)
 {
+  // Wait other processes
+  MPI_Barrier(newton_comm);
+  
   // Set flag
   jacobianIsNotBuildYet = false;
   // Back up
@@ -775,27 +779,79 @@ void Solver::jacobianConstruction(System* sys, Communicator* comm, int step)
   
   // f(x) was calculated in calculateResiduals() previously
   
-  // Loop in partial derivative calculation (cols)
-  rootPrints("  Calculating Jacobian by finite difference...");
-  for(int j=0; j<sys->nUnk; j++){
-    rootPrints("   Jacobian Row: "+int2str(j+1));
-    math->sumDeltaInPosition(x, j, dxJacCalc, sys->nUnk);
-    
-    x2gamma2delta(sys);
-    calculateResiduals(sys, comm, step);
-    // Loop in residuals (rows)
-    // Saving -J in order to solve deltaX = -J * res
-    // Now just saving J
-    for(int i=0; i<sys->nRes; i++){
-      J[i][j] = (resVector[i]-resVectorBackUp[i]) / dxJacCalc;
+  // High parallelized calculation, one spawn per thread!
+  if(sys->allCodesByIO && sys->jacParallelized){
+    rootPrints("  Calculating Jacobian by finite difference with high parallelization...");
+    // J reset
+    for(int i=0; i<sys->nUnk; i++){
+      for(int j=0; j<sys->nUnk; j++){
+        J[i][j] = 0;
+      }
     }
+    freeRank = 0;
+    for(int j=0; j<sys->nUnk; j++){
+      
+      if(local_rank==freeRank){
+        cout<<"  Jacobian col: "<<j<<endl<<endl;
+        math->sumDeltaInPosition(x, j, dxJacCalc, sys->nUnk);
+        for(int iCode=0; iCode<sys->nCodes; iCode++){
+          error += sys->setFilesAndCommands(step, j);
+          error += runCode(iCode, sys);
+          error += readOutputFromCode(iCode, sys);
+          error += sys->alpha2beta(iCode);
+        }
+        sys->computeResiduals(resVector, x);
+        for(int i=0; i<sys->nRes; i++){
+          J[i][j] = (resVector[i]-resVectorBackUp[i]) / dxJacCalc;
+        }
+        // Restore x
+        math->copyInVector(x, 0, xBackUp, 0, sys->nUnk);        
+      }
+      else{
+        // Wait to spawn a new relap run, needs to open file alone (cuac?)
+        sleep(1);
+      }      
+      freeRank++;
+      // When all processes run particular codes, 
+      // check errors and give them more work
+      if(freeRank==local_size){
+        checkError(error, "Error computing jacobian - Solver::jacobianConstruction");
+        freeRank = 0;
+      }  
+    }
+    for(int i=0; i<sys->nUnk; i++){
+      error = MPI_Allreduce(MPI_IN_PLACE, // const void *sendbuf
+                            J[i], // void *recvbuf
+                            sys->nUnk, // int count: number of elements in send buffer (integer) 
+                            MPI_DOUBLE_PRECISION, // MPI_Datatype datatype
+                            MPI_SUM, // MPI_Op op
+                            newton_comm); // MPI_Comm comm
+      checkError(error, "Error reducing jacobian - Solver::jacobianConstruction");
+    }
+  }  
+  else{
+    // Loop in partial derivative calculation (cols)
+    rootPrints("  Calculating Jacobian by finite difference...");
+    for(int j=0; j<sys->nUnk; j++){
+      rootPrints("   Jacobian col: "+int2str(j+1));
+      math->sumDeltaInPosition(x, j, dxJacCalc, sys->nUnk);
+      
+      x2gamma2delta(sys);
+      calculateResiduals(sys, comm, step);
+      // Loop in residuals (rows)
+      // Saving -J in order to solve deltaX = -J * res
+      // Now just saving J
+      for(int i=0; i<sys->nRes; i++){
+        J[i][j] = (resVector[i]-resVectorBackUp[i]) / dxJacCalc;
+      }
 
-    // Restore x
-    math->copyInVector(x, 0, xBackUp, 0, sys->nUnk);
-    
-    // Send NEWTON_RESTART order to clients connected by MPI
-    order = NEWTON_RESTART;
-    comm->sendOrder(order);
+      // Restore x
+      math->copyInVector(x, 0, xBackUp, 0, sys->nUnk);
+      
+      // Send NEWTON_RESTART order to clients connected by MPI
+      order = NEWTON_RESTART;
+      comm->sendOrder(order);
+    }
   }
   
   rootPrints("  End Jacobian calculation");

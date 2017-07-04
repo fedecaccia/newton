@@ -71,11 +71,23 @@ int Mapper::channel2FE(int nxToMap, double* xToMap, int nMapped, double* mapped)
         j++;
       }
     }
-  }
+  }  
   
-  //~ for(int i=0; i<nMapped; i++){
-    //~ cout<<mapped[i]<<endl;
-  //~ }
+  debug.log("Variables received:\n", 0, 0);
+  for(int ith=0; ith<3; ith++){
+    if(ith==0) debug.log("T ref:\n"); else if(ith==1) debug.log("T fuel:\n"); else if(ith==2) debug.log("N ref:\n");
+    for(int iz=0; iz<28; iz++){
+      debug.log(dou2str(xToMap[iz*3+ith]));
+    }
+    debug.log("\n");
+  } 
+  debug.log("\n");
+    
+  debug.log("Input to puma:\n", 0, 0);
+  for(int i=0; i<nMapped; i++){
+    debug.log(dou2str(mapped[i])+"\n");
+  }
+  debug.log("\n");
      
   return error;
 }

@@ -54,8 +54,8 @@ class System
     void allocate1(int);
     void allocate3();
 		void construct(Mapper*);
-    int setFilesAndCommands(int);
-    void alpha2beta(int);
+    int setFilesAndCommands(int, int col=-1);
+    int alpha2beta(int);
     void computeResiduals(double*, double*);
     void computePhaseResiduals(int, double*);
     void x2gamma(double*);
@@ -71,6 +71,8 @@ class System
     //~ client* code;
     int nUnk;
     int nRes;
+    bool allCodesByIO;
+    bool jacParallelized;
     
     double* beta;
     int nBeta;

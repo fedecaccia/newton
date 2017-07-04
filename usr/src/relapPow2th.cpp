@@ -157,7 +157,7 @@ output: error: NEWTON_ERROR or NEWTON_SUCCESS
 */
 int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, string output)
 { 
-  // number of fermi code
+  // number of relap code
   int iR=-1;
   for(int i=0; i<nRelap; i++){
     if(relap[i].name==codeName){
@@ -169,6 +169,16 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
     error=NEWTON_ERROR;
     cout<<"Bad Relap index name - Client::prepareRelapPow2thInput"<<endl;
     return error;
+  }
+  
+  // Taken arrays
+  bool* coolantTempTaken = new bool[relap[iR].nAxialZones];
+  bool* fuelTempTaken = new bool[relap[iR].nAxialZones];
+  bool* coolantDensityTaken = new bool[relap[iR].nAxialZones];
+  for(int i=0; i<relap[iR].nAxialZones; i++){
+    coolantTempTaken[i] = false;
+    fuelTempTaken[i] = false;
+    coolantDensityTaken[i] = false;
   }
   
   // Output file
@@ -190,7 +200,7 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
           
           while(!outputFile.eof()){            
             
-            // Refrigerant temperature
+            // Coolant temperature
             if(word=="voidf"){              
               
               // Standing at the beggining of the interest pipe
@@ -217,12 +227,17 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
                 stringstream(word) >> relap[iR].tempg;
                 
                 // Mean temperature
-                relap[iR].tempRef[iZone] = (relap[iR].voidf)*(relap[iR].tempf) + (relap[iR].voidg)*(relap[iR].tempg);          
+                relap[iR].tempRef[iZone] = ((relap[iR].voidf)*(relap[iR].tempf) + (relap[iR].voidg)*(relap[iR].tempg)) -273.15;
+                coolantTempTaken[iZone] = true;
                 
                 // Taking rest of line
                 word = takeNextLine();
-                // Taking next pipe
-                word = takeNextWord();           
+                // Standing at the beggining of the next pipe
+                if(iZone<relap[iR].nAxialZones-1){
+                  while(word!=relap[iR].pipe[iZone+1]){
+                    word = takeNextWord();
+                  }
+                }
               }
               
             }
@@ -243,11 +258,16 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
                 // rho-mix
                 word = takeNextWord();
                 stringstream(word) >> relap[iR].rhomix[iZone];
+                coolantDensityTaken[iZone] = true;
                 
                 // Taking rest of line
                 word = takeNextLine();
-                // Taking next pipe
-                word = takeNextWord();            
+                // Standing at the beggining of the next pipe
+                if(iZone<relap[iR].nAxialZones-1){
+                  while(word!=relap[iR].pipe[iZone+1]){
+                    word = takeNextWord();
+                  }
+                }
               }
               
             }      
@@ -279,12 +299,17 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
                   }
                   stringstream(word) >> relap[iR].tempFuelV;
                   
-                  relap[iR].tempDoppFuel[iZone] = 0.3*relap[iR].tempFuelC + 0.7*relap[iR].tempFuelV;
+                  relap[iR].tempDoppFuel[iZone] = (0.3*relap[iR].tempFuelC + 0.7*relap[iR].tempFuelV) - 273.15;
+                  fuelTempTaken[iZone] = true;
                   
                   // Taking rest of line
                   word = takeNextLine();
-                  // Taking next HS
-                  word = takeNextWord();
+                  // Standing at the beggining of the next hs
+                  if(iZone<relap[iR].nAxialZones-1){
+                    while(word!=relap[iR].hs[iZone+1]){
+                      word = takeNextWord();
+                    }
+                  }
                 }
                 
               }
@@ -292,7 +317,7 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
             
             word = takeNextWord();
           }
-        }      
+        }
       }
       
       word = takeNextWord();
@@ -305,6 +330,17 @@ int Client::readRelapPow2thOutput(string codeName, int nValues, double* values, 
     error = NEWTON_ERROR;
 	}
   outputFile.close();
+  
+  // Check that all needed values has been readed
+  for(int iZone=0; iZone<relap[iR].nAxialZones; iZone++){
+    if(fuelTempTaken[iZone]==false ||
+       coolantTempTaken[iZone]==false ||
+       coolantDensityTaken[iZone]==false){
+      cout<<"ERROR. Not all values founded - Client::readRelapPow2thOutput"<<endl;
+      error = NEWTON_ERROR;
+      break;
+    }
+  }
   
   // Saving data
   // Same order as CALCS in newton.config

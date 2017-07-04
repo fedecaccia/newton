@@ -99,6 +99,93 @@ int Client::preparePumaInput(string codeName, int nValues, double* values, strin
    * ...
    * N_cool_ChannelN_zN */
 
+  //~ // Input file  
+  //~ inputFile.open(input.c_str());
+  //~ inputFile.precision(numeric_limits<double>::digits10 + 1);
+  //~ 
+  //~ // Input model
+  //~ inputModelFile.open(inputModel.c_str());
+  //~ 
+  //~ if(inputFile.is_open()){
+    //~ if(inputModelFile.is_open()){
+    //~ 
+      //~ while(!inputModelFile.eof()){
+            //~ 
+        //~ line = takeNextLine();
+        //~ 
+        //~ if(line!="#NEWTON_FUEL_TEMP" && line!="#NEWTON_COOLANT_TEMP" && line!="#NEWTON_COOLANT_DENSITY"){
+          //~ // Just copy input model
+          //~ inputFile <<line<<endl;
+        //~ }
+        //~ else if(line=="#NEWTON_FUEL_TEMP"){
+          //~ inputFile <<line<<endl;
+          //~ inputFile << "   fuelTempValues = np.array([[";
+          //~ for(int i=0; i<nAxialZones-1; i++){
+            //~ for(int j=0; j<nFE-1; j++){
+              //~ inputFile<<"   "<<values[i*nFE+j]<<", "<<endl;
+            //~ }
+            //~ inputFile<<"   "<<values[i*nFE+nFE-1]<<"], [";
+          //~ }
+          //~ for(int j=0; j<nFE-1; j++){
+            //~ inputFile<<"   "<<values[(nAxialZones-1)*nFE+j]<<", "<<endl;
+          //~ }
+          //~ inputFile<<"   "<<values[(nAxialZones-1)*nFE+nFE-1]<<"]])"<<endl;
+          //~ // Skip next line
+          //~ line = takeNextLine();
+        //~ }
+        //~ 
+        //~ else if(line=="#NEWTON_COOLANT_TEMP"){
+          //~ inputFile <<line<<endl;
+          //~ inputFile << "   coolantTempValues = np.array([[";
+          //~ for(int i=nAxialZones; i<2*nAxialZones-1; i++){
+            //~ for(int j=0; j<nFE-1; j++){
+              //~ inputFile<<"   "<<values[i*nFE+j]<<", "<<endl;
+            //~ }
+            //~ inputFile<<"   "<<values[i*nFE+nFE-1]<<"], [";
+          //~ }
+          //~ for(int j=0; j<nFE-1; j++){
+            //~ inputFile<<"   "<<values[(2*nAxialZones-1)*nFE+j]<<", "<<endl;
+          //~ }
+          //~ inputFile<<"   "<<values[(2*nAxialZones-1)*nFE+nFE-1]<<"]])"<<endl;
+          //~ // Skip next line
+          //~ line = takeNextLine();
+        //~ }
+        //~ 
+        //~ else if(line=="#NEWTON_COOLANT_DENSITY"){
+          //~ inputFile <<line<<endl;
+          //~ inputFile << "   coolantDensityValues = np.array([[";
+          //~ for(int i=2*nAxialZones; i<3*nAxialZones-1; i++){
+            //~ for(int j=0; j<nFE-1; j++){
+              //~ inputFile<<"   "<<values[i*nFE+j]<<", "<<endl;
+            //~ }
+            //~ inputFile<<"   "<<values[i*nFE+nFE-1]<<"], [";
+          //~ }
+          //~ for(int j=0; j<nFE-1; j++){
+            //~ inputFile<<"   "<<values[(3*nAxialZones-1)*nFE+j]<<", "<<endl;
+          //~ }
+          //~ inputFile<<"   "<<values[(3*nAxialZones-1)*nFE+nFE-1]<<"]])"<<endl;
+          //~ // Skip next line
+          //~ line = takeNextLine();
+        //~ }
+      //~ }
+    //~ }
+    //~ else{
+      //~ cout<<"Error reading input model file: \""<<inputModel<<"\" for code: "<<codeName<<" - Client::preparePumaInput"<<endl;
+      //~ error = NEWTON_ERROR;
+    //~ }
+    //~ inputModelFile.close();
+    //~ }
+	//~ else{
+		//~ cout<<"Error writing input file: \""<<input<<"\" for code: "<<codeName<<" - Client::preparePumaInput"<<endl;
+    //~ error = NEWTON_ERROR;
+	//~ }
+  //~ inputFile.close();
+ //~ 
+ //~ return error; 
+//~ }
+  
+
+
   
   // Input file 1
   inputFile.open("coolantTemp.dat");
@@ -199,7 +286,7 @@ int Client::readPumaOutput(string codeName, int nValues, double* values, string 
     }
 	}
 	else{
-		cout<<"Error reading output file from code: "<<codeName<<" - Client::readPumaOutput"<<endl;
+		cout<<"Error opening output file: "<< output<<" from code: "<<codeName<<" - Client::readPumaOutput"<<endl;
     error = NEWTON_ERROR;
 	}
   outputFile.close();  

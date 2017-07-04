@@ -57,6 +57,10 @@ System::System()
   nPhasesPerIter = 0;
   // Math object
   math = new MathLib();
+  // All codes are connected by io?
+  allCodesByIO = false;
+  // Jacobian calculation parallelized?
+  jacParallelized = false;
   
   // Initial error value
 	error = NEWTON_SUCCESS;
@@ -230,6 +234,14 @@ output: -
 */
 void System::construct(Mapper* mapper)
 {
+  // Check connection types
+  allCodesByIO = true;
+  for (int iCode=0; iCode<nCodes; iCode++){
+    if(code[iCode].connection!=NEWTON_SPAWN && code[iCode].connection!= NEWTON_SYSTEM){
+      allCodesByIO = false;
+      break;
+    }
+  }
   
   rootPrints("Building system...");
   
@@ -403,12 +415,13 @@ void System::construct(Mapper* mapper)
 
 Set input, output, restart file and command to run strings.
 This only matters to codes wich are connected by I/O.
+Under construction of jacobian, argument 2 is received, to change input and output names.
 
-input: step integer
+input: step integer, int col
 output: error
 
 */
-int System::setFilesAndCommands(int step)
+int System::setFilesAndCommands(int step, int col)
 {
   
   for(int iCode=0; iCode<nCodes; iCode++){
@@ -416,6 +429,10 @@ int System::setFilesAndCommands(int step)
     code[iCode].inputModel = code[iCode].inputModelName+"."+code[iCode].inputExt;
     code[iCode].actualInputName = code[iCode].inputModelName+"_step"+int2str(step);
     code[iCode].actualInput = code[iCode].actualInputName+"."+code[iCode].inputExt;
+    if(col!=-1){
+      code[iCode].actualInputName = code[iCode].inputModelName+"_"+int2str(col)+"_step"+int2str(step);
+      code[iCode].actualInput = code[iCode].actualInputName+"."+code[iCode].inputExt;
+    }    
     // Ouput file
     if(code[iCode].outputName=="FROM_INPUT" || 
        code[iCode].outputName=="from_input" || 
@@ -488,10 +505,10 @@ int System::setFilesAndCommands(int step)
 }
 
 
-void System::alpha2beta(int iCode)
+int System::alpha2beta(int iCode)
 {
   error= NewtonMap->map(iCode, code[iCode].name, code[iCode].alphaMap, code[iCode].nAlpha, code[iCode].alpha, code[iCode].nBeta, &(beta[code[iCode].betaFirstValuePos]));
-  checkError(error, "Error building beta - System::alpha2beta");
+  return error;
 }
 
 

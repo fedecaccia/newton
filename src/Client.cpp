@@ -349,7 +349,11 @@ void Client::updateVars(int step, double deltaStep, double* x, int clientType)
       
     case PUMA_TH2POW:
       // Save burnup state in MAESTRO.PUM
-      system("./run_puma.sh runPumaAndBurn.py");
+      rootPrints("Saving burnup state in MAESTRO.PUM...");
+      if(local_rank==NEWTON_ROOT){
+        system("./run_puma.sh runPumaAndBurn.py");
+      }
+      MPI_Barrier(newton_comm);
       break;
       
     default:
