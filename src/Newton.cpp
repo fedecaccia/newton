@@ -162,17 +162,17 @@ void Newton::run()
     }
     MPI_Barrier(newton_comm);
     click2 = time(NULL);
-    rootPrints(" Total time step: "+dou2str((click2-click1)/ CLOCKS_PER_SEC)+" seconds");
+    rootPrints(" Total time step: "+dou2str((click2-click1))+" seconds");
     debug.log("step: "+int2str(NewtonEvolution->step));
-    debug.log("time: "+dou2str((click2-click1)/ CLOCKS_PER_SEC));
-    debug.log("total time: "+dou2str((click2-firstClick)/ CLOCKS_PER_SEC), 0, 25);
+    debug.log("time: "+dou2str((click2-click1)));
+    debug.log("total time: "+dou2str((click2-firstClick)), 0, 25);
     debug.log("f_eval: "+int2str(NewtonSolver->nEvalInStep)+"\n");
 	}
   rootPrints("Total function evaluations: "+int2str(NewtonSolver->nEval));
   lastClick = time(NULL);
-  rootPrints("Total time: "+dou2str((lastClick-firstClick)/ CLOCKS_PER_SEC)+" seconds");
+  rootPrints("Total time: "+dou2str((lastClick-firstClick))+" seconds");
     debug.log("steps: "+int2str(NewtonEvolution->step));
-    debug.log("time: "+dou2str((lastClick-firstClick)/ CLOCKS_PER_SEC));
+    debug.log("time: "+dou2str((lastClick-firstClick)));
     debug.log("f_evals: "+int2str(NewtonSolver->nEval)+"\n");
   rootPrints("Calculation finished successfully.");
 }
