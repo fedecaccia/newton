@@ -75,9 +75,9 @@ class Mapper
     double* energyPerFission;
     
     Debugger debug;
-
-  private:
     Client* client;
+
+  private:    
     int testMap(int, double*, int, double*);
     int userMap(int, double*, int, double*);
     int th2xs(int, double*, int, double*, Client::fermiStruct*);

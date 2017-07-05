@@ -997,7 +997,7 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
         if(word=="EXPLICIT_SERIAL" || word=="PICCARD"){
           sol->method = EXPLICIT_SERIAL;
         }
-        else if(word=="EXPLICIT_PARALLEL"){
+        else if(word=="EXPLICIT_PARALLEL" || word == "COMBINATED_PICCARD"){
           sol->method = EXPLICIT_PARALLEL;
         }
         else if(word=="NEWTON"){

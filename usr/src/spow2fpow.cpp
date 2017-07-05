@@ -53,8 +53,8 @@ int Mapper::spow2fpow(int nXToMap, double* xToMap, int nMapped, double* mapped)
 {
   // Check consistency
   
-  int variablesIWantToReceive = 28;
-  int variablesIWantToSend = 28;
+  int variablesIWantToReceive = client->relap->nAxialZones;
+  int variablesIWantToSend = client->relap->nAxialZones;
   
   if(nMapped!=variablesIWantToSend || nXToMap!=variablesIWantToReceive){
     error = NEWTON_ERROR;

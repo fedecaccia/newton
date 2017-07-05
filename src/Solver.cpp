@@ -276,7 +276,7 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
   }
   calculateResiduals(sys, comm, step);
   rootPrints(" First guess: \t\t\t Residual: "+dou2str(residual));
-  debug.log("step: "+int2str(step), ITER_LOG);
+  debug.log("step: "+int2str(step+1), ITER_LOG);
   debug.log("iter: "+int2str(iter), ITER_LOG);
   debug.log("f_evals: "+int2str(nEvalInStep), ITER_LOG);
   debug.log("res: "+dou2str(residual)+"\n", ITER_LOG);
@@ -292,14 +292,14 @@ void Solver::iterateUntilConverge(System* sys, Communicator* comm, int step)
     calculateResiduals(sys, comm, step);
     
     rootPrints(" Nonlinear iteration: "+int2str(iter)+"   Residual: "+dou2str(residual));
-    debug.log("step: "+int2str(step), ITER_LOG);
+    debug.log("step: "+int2str(step+1), ITER_LOG);
     debug.log("iter: "+int2str(iter), ITER_LOG);
     debug.log("f_evals: "+int2str(nEvalInStep), ITER_LOG);
     debug.log("res: "+dou2str(residual)+"\n", ITER_LOG);
   }
 
   rootPrints(" Total iterations in step: "+int2str(iter)+" - Total funtion evaluations: "+int2str(nEvalInStep));
-  debug.log("step: "+int2str(step), GLOBAL_LOG);
+  debug.log("step: "+int2str(step+1), GLOBAL_LOG);
   debug.log("iters: "+int2str(iter), GLOBAL_LOG);
   debug.log("f_evals: "+int2str(nEvalInStep)+"\n", GLOBAL_LOG);
   
