@@ -22,14 +22,14 @@ or just use "NEWTON" as first word of the line.
 Sets the nonlinear method used to solve the residual of the equations. Available values are: 
 
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{explicit_serial} 
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{picard} 
 \end{Verbatim}
 This method is the common dirichlet-to-newmann explicit method. Codes run by phases inside each iteration. Initial guesses are sended to clients in phase run. \bf{Newton} waits for their solutions and after that, updates unknowns and send necessary values to client codes in phase 2, and so on.
 
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
-\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{explicit_parallel} 
+\textcolor{Red}{METHOD}  \textcolor{OliveGreen}{combinated_picard} 
 \end{Verbatim}
-This method is similar to the $explicit$_$serial$, but in this case, guesses are sended to all client codes at the same time. Once all client has ended their calculations, Newton updates the unknown solution with these values and send them again to the clients codes as new guesses.
+This method is similar to the $picard$, but in this case, guesses are sended to all client codes at the same time. Once all client has ended their calculations, Newton updates the unknown solution with these values and send them again to the clients codes as new guesses.
 
 \begin{Verbatim}[frame=single,commandchars=\\\{\}]
 \textcolor{Red}{METHOD}  \textcolor{OliveGreen}{newton} 

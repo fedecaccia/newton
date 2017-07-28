@@ -378,7 +378,7 @@ void Parser::checkImportantCards(System* sys, Solver* sol)
   if(sol->method==EXPLICIT_SERIAL){
     if(sys->nPhasesPerIter==0){
       error = NEWTON_ERROR;
-      checkError(error, "Using PICCARD method. PHASES card needed - Parser::checkImportantCards");
+      checkError(error, "Using PICARD method. PHASES card needed - Parser::checkImportantCards");
     }     
   }  
 }
@@ -994,10 +994,10 @@ void Parser::parseInput(System* sys, Evolution* evol, Solver* sol, Client* clien
       else if(word=="METHOD"){
         word = takeNextWord();
         transform(word.begin(), word.end(), word.begin(), ::toupper);
-        if(word=="EXPLICIT_SERIAL" || word=="PICCARD"){
+        if(word=="EXPLICIT_SERIAL" || word=="PICARD"){
           sol->method = EXPLICIT_SERIAL;
         }
-        else if(word=="EXPLICIT_PARALLEL" || word == "COMBINATED_PICCARD"){
+        else if(word=="EXPLICIT_PARALLEL" || word == "COMBINATED_PICARD"){
           sol->method = EXPLICIT_PARALLEL;
         }
         else if(word=="NEWTON"){
