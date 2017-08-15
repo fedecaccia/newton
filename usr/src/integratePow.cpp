@@ -65,7 +65,7 @@ int Mapper::integratePow(int nxToMap, double* xToMap, int nMapped, double* mappe
   for(int iz=0; iz<28; iz++){
     mapped[iz] = 0;
     for(int ich=0; ich<61; ich++){
-      mapped[iz] += xToMap[61*iz+ich]/10000;
+      mapped[iz] += xToMap[61*iz+ich]/1000000;
     }
   }
   

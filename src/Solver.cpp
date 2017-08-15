@@ -143,6 +143,16 @@ void Solver::initialize(System* sys)
     math->identity(JStPrev[i], sys->nUnk);
   }
   
+  // Initial matrix = -I
+  //~ for(int i=0; i<sys->nUnk; i++){
+    //~ for(int j=0; j<sys->nUnk; j++){
+      //~ J[i][j]=-J[i][j];
+      //~ JItPrev[i][j]=-JItPrev[i][j];
+      //~ for(int k=0; k<nJStPrev; k++){
+        //~ JStPrev[k][i][j] = - JStPrev[k][i][j];
+      //~ }
+    //~ }
+  //~ }
   //~ for(int i=0; i<sys->nUnk; i++){
     //~ for(int j=0; j<sys->nUnk; j++){
       //~ cout<<J[i][j]<<" ";
