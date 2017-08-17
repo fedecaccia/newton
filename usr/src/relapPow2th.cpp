@@ -110,7 +110,15 @@ int Client::prepareRelapPow2thInput(string codeName, int nValues, double* values
             word=takeNextWord();
             inputFile<<word<<" ";
             word=takeNextWord();
-            inputFile<<relap[iR].fpow[iZone]<<" ";
+            //~ if(relap[iR].fpow[iZone]>0.1){
+              //~ inputFile<<0.1<<" ";
+            //~ }
+            //~ else if(relap[iR].fpow[iZone]>=0 && relap[iR].fpow[iZone]<=0.1){
+              inputFile<<relap[iR].fpow[iZone]<<" ";
+            //~ }
+            //~ else{
+              //~ inputFile<<0<<" ";
+            //~ }
             word=takeNextWord();
             inputFile<<word<<" ";
             word=takeNextWord();
