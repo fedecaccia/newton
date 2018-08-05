@@ -120,7 +120,7 @@ You should have received a copy of the GNU General Public License
 along with Newton.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Contact
-Any questions or suggestions feel free to contact me at [federicoagustincaccia@gmail.com].
+Any questions or suggestions feel free to contact me at federicoagustincaccia@gmail.com.
 
 ## References
 
